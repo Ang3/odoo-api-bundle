@@ -52,8 +52,6 @@ class AppKernel extends Kernel
 Step 3: Configure your app
 --------------------------
 
-No config is required, but you can configure a specific logger:
-
 ```yaml
 # app/config/config.yml
 ang3_odoo_api:

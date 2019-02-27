@@ -12,7 +12,9 @@
         }
     ],
     "autoload": {
-        "psr-4": { "Ang3\\Bundle\\OdooApiBundle\\": "src/" }
+        "psr-4": {
+            "Ang3\\Bundle\\OdooApiBundle\\": "src/"
+        }
     },
     "require": {
         "php": ">=7.1",

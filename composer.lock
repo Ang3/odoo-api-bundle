@@ -12,12 +12,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/Ang3/php-odoo-api-client.git",
-                "reference": "0b378056eede914a7c744a0df6b6ffd23e99d215"
+                "reference": "7e9c8ef9d0dcaf4815c5a6e70bec7bde26318a57"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Ang3/php-odoo-api-client/zipball/0b378056eede914a7c744a0df6b6ffd23e99d215",
-                "reference": "0b378056eede914a7c744a0df6b6ffd23e99d215",
+                "url": "https://api.github.com/repos/Ang3/php-odoo-api-client/zipball/7e9c8ef9d0dcaf4815c5a6e70bec7bde26318a57",
+                "reference": "7e9c8ef9d0dcaf4815c5a6e70bec7bde26318a57",
                 "shasum": ""
             },
             "require": {
@@ -52,7 +52,7 @@
                 "external",
                 "odoo"
             ],
-            "time": "2019-02-27T11:59:50+00:00"
+            "time": "2019-02-27T12:23:10+00:00"
         },
         {
             "name": "darkaonline/ripcord",

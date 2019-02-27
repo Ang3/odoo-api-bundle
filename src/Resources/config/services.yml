@@ -1,7 +1,18 @@
 services:
+  _defaults:
+    autowire: true
+    autoconfigure: true
+    public: false
+
+  Ang3\Component\OdooApiClient\Factory\ApiClientFactory: ~
+
+  ang3_odoo_api.factory.api_client_factory:
+    alias: Ang3\Component\OdooApiClient\Factory\ApiClientFactory
+    public: true
+
   ang3_odoo_api.default_external_api_client:
-    class: Ang3\Bundle\OdooApiBundle\Client\ExternalApiClient
-    factory: 'Ang3\Bundle\OdooApiBundle\Factory\OdooClientFactory:createExternalApiClient'
+    class: Ang3\Component\OdooApiClient\Client\ExternalApiClient
+    factory: 'Ang3\Component\OdooApiClient\Factory\ApiClientFactory:createExternalApiClient'
     arguments:
       $parameters: '%ang3_odoo_api.parameters%'
     public: true

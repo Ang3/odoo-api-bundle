@@ -78,3 +78,5 @@ Usage
 $client = $this->get('ang3_odoo_api.default_external_api_client');
 
 ```
+
+That's it!

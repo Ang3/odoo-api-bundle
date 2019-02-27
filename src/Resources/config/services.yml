@@ -1,0 +1,7 @@
+services:
+  ang3_odoo_api.default_external_api_client:
+    class: Ang3\Bundle\OdooApiBundle\Client\ExternalApiClient
+    factory: 'Ang3\Bundle\OdooApiBundle\Factory\OdooClientFactory:createExternalApiClient'
+    arguments:
+      $parameters: '%ang3_odoo_api.parameters%'
+    public: true

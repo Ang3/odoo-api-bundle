@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "14127c9d80449c6cb2fdb1bca9e3d850",
+    "content-hash": "0a39c6aeaf7363fdcb4e3c433d55de0b",
     "packages": [
         {
             "name": "ang3/php-odoo-api-client",
-            "version": "v1.0.0",
+            "version": "dev-master",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Ang3/php-odoo-api-client.git",
-                "reference": "7e9c8ef9d0dcaf4815c5a6e70bec7bde26318a57"
+                "reference": "dbec8af1d6f2f52d6889292c6e03a9e8e9a8a833"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Ang3/php-odoo-api-client/zipball/7e9c8ef9d0dcaf4815c5a6e70bec7bde26318a57",
-                "reference": "7e9c8ef9d0dcaf4815c5a6e70bec7bde26318a57",
+                "url": "https://api.github.com/repos/Ang3/php-odoo-api-client/zipball/dbec8af1d6f2f52d6889292c6e03a9e8e9a8a833",
+                "reference": "dbec8af1d6f2f52d6889292c6e03a9e8e9a8a833",
                 "shasum": ""
             },
             "require": {
@@ -52,7 +52,7 @@
                 "external",
                 "odoo"
             ],
-            "time": "2019-02-27T12:23:10+00:00"
+            "time": "2019-07-06T12:56:12+00:00"
         },
         {
             "name": "darkaonline/ripcord",
@@ -1011,7 +1011,9 @@
     "packages-dev": [],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": [],
+    "stability-flags": {
+        "ang3/php-odoo-api-client": 20
+    },
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {

@@ -22,7 +22,7 @@ class Configuration implements ConfigurationInterface
         $rootNode = $treeBuilder->root('ang3_odoo_api');
 
         $rootNode
-        	->children()
+            ->children()
                 ->scalarNode('url')
                     ->isRequired()
                     ->cannotBeEmpty()

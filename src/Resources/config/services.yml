@@ -4,7 +4,12 @@ services:
     autoconfigure: true
     public: false
 
+  # Autowire
   Ang3\Component\OdooApiClient\Factory\ApiClientFactory: ~
+
+  # 
+  # Client
+  # 
 
   ang3_odoo_api.factory.api_client_factory:
     alias: Ang3\Component\OdooApiClient\Factory\ApiClientFactory
@@ -16,3 +21,11 @@ services:
     arguments:
       $parameters: '%ang3_odoo_api.parameters%'
     public: true
+
+  # 
+  # Managers
+  # 
+  
+  Ang3\Bundle\OdooApiBundle\Manager\RecordManager:
+    arguments:
+      $client: '@ang3_odoo_api.default_external_api_client'

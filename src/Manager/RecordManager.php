@@ -169,12 +169,13 @@ class RecordManager
      *
      * @param string $model
      * @param int    $id
+     * @param array  $options
      *
      * @throws RecordNotFoundException when the record was not foud on Odoo
      *
      * @return Record
      */
-    public function get(string $model, int $id)
+    public function get(string $model, int $id, array $options = [])
     {
         // Récupération du modèle
         $record = $this->find($model, $id);
@@ -183,6 +184,9 @@ class RecordManager
         if (null === $record) {
             throw new RecordNotFoundException($this->client, $model, $id);
         }
+
+        // Mise-à-jour des données originelles
+        $this->setOriginalData($model, $id, $record->getData());
 
         // Retour de l'enregistrement
         return $record;
@@ -193,13 +197,15 @@ class RecordManager
      *
      * @param string $model
      * @param int    $id
+     * @param array  $options
      *
      * @return Record|null
      */
-    public function find(string $model, int $id)
+    public function find(string $model, int $id, array $options = [])
     {
         return $this->findOneBy($model, [
             ['id', '=', $id],
+            $options,
         ]);
     }
 

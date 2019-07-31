@@ -21,6 +21,7 @@
         "ang3/php-odoo-api-client": "^1.0",
         "symfony/dependency-injection": "^4.1",
         "symfony/http-kernel": "^4.1",
-        "doctrine/orm": "^2.6"
+        "doctrine/orm": "^2.6",
+        "jms/serializer": "^3.1"
     }
 }

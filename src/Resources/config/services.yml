@@ -23,9 +23,9 @@ services:
     public: true
 
   # 
-  # Managers
+  # ORM
   # 
   
-  Ang3\Bundle\OdooApiBundle\Manager\RecordManager:
+  Ang3\Bundle\OdooApiBundle\ORM\RecordManager:
     arguments:
       $client: '@ang3_odoo_api.default_external_api_client'

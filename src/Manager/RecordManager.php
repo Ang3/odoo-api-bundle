@@ -53,10 +53,14 @@ class RecordManager
     /**
      * Constructor of the manager.
      *
-     * @param ExternalApiClient $client
+     * @param ArrayTransformerInterface $arrayTranformer
+     * @param Reader                    $reader
+     * @param ExternalApiClient         $client
      */
-    public function __construct(ExternalApiClient $client)
+    public function __construct(ArrayTransformerInterface $arrayTranformer, Reader $reader, ExternalApiClient $client)
     {
+        $this->arrayTranformer = $arrayTranformer;
+        $this->reader = $reader;
         $this->client = $client;
     }
 

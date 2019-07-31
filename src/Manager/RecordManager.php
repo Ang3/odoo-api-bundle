@@ -23,7 +23,7 @@ class RecordManager
      *
      * @var array
      */
-    private static $cache;
+    private static $cache = [];
 
     /**
      * Constructor of the manager.
@@ -205,8 +205,7 @@ class RecordManager
     {
         return $this->findOneBy($model, [
             ['id', '=', $id],
-            $options,
-        ]);
+        ], $options);
     }
 
     /**
@@ -412,5 +411,13 @@ class RecordManager
 
         // Pas de données
         return [];
+    }
+
+    /**
+     * @return ExternalApiClient
+     */
+    public function getClient()
+    {
+        return $this->client;
     }
 }

@@ -11,7 +11,6 @@ use Ang3\Bundle\OdooApiBundle\Exception\RecordNotFoundException;
 use Ang3\Bundle\OdooApiBundle\Model\Record;
 use Ang3\Bundle\OdooApiBundle\Model\ManyToOne;
 use Ang3\Bundle\OdooApiBundle\Model\RecordInterface;
-use Ang3\Bundle\OdooApiBundle\Model\Res\User;
 use Doctrine\Common\Annotations\Reader;
 use JMS\Serializer\Annotation as JMS;
 use JMS\Serializer\ArrayTransformerInterface;

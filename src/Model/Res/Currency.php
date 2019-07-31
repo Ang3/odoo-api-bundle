@@ -10,7 +10,7 @@ use Ang3\Bundle\OdooApiBundle\Model\NamedRecordTrait;
 /**
  * @author Joanis ROUANET
  *
- * @Odoo\Model("res.partner")
+ * @Odoo\Model("res.currency")
  */
 class Currency extends AbstractRecord
 {

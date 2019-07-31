@@ -7,6 +7,8 @@ use Ang3\Bundle\OdooApiBundle\Model\ActivatableModelTrait;
 
 /**
  * @author Joanis ROUANET
+ *
+ * @Odoo\Model("res.partner")
  */
 class Partner extends AbstractRecord
 {

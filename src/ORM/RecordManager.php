@@ -1,6 +1,6 @@
 <?php
 
-namespace Ang3\Bundle\OdooApiBundle\Manager;
+namespace Ang3\Bundle\OdooApiBundle\ORM;
 
 use Exception;
 use LogicException;

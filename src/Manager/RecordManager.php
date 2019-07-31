@@ -178,7 +178,7 @@ class RecordManager
     public function get(string $model, int $id, array $options = [])
     {
         // Récupération du modèle
-        $record = $this->find($model, $id);
+        $record = $this->find($model, $id, $options);
 
         // Si pas de modèle trouvé
         if (null === $record) {
@@ -226,7 +226,7 @@ class RecordManager
         ]));
 
         // Retour de la dénormlisation de la lecture sur l'ID
-        return $records ? new Record($model, $records[0]['id'], $records[0]) : null;
+        return $records ? $this->createRecord($model, $records[0]['id'], $records[0]) : null;
     }
 
     /**
@@ -245,8 +245,11 @@ class RecordManager
 
         // Pour chaque ligne de données
         foreach ($result as $key => $data) {
+            // Création de l'enregistrement
+            $record = $this->createRecord($model, $data['id'], $data);
+
             // Dénormalization des données
-            $result[$key] = new Record($model, $data['id'], $data);
+            $result[$key] = $record;
         }
 
         // Retour des données
@@ -273,6 +276,27 @@ class RecordManager
 
         // Retour de la différence entre les données originelles et l'enregistrement normalisé
         return $this->diff($record->getData(), $original);
+    }
+
+    /**
+     * Create a new record.
+     *
+     * @param string $model
+     * @param int    $id
+     * @param array  $data
+     *
+     * @return Record
+     */
+    private function createRecord(string $model, int $id, array $data = [])
+    {
+        // Création de l'enregistrement
+        $record = new Record($model, $id, $data);
+
+        // Mise-à-jour des données originelles
+        $this->setOriginalData($model, $id, $data);
+
+        // Retour de l'enregistrement
+        return $record;
     }
 
     /**

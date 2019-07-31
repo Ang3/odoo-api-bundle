@@ -8,16 +8,16 @@
     "packages": [
         {
             "name": "ang3/php-odoo-api-client",
-            "version": "v1.0.3",
+            "version": "v1.0.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Ang3/php-odoo-api-client.git",
-                "reference": "ba9cdbaad6d418d36f37c53a2fb523b7c75bf928"
+                "reference": "a213973eebe1805c9645cb67c1486946839d30a9"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Ang3/php-odoo-api-client/zipball/ba9cdbaad6d418d36f37c53a2fb523b7c75bf928",
-                "reference": "ba9cdbaad6d418d36f37c53a2fb523b7c75bf928",
+                "url": "https://api.github.com/repos/Ang3/php-odoo-api-client/zipball/a213973eebe1805c9645cb67c1486946839d30a9",
+                "reference": "a213973eebe1805c9645cb67c1486946839d30a9",
                 "shasum": ""
             },
             "require": {
@@ -52,7 +52,7 @@
                 "external",
                 "odoo"
             ],
-            "time": "2019-07-28T11:01:51+00:00"
+            "time": "2019-07-06T14:41:34+00:00"
         },
         {
             "name": "darkaonline/ripcord",

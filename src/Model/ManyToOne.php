@@ -16,21 +16,21 @@ class ManyToOne
      *
      * @JMS\Exclude
      */
-    private $class;
+    protected $class;
 
     /**
      * @var string
      *
      * @JMS\Exclude
      */
-    private $property;
+    protected $property;
 
     /**
      * @var string|null
      *
      * @JMS\Exclude
      */
-    private $target;
+    protected $target;
 
     /**
      * @var int|null

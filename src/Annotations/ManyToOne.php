@@ -8,7 +8,7 @@ namespace Ang3\Bundle\OdooApiBundle\Annotations;
  * @Annotation
  * @Target({"PROPERTY"})
  * @Attributes({
- *   @Attribute("class", type = "string")
+ *   @Attribute("class", type = "string"),
  *   @Attribute("nullable", type = "boolean")
  * })
  */
@@ -22,8 +22,6 @@ class ManyToOne
     public $class;
 
     /**
-     * @Required
-     *
      * @var bool
      */
     public $nullable = true;

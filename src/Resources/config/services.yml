@@ -29,3 +29,15 @@ services:
   Ang3\Bundle\OdooApiBundle\ORM\RecordManager:
     arguments:
       $client: '@ang3_odoo_api.default_external_api_client'
+
+  # 
+  # LISTENERS AND SUBSCRIBERS
+  # 
+
+  Ang3\Bundle\OdooApiBundle\Serializer\Handler\ManyToOneHandler:
+    tags:
+      - { name: jms_serializer.subscribing_handler }
+
+  Ang3\Bundle\OdooApiBundle\Serializer\Listener\RecordSubscriber:
+    tags:
+      - { name: jms_serializer.event_subscriber, event: serializer.post_deserialize }

@@ -208,9 +208,6 @@ class RecordManager
             throw new RecordNotFoundException($this->client, $model, $id);
         }
 
-        // Mise-à-jour des données originelles
-        $this->setOriginalData($record);
-
         // Retour de l'enregistrement
         return $record;
     }
@@ -271,19 +268,19 @@ class RecordManager
      */
     public function findOneBy(string $class, array $domains = [], array $options = [])
     {
-        // Récupéraion du nom du modèle
-        $model = $this->getModelName($class);
-
-        // Normalisation des domaines
-        $domains = $this->normalizeDomains($class, $domains);
-
         // Récupération des entrées
-        $records = $this->client->searchAndRead($model, $domains, array_merge($options, [
+        $records = $this->findBy($class, $domains, array_merge($options, [
             'limit' => 1,
         ]));
 
-        // Retour de la dénormlisation de la lecture sur l'ID
-        return $records ? $this->denormalize($class, $records[0]) : null;
+        // Si pas d'enregistrement
+        if (!$records) {
+            // Retour nul
+            return null;
+        }
+
+        // Retour du premier enregistrement
+        return $records[0];
     }
 
     /**
@@ -300,13 +297,28 @@ class RecordManager
         // Récupéraion du nom du modèle
         $model = $this->getModelName($class);
 
+        // Normalisation des domaines
+        $domains = $this->normalizeDomains($class, $domains);
+
+        // Récupération du noms des propriétés et leur nom sérialisés
+        $serializedNames = $this->getSerializedNames($class);
+
+        // Si pas d'options de champs particuliers
+        if (!isset($options['fields'])) {
+            // On filtre selon les champs de la classe
+            $options['fields'] = array_values($serializedNames);
+        }
+
         // Récupération des entrées
         $result = $this->client->searchAndRead($model, $domains, $options);
 
         // Pour chaque ligne de données
         foreach ($result as $key => $data) {
             // Création de l'enregistrement
-            $record = $this->denormalize($class, $data);
+            $record = $this->denormalize($data, $class);
+
+            // Mise-à-jour des données originelles
+            $this->setOriginalData($record, $data);
 
             // Dénormalization des données
             $result[$key] = $record;
@@ -341,7 +353,7 @@ class RecordManager
         }
 
         // Récupération des données originelles
-        $original = $this->getOriginalData($model, $id);
+        $original = $this->getOriginalData($record);
 
         // Si l'enregistrement ne possède pas de données originelles
         if (!$original) {
@@ -356,23 +368,20 @@ class RecordManager
     /**
      * Denormalize a record from Odoo data.
      *
-     * @param string $class
      * @param array  $data
+     * @param string $class
      *
      * @throws Exception when the record class is not valid
      *
      * @return RecordInterface
      */
-    public function denormalize(string $class, array $data)
+    public function denormalize(array $data, string $class)
     {
         // Récupéraion du nom du modèle
         $model = $this->getModelName($class);
 
         // Dénormlization de l'enregistrement
         $record = $this->arrayTranformer->fromArray($data, $class);
-
-        // Mise-à-jour des données originelles
-        $this->setOriginalData($record);
 
         // Retour de l'enregistrement
         return $record;
@@ -420,6 +429,8 @@ class RecordManager
 
     /**
      * Normalize a flattened field name.
+     *
+     * @internal
      *
      * @param string $class
      * @param string $fieldName
@@ -527,10 +538,11 @@ class RecordManager
      * @internal
      *
      * @param RecordInterface $record
+     * @param array           $data
      *
      * @return self
      */
-    private function setOriginalData(RecordInterface $record)
+    private function setOriginalData(RecordInterface $record, array $data = [])
     {
         // Récupération de l'ID de l'enregistrement
         $id = $record->getId();
@@ -551,7 +563,7 @@ class RecordManager
         }
 
         // Enregistrement des données identifiées
-        self::$cache[$model][$id] = $this->normalize($record);
+        self::$cache[$model][$id] = $data;
 
         // Retour du cache
         return $this;
@@ -560,15 +572,24 @@ class RecordManager
     /**
      * Get cached data of a model.
      *
-     * @internal
-     *
-     * @param string $model
-     * @param int    $id
+     * @param RecordInterface $record
      *
      * @return array
      */
-    private function getOriginalData(string $model, int $id)
+    public function getOriginalData(RecordInterface $record)
     {
+        // Récupération de l'identifiant de l'enregistrement
+        $id = $record->getId();
+
+        // Si pas d'identifiant
+        if (null === $id) {
+            // Retour d'un tableau vide
+            return [];
+        }
+
+        // Récupéraion du nom du modèle
+        $model = $this->getModelName($record);
+
         // Si on a des données pour ce mocèle identifié
         if (!empty(self::$cache[$model][$id])) {
             // Retour des données

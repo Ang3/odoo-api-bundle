@@ -23,7 +23,7 @@ class RecordManager
      *
      * @var array
      */
-    private static $cache;
+    private static $cache = [];
 
     /**
      * Constructor of the manager.
@@ -178,7 +178,7 @@ class RecordManager
     public function get(string $model, int $id, array $options = [])
     {
         // Récupération du modèle
-        $record = $this->find($model, $id);
+        $record = $this->find($model, $id, $options);
 
         // Si pas de modèle trouvé
         if (null === $record) {

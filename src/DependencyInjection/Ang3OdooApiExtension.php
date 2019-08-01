@@ -2,15 +2,17 @@
 
 namespace Ang3\Bundle\OdooApiBundle\DependencyInjection;
 
+use Ang3\Bundle\OdooApiBundle\DBAL\Types\RecordType;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\Extension\PrependExtensionInterface;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 
 /**
  * @author Joanis ROUANET
  */
-class Ang3OdooApiExtension extends Extension
+class Ang3OdooApiExtension extends Extension implements PrependExtensionInterface
 {
     /**
      * {@inheritdoc}
@@ -28,5 +30,21 @@ class Ang3OdooApiExtension extends Extension
 
         // Chargement des services
         $loader->load('services.yml');
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function prepend(ContainerBuilder $container)
+    {
+        $container->prependExtensionConfig('doctrine', [
+            'dbal' => [
+                'types' => [
+                    'RecordType' => [
+                        'class' => RecordType::class
+                    ]
+                ]
+            ]
+        ]);
     }
 }

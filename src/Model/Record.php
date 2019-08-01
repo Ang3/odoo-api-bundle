@@ -73,7 +73,7 @@ class Record
     }
 
     /**
-     * @return int
+     * {@inherited}.
      */
     public function getId()
     {

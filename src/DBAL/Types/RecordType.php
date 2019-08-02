@@ -56,19 +56,19 @@ class RecordType extends Type
         // Si la valeur est une ManyToOne
         if ($value instanceof ManyToOne) {
             // Récupération de la classe cible et de l'ID de l'enregistrement
-            list($target, $id) = [
-                $value->getTarget(),
+            list($class, $id) = [
+                $value->getClass(),
                 $value->getId(),
             ];
 
             // Si pas de cible ou pas d'ID
-            if (null === $target || null === $id) {
+            if (null === $class || null === $id) {
                 // Retour nul
                 return null;
             }
 
             // Retour de l'identifiant de la relation
-            return sprintf('%s,%s', $this->modelRegistry->resolve($target), $id);
+            return sprintf('%s,%s', $this->modelRegistry->resolve($class), $id);
         }
 
         // Retour de la valeur en chaine de caractères
@@ -107,7 +107,7 @@ class RecordType extends Type
         }
 
         // Retour de la restauration de la relation
-        return new ManyToOne($this->modelRegistry->getClass($model), $id);
+        return ManyToOne::create($this->modelRegistry->getClass($model), $id);
     }
 
     /**

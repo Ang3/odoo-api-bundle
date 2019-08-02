@@ -217,23 +217,24 @@ class RecordManager
      *
      * @param ManyToOne $manyToOne
      *
-     * @throws Exception when the manyToOne hasn't specified target class
-     *
      * @return RecordInterface|null
      */
     public function load(ManyToOne $manyToOne)
     {
-        // Récupération de l'ID de l'enregistrement cible
-        $id = $manyToOne->getId();
+        // Récupération de la cible et de l'ID
+        list($class, $id) = [
+            $manyToOne->getClass(),
+            $manyToOne->getId(),
+        ];
 
-        // Si pas d'identifiant
-        if (null === $id) {
+        // Si pas de cible ou d'identifiant
+        if (null === $class || null === $id) {
             // Pas d'enregistrement
             return null;
         }
 
         // Retour de la recherche de l'entité
-        return $this->find($manyToOne->getTarget(), $id);
+        return $this->find($class, $id);
     }
 
     /**

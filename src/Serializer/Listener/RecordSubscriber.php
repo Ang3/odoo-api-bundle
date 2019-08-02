@@ -78,48 +78,29 @@ class RecordSubscriber implements EventSubscriberInterface
 
                 // Si la valeur est une association simple
                 if ($value instanceof ManyToOne) {
-                    // Enregistrement de la classe source
-                    $this
-                        ->setPropertyValue($value, 'class', $reflection->getName())
-                        ->setPropertyValue($value, 'property', $property->getName())
-                    ;
+                    // Si la cible est nulle
+                    if (null === $value->getClass()) {
+                        /**
+                         * Récupération de l'annotation de l'association.
+                         *
+                         * @var Annotations\ManyToOne|null
+                         */
+                        $manyToOne = $this->reader->getPropertyAnnotation($property, Annotations\ManyToOne::class);
 
-                    /**
-                     * Récupération de l'annotation de l'association.
-                     *
-                     * @var Annotations\ManyToOne|null
-                     */
-                    $manyToOne = $this->reader->getPropertyAnnotation($property, Annotations\ManyToOne::class);
+                        // Si on a une annotation de relation
+                        if (null !== $manyToOne) {
+                            // Récupération de la propriété de la classe de l'association
+                            $classProperty = new ReflectionProperty(get_class($value), 'class');
 
-                    // Si on a une annotation
-                    if (null !== $manyToOne) {
-                        // Enregistrement de la classe cible
-                        $this->setPropertyValue($value, 'target', $manyToOne->class);
+                            // On rend accessible la propriété
+                            $classProperty->setAccessible(true);
+
+                            // Enregistrement de la classe source
+                            $classProperty->setValue($object, $value);
+                        }
                     }
                 }
             }
         }
-    }
-
-    /**
-     * Set property value on object.
-     *
-     * @param object $object
-     * @param string $property
-     * @param mixed  $value
-     */
-    private function setPropertyValue(object $object, string $property, $value)
-    {
-        // Récupération de la propriété de la classe de l'association
-        $property = new ReflectionProperty(get_class($object), $property);
-
-        // On rend accessible la propriété
-        $property->setAccessible(true);
-
-        // Enregistrement de la classe source
-        $property->setValue($object, $value);
-
-        // Retour du subscriber pour le chainage
-        return $this;
     }
 }

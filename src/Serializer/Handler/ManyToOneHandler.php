@@ -78,7 +78,7 @@ class ManyToOneHandler implements SubscribingHandlerInterface
      * Deserialize a many to one.
      *
      * @param JsonDeserializationVisitor $visitor
-     * @param bool|array                 $params
+     * @param bool|int|array             $params
      * @param array                      $type
      * @param Context                    $context
      *
@@ -86,13 +86,28 @@ class ManyToOneHandler implements SubscribingHandlerInterface
      */
     public function deserializeManyToOneToJson(JsonDeserializationVisitor $visitor, $params, array $type, Context $context)
     {
-        // Définition des paramètres
-        $params = !is_array($params) ? [null, ''] : $params;
+        // i on a pas un tableau de paramètres
+        if (!is_array($params)) {
+            // Si ce n'est pas non plus un entier
+            if (!is_int($params)) {
+                // Retour null
+                return null;
+            }
 
-        // Récupération de l'objet sérialisé
-        $object = $visitor->getCurrentObject();
+            // Initialisation des paramètres selon l'ID
+            $params = [$params, null];
+        }
+
+        // Si on a moins de deux valeurs
+        if (count($params) < 2) {
+            // Pas d'ID
+            return null;
+        }
+
+        // Récupération du modèle et de l'ID
+        list($id, $displayName) = $params;
 
         // Retour de la relation
-        return new ManyToOne();
+        return ManyToOne::create(null, $id, $displayName);
     }
 }

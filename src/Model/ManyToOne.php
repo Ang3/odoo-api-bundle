@@ -12,11 +12,11 @@ class ManyToOne
     use DisplayedRecordTrait;
 
     /**
-     * @var string
+     * @var string|null
      *
      * @JMS\Exclude
      */
-    protected $target;
+    protected $class;
 
     /**
      * @var int|null
@@ -27,23 +27,32 @@ class ManyToOne
     protected $id;
 
     /**
-     * @param string      $target
+     * @static
+     *
+     * @param string      $class
      * @param int|null    $id
      * @param string|null $displayName
      */
-    public function __construct(string $target, int $id = null, $displayName = null)
+    public static function create(string $class = null, int $id = null, $displayName = null)
     {
-        $this->target = $target;
-        $this->id = $id;
-        $this->displayName = $displayName;
+        // Création de l'objet
+        $manyToOne = new static();
+
+        // Hydratation
+        $manyToOne->class = $class;
+        $manyToOne->id = $id;
+        $manyToOne->displayName = $displayName;
+
+        // Retour de l'objet
+        return $manyToOne;
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getTarget()
+    public function getClass()
     {
-        return $this->target;
+        return $this->class;
     }
 
     /**
@@ -71,6 +80,6 @@ class ManyToOne
      */
     public function isLoadable()
     {
-        return null !== $this->target && null !== $this->id;
+        return null !== $this->class && null !== $this->id;
     }
 }

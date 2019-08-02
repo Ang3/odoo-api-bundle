@@ -48,11 +48,35 @@ class ManyToOne
     }
 
     /**
+     * @param string|null $class
+     *
+     * @return self
+     */
+    public function setClass(string $class = null)
+    {
+        $this->class = $class;
+
+        return $this;
+    }
+
+    /**
      * @return string|null
      */
     public function getClass()
     {
         return $this->class;
+    }
+
+    /**
+     * @param int|null $id
+     *
+     * @return self
+     */
+    public function setId(int $id = null)
+    {
+        $this->id = $id;
+
+        return $this;
     }
 
     /**

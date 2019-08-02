@@ -2,7 +2,6 @@
 
 namespace Ang3\Bundle\OdooApiBundle\Model\Res;
 
-use Ang3\Bundle\OdooApiBundle\Annotations as Odoo;
 use Ang3\Bundle\OdooApiBundle\Model\AbstractRecord;
 use Ang3\Bundle\OdooApiBundle\Model\ActivatableModelTrait;
 use Ang3\Bundle\OdooApiBundle\Model\NamedRecordTrait;
@@ -10,8 +9,6 @@ use JMS\Serializer\Annotation as JMS;
 
 /**
  * @author Joanis ROUANET
- *
- * @Odoo\Model("res.currency")
  */
 class Currency extends AbstractRecord
 {

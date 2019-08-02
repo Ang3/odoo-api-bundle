@@ -2,11 +2,7 @@
 
 namespace Ang3\Bundle\OdooApiBundle\ORM;
 
-use ReflectionClass;
 use InvalidArgumentException;
-use Ang3\Bundle\OdooApiBundle\Annotations;
-use Ang3\Bundle\OdooApiBundle\Model\RecordInterface;
-use Doctrine\Common\Annotations\Reader;
 
 /**
  * @author Joanis ROUANET
@@ -14,80 +10,30 @@ use Doctrine\Common\Annotations\Reader;
 class ModelRegistry
 {
     /**
-     * @var Reader
-     */
-    private $reader;
-
-    /**
      * @var array
      */
-    private $parameters = [];
+    private $models = [];
 
     /**
-     * @var array
+     * @param array $models
      */
-    private $classMap = [];
-
-    /**
-     * @param Reader $reader
-     * @param array  $parameters
-     */
-    public function __construct(Reader $reader, array $parameters)
+    public function __construct(array $models)
     {
         // Hydratation
-        $this->reader = $reader;
-        $this->parameters = $parameters;
-
-        // Configuration des maps de classe
-        $this->configure($parameters);
-    }
-
-    /**
-     * Configure class map from parameters.
-     *
-     * @param array $parameters
-     */
-    public function configure(array $parameters)
-    {
-        // Pour chaque classe dans la configuration
-        foreach ($parameters as $class) {
-            // Si la classe n'implémente pas l'interface d'enregistrement de Odoo
-            if (!in_array(RecordInterface::class, class_implements($class))) {
-                throw new InvalidArgumentException(sprintf('The class "%s" does not represent a record. Did you forget to implement interface "%s"?', $class, RecordInterface::class));
-            }
-
-            // Si la classe du modèle n'existe pas
-            if (!class_exists($class)) {
-                throw new InvalidArgumentException(sprintf('Model class "%s" not found.', $class));
-            }
-
-            // Réflection du modèle
-            $reflection = new ReflectionClass($class);
-
-            // Recherche de l'annotation "Model"
-            $annotation = $this->reader->getClassAnnotation($reflection, Annotations\Model::class);
-
-            // Si pas d'annotation de modèle
-            if (!($annotation instanceof Annotations\Model)) {
-                throw new InvalidArgumentException(sprintf('The class "%s" does not represent a model. Did you forget to implement annotation "%s"?', $class, Annotations\Model::class));
-            }
-
-            // Enregistrement de la classe et de son modèle associé
-            $this->register($class, $annotation->name);
-        }
+        $this->models = $models;
     }
 
     /**
      * Register a model class.
      *
-     * @param string $class
      * @param string $name
+     * @param string $class
      *
      * @throws InvalidArgumentException when the class does not exist
      *
      * @return self
      */
-    public function register($class, $name)
+    public function register(string $name, string $class)
     {
         // Si la classe n'existe pas
         if (!class_exists($class)) {
@@ -95,7 +41,7 @@ class ModelRegistry
         }
 
         // Enregistrement
-        $this->classMap[$class] = $name;
+        $this->models[$name] = $class;
 
         // Retour du registre
         return $this;
@@ -115,35 +61,59 @@ class ModelRegistry
         // Récuépration du nom complet de la classe
         $class = is_object($objectOrClass) ? get_class($objectOrClass) : (string) $objectOrClass;
 
+        // Recherche du modèle par la classe
+        $name = array_search($class, $this->models);
+
         // Si la classe n'est pas un modèle Odoo
-        if (!array_key_exists($class, $this->classMap)) {
-            throw new InvalidArgumentException(sprintf('The class "%s" does not represent an Odoo model - Did you forget to implement annotation "%s" on class?', $class, Annotations\Model::class));
+        if (false === $name) {
+            throw new InvalidArgumentException(sprintf('The class "%s" does not represent an Odoo model - Did you forget to add the associated model in configuration?', $class));
         }
 
         // Retour du nom du modèle
-        return $this->classMap[$class];
+        return $name;
     }
 
     /**
-     * Get the class of a model.
+     * Get the class of a name.
      *
-     * @param string $model
+     * @param string $name
      *
      * @throws InvalidArgumentException when no class found for the model
      *
      * @return string
      */
-    public function getClass($model)
+    public function getClass($name)
     {
-        // Recherche du modèle par la classe
-        $class = array_search($model, $this->classMap);
-
         // Si pas de clé
-        if (false === $class) {
-            throw new InvalidArgumentException(sprintf('No class found for the model "%s"', $model));
+        if (!$this->hasModel($name)) {
+            throw new InvalidArgumentException(sprintf('No class found for the model "%s"', $name));
         }
 
         // Retour de la classe du modèle
-        return $class;
+        return $this->models[$name];
+    }
+
+    /**
+     * Check if a model exists.
+     *
+     * @param string $name
+     *
+     * @return bool
+     */
+    public function hasModel(string $name)
+    {
+        return array_key_exists($name, $this->models);
+    }
+
+    /**
+     * Check if the class is registered for a model.
+     *
+     * @param string $class
+     *
+     * @return bool
+     */
+    public function hasClass(string $class)
+    {
+        return in_array($class, $this->models);
     }
 }

@@ -9,8 +9,6 @@ use JMS\Serializer\Annotation as JMS;
 
 /**
  * @author Joanis ROUANET
- *
- * @Odoo\Model("res.company")
  */
 class Company extends AbstractRecord
 {

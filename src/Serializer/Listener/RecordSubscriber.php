@@ -3,7 +3,6 @@
 namespace Ang3\Bundle\OdooApiBundle\Serializer\Listener;
 
 use ReflectionClass;
-use ReflectionProperty;
 use Ang3\Bundle\OdooApiBundle\Annotations;
 use Ang3\Bundle\OdooApiBundle\ORM\RecordManager;
 use Ang3\Bundle\OdooApiBundle\Model\ManyToOne;
@@ -70,35 +69,35 @@ class RecordSubscriber implements EventSubscriberInterface
 
             // Pour chaque propriété de la classe
             foreach ($reflection->getProperties() as $property) {
+                /**
+                 * Récupération de l'annotation de l'association.
+                 *
+                 * @var Annotations\ManyToOne|null
+                 */
+                $manyToOne = $this->reader->getPropertyAnnotation($property, Annotations\ManyToOne::class);
+
+                // Si on a une annotation de relation
+                if (null === $manyToOne) {
+                    // Propriété suivante
+                    continue;
+                }
+
                 // On rend accessible la propriété
                 $property->setAccessible(true);
 
                 // Récupératio de la valeur de la propriété
                 $value = $property->getValue($object);
 
-                // Si la valeur est une association simple
-                if ($value instanceof ManyToOne) {
-                    // Si la cible est nulle
-                    if (null === $value->getClass()) {
-                        /**
-                         * Récupération de l'annotation de l'association.
-                         *
-                         * @var Annotations\ManyToOne|null
-                         */
-                        $manyToOne = $this->reader->getPropertyAnnotation($property, Annotations\ManyToOne::class);
+                // Si la valeur n'est pas une relation
+                if (!($value instanceof ManyToOne)) {
+                    // Propriété suivante
+                    continue;
+                }
 
-                        // Si on a une annotation de relation
-                        if (null !== $manyToOne) {
-                            // Récupération de la propriété de la classe de l'association
-                            $classProperty = new ReflectionProperty(get_class($value), 'class');
-
-                            // On rend accessible la propriété
-                            $classProperty->setAccessible(true);
-
-                            // Enregistrement de la classe source
-                            $classProperty->setValue($object, $value);
-                        }
-                    }
+                // Si la cible est nulle
+                if (null === $value->getClass()) {
+                    // Assignation de la classe cible de la relation
+                    $value->setClass($manyToOne->class);
                 }
             }
         }

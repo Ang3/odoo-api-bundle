@@ -54,7 +54,7 @@ class ManyToOneHandler implements SubscribingHandlerInterface
                 'direction' => GraphNavigator::DIRECTION_DESERIALIZATION,
                 'format' => 'json',
                 'type' => ManyToOne::class,
-                'method' => 'deserializeManyToOneToJson',
+                'method' => 'deserializeManyToOneFromJson',
             ],
         ];
     }
@@ -84,7 +84,7 @@ class ManyToOneHandler implements SubscribingHandlerInterface
      *
      * @return ManyToOne|null
      */
-    public function deserializeManyToOneToJson(JsonDeserializationVisitor $visitor, $params, array $type, Context $context)
+    public function deserializeManyToOneFromJson(JsonDeserializationVisitor $visitor, $params, array $type, Context $context)
     {
         // i on a pas un tableau de paramètres
         if (!is_array($params)) {

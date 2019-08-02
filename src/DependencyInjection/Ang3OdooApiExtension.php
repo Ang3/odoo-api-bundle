@@ -47,9 +47,7 @@ class Ang3OdooApiExtension extends Extension implements PrependExtensionInterfac
         $container->prependExtensionConfig('doctrine', [
             'dbal' => [
                 'types' => [
-                    'RecordType' => [
-                        'class' => RecordType::class,
-                    ],
+                    RecordType::NAME => RecordType::class,
                 ],
             ],
         ]);
@@ -57,11 +55,11 @@ class Ang3OdooApiExtension extends Extension implements PrependExtensionInterfac
         // Odoo base models
         $container->prependExtensionConfig('ang3_odoo_api', [
             'models' => [
-                Company::class,
-                Country::class,
-                Currency::class,
-                Partner::class,
-                User::class,
+                'res.company' => Company::class,
+                'res.country' => Country::class,
+                'res.currency' => Currency::class,
+                'res.partner' => Partner::class,
+                'res.user' => User::class,
             ],
         ]);
     }

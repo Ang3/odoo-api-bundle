@@ -3,6 +3,7 @@
 namespace Ang3\Bundle\OdooApiBundle\Serializer\Handler;
 
 use Ang3\Bundle\OdooApiBundle\Model\ManyToOne;
+use Ang3\Bundle\OdooApiBundle\ORM\ModelRegistry;
 use Doctrine\Common\Annotations\Reader;
 use JMS\Serializer\Handler\SubscribingHandlerInterface;
 use JMS\Serializer\GraphNavigator;
@@ -21,13 +22,20 @@ class ManyToOneHandler implements SubscribingHandlerInterface
     private $annotationReader;
 
     /**
+     * @var ModelRegistry
+     */
+    private $modelRegistry;
+
+    /**
      * Constructor of the handler.
      *
-     * @param Reader $annotationReader
+     * @param Reader        $annotationReader
+     * @param ModelRegistry $modelRegistry
      */
-    public function __construct(Reader $annotationReader)
+    public function __construct(Reader $annotationReader, ModelRegistry $modelRegistry)
     {
         $this->annotationReader = $annotationReader;
+        $this->modelRegistry = $modelRegistry;
     }
 
     /**
@@ -81,7 +89,10 @@ class ManyToOneHandler implements SubscribingHandlerInterface
         // Définition des paramètres
         $params = !is_array($params) ? [null, ''] : $params;
 
+        // Récupération de l'objet sérialisé
+        $object = $visitor->getCurrentObject();
+
         // Retour de la relation
-        return ManyToOne::create($params);
+        return new ManyToOne();
     }
 }

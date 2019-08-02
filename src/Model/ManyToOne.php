@@ -16,20 +16,6 @@ class ManyToOne
      *
      * @JMS\Exclude
      */
-    protected $class;
-
-    /**
-     * @var string
-     *
-     * @JMS\Exclude
-     */
-    protected $property;
-
-    /**
-     * @var string|null
-     *
-     * @JMS\Exclude
-     */
     protected $target;
 
     /**
@@ -41,61 +27,23 @@ class ManyToOne
     protected $id;
 
     /**
-     * Create a new ManyToOne.
-     *
-     * @static
-     *
-     * @param array $params
-     *
-     * @return self
+     * @param string      $target
+     * @param int|null    $id
+     * @param string|null $displayName
      */
-    public static function create(array $params)
+    public function __construct(string $target, int $id = null, $displayName = null)
     {
-        // Création de la relation
-        $manyToOne = new static();
-
-        // Hydratation
-        $manyToOne->id = $params[0];
-        $manyToOne->displayName = $params[1];
-
-        // Retour de la relation
-        return $manyToOne;
+        $this->target = $target;
+        $this->id = $id;
+        $this->displayName = $displayName;
     }
 
     /**
      * @return string
-     */
-    public function getClass()
-    {
-        return $this->class;
-    }
-
-    /**
-     * @return string
-     */
-    public function getProperty()
-    {
-        return $this->property;
-    }
-
-    /**
-     * @return string|null
      */
     public function getTarget()
     {
         return $this->target;
-    }
-
-    /**
-     * @param int $id
-     *
-     * @return self
-     */
-    public function setId($id)
-    {
-        $this->id = $id;
-
-        return $this;
     }
 
     /**
@@ -123,11 +71,6 @@ class ManyToOne
      */
     public function isLoadable()
     {
-        return
-            null !== $this->class
-            && null !== $this->property
-            && null !== $this->target
-            && null !== $this->id
-        ;
+        return null !== $this->target && null !== $this->id;
     }
 }

@@ -2,10 +2,9 @@
 
 namespace Ang3\Bundle\OdooApiBundle\DBAL\Types;
 
-use Ang3\Bundle\OdooApiBundle\Manager\RecordManager;
 use Ang3\Bundle\OdooApiBundle\Model\ManyToOne;
+use Ang3\Bundle\OdooApiBundle\ORM\ModelRegistry;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
-use Doctrine\DBAL\Types\ConversionException;
 use Doctrine\DBAL\Types\Type;
 
 /**
@@ -19,18 +18,18 @@ class RecordType extends Type
     const NAME = 'odoo_model_record';
 
     /**
-     * @var RecordManager
+     * @var ModelRegistry
      */
-    private $recordManager;
+    private $modelRegistry;
 
     /**
      * @required
-     * 
-     * @param RecordManager $recordManager
+     *
+     * @param ModelRegistry $modelRegistry
      */
-    public function setRecordManager(RecordManager $recordManager)
+    public function setModelRegistry(ModelRegistry $modelRegistry)
     {
-        $this->recordManager = $recordManager;
+        $this->modelRegistry = $modelRegistry;
     }
 
     /**
@@ -56,17 +55,20 @@ class RecordType extends Type
 
         // Si la valeur est une ManyToOne
         if ($value instanceof ManyToOne) {
-            // Récupération de l'ID de la relation
-            $id = $value->getId();
+            // Récupération de la classe cible et de l'ID de l'enregistrement
+            list($target, $id) = [
+                $value->getTarget(),
+                $value->getId(),
+            ];
 
-            // Si pas d'ID
-            if($id) {
+            // Si pas de cible ou pas d'ID
+            if (null === $target || null === $id) {
                 // Retour nul
                 return null;
             }
 
             // Retour de l'identifiant de la relation
-            return sprintf('%s,%s', $this->recordManager->getModelName($value->getTarget()), $value->getId());
+            return sprintf('%s,%s', $this->modelRegistry->resolve($target), $id);
         }
 
         // Retour de la valeur en chaine de caractères
@@ -90,7 +92,7 @@ class RecordType extends Type
         $values = explode(',', $value);
 
         // Si on a moins de deux valeurs
-        if(count($values) < 2) {
+        if (count($values) < 2) {
             // Pas d'ID
             return null;
         }
@@ -99,13 +101,13 @@ class RecordType extends Type
         list($model, $id) = $values;
 
         // Si pas d'identifiant
-        if(null === $id) {
+        if (null === $id) {
             // Pas d'ID
             return null;
         }
 
         // Retour de la restauration de la relation
-        return $this->recordManager->restoreManyToOne($model, $id);
+        return new ManyToOne($this->modelRegistry->getClass($model), $id);
     }
 
     /**

@@ -36,6 +36,11 @@ class RecordManager
     private $client;
 
     /**
+     * @var ModelRegistry
+     */
+    private $modelRegistry;
+
+    /**
      * Original data of loaded records.
      *
      * @var array
@@ -43,24 +48,19 @@ class RecordManager
     private static $cache = [];
 
     /**
-     * Class map of Odoo models.
-     *
-     * @var array
-     */
-    private static $models = [];
-
-    /**
      * Constructor of the manager.
      *
      * @param ArrayTransformerInterface $arrayTranformer
      * @param Reader                    $reader
      * @param ExternalApiClient         $client
+     * @param ModelRegistry             $modelRegistry
      */
-    public function __construct(ArrayTransformerInterface $arrayTranformer, Reader $reader, ExternalApiClient $client)
+    public function __construct(ArrayTransformerInterface $arrayTranformer, Reader $reader, ExternalApiClient $client, ModelRegistry $modelRegistry)
     {
         $this->arrayTranformer = $arrayTranformer;
         $this->reader = $reader;
         $this->client = $client;
+        $this->modelRegistry = $modelRegistry;
     }
 
     /**
@@ -73,7 +73,7 @@ class RecordManager
     public function persist(RecordInterface $record)
     {
         // Récupération du nom du modèle de l'enregistrement
-        $model = $this->getModelName($record);
+        $model = $this->modelRegistry->resolve($record);
 
         // Récupération de l'ID de l'enregistrement
         $id = $record->getId();
@@ -124,7 +124,7 @@ class RecordManager
         }
 
         // Récupéraion du nom du modèle
-        $model = $this->getModelName($record);
+        $model = $this->modelRegistry->resolve($record);
 
         // Retour de la suppression par l'ID
         return $this->deleteById($model, $record->getId());
@@ -141,7 +141,7 @@ class RecordManager
     public function deleteById(string $class, $ids)
     {
         // Récupéraion du nom du modèle
-        $model = $this->getModelName($class);
+        $model = $this->modelRegistry->resolve($class);
 
         // Lancement de la requête de suppression
         $this->client->delete($model, $ids);
@@ -160,7 +160,7 @@ class RecordManager
     public function reload(RecordInterface $record)
     {
         // Récupéraion du nom du modèle
-        $model = $this->getModelName($record);
+        $model = $this->modelRegistry->resolve($record);
 
         // Récupération de l'ID de l'enregistrement
         $id = $record->getId();
@@ -223,22 +223,17 @@ class RecordManager
      */
     public function load(ManyToOne $manyToOne)
     {
-        // Récupération de la classe cible
-        $target = $manyToOne->getTarget();
-
-        // Si pas de classe cible
-        if (null === $target) {
-            throw new Exception(sprintf('Unable to get target class of property "%s::$%s" (id: %s) - Did you forget to implement "ManyToOne" annotation on property?', $manyToOne->getClass(), $manyToOne->getProperty(), $manyToOne->getId() ?: 'null'));
-        }
+        // Récupération de l'ID de l'enregistrement cible
+        $id = $manyToOne->getId();
 
         // Si pas d'identifiant
-        if (null === $manyToOne->getId()) {
+        if (null === $id) {
             // Pas d'enregistrement
             return null;
         }
 
         // Retour de la recherche de l'entité
-        return $this->find($target, $manyToOne->getId());
+        return $this->find($manyToOne->getTarget(), $id);
     }
 
     /**
@@ -295,7 +290,7 @@ class RecordManager
     public function findBy(string $class, array $domains = [], array $options = [])
     {
         // Récupéraion du nom du modèle
-        $model = $this->getModelName($class);
+        $model = $this->modelRegistry->resolve($class);
 
         // Normalisation des domaines
         $domains = $this->normalizeDomains($class, $domains);
@@ -338,7 +333,7 @@ class RecordManager
     public function getChangeSet(RecordInterface $record)
     {
         // Récupéraion du nom du modèle
-        $model = $this->getModelName($record);
+        $model = $this->modelRegistry->resolve($record);
 
         // Normalization de l'enregistrement reçu
         $normalized = $this->normalize($record);
@@ -378,7 +373,7 @@ class RecordManager
     public function denormalize(array $data, string $class)
     {
         // Récupéraion du nom du modèle
-        $model = $this->getModelName($class);
+        $model = $this->modelRegistry->resolve($class);
 
         // Dénormlization de l'enregistrement
         $record = $this->arrayTranformer->fromArray($data, $class);
@@ -554,7 +549,7 @@ class RecordManager
         }
 
         // Récupéraion du nom du modèle
-        $model = $this->getModelName($record);
+        $model = $this->modelRegistry->resolve($record);
 
         // Si le modèle n'est pas encore déclaré
         if (array_key_exists($model, self::$cache)) {
@@ -588,7 +583,7 @@ class RecordManager
         }
 
         // Récupéraion du nom du modèle
-        $model = $this->getModelName($record);
+        $model = $this->modelRegistry->resolve($record);
 
         // Si on a des données pour ce mocèle identifié
         if (!empty(self::$cache[$model][$id])) {
@@ -598,73 +593,6 @@ class RecordManager
 
         // Pas de données
         return [];
-    }
-
-    /**
-     * Get the name of the record class from "Model" annotation.
-     *
-     * @internal
-     *
-     * @param object|scalar $objectOrClass
-     *
-     * @throws Exception when the class does not implement interface RecordInterface or does not implement annotation "Model"
-     *
-     * @return string
-     */
-    private function getModelName($objectOrClass)
-    {
-        // Définition de la classe à vérifier
-        $class = is_object($objectOrClass) ? get_class($objectOrClass) : (string) $objectOrClass;
-
-        // Si on a déjà le nom du modèle pour cette classe
-        if (!empty(self::$models[$class])) {
-            // Retour du nom du modèle stocké en cache
-            return self::$models[$class];
-        }
-
-        // Si la classe n'implémente pas l'interface d'enregistrement de Odoo
-        if (!in_array(RecordInterface::class, class_implements($class))) {
-            throw new Exception(sprintf('The class "%s" does not represent a record. Did you forget to implement interface "%s"?', $class, RecordInterface::class));
-        }
-
-        // Si pas d'annotation de modèle
-        if (!($annotation = $this->getModelAnnotation($class))) {
-            throw new Exception(sprintf('The class "%s" does not represent a model. Did you forget to implement annotation "%s"?', $class, Annotations\Model::class));
-        }
-
-        // Enregistrement du nom du modèle pour cette classe
-        self::$models[$class] = $annotation->name;
-
-        // Retour du nom du modèle
-        return $annotation->name;
-    }
-
-    /**
-     * Get the "Model" annotation of a class.
-     *
-     * @internal
-     *
-     * @param string $class
-     *
-     * @throws Exception when the class was not found
-     *
-     * @return Annotations\Model|null
-     */
-    private function getModelAnnotation(string $class)
-    {
-        // Si la classe du modèle n'existe pas
-        if (!class_exists($class)) {
-            throw new Exception(sprintf('Model class "%s" not found.', $class));
-        }
-
-        // Réflection du modèle
-        $reflection = new ReflectionClass($class);
-
-        // Recherche de l'annotation "Model"
-        $annotation = $this->reader->getClassAnnotation($reflection, Annotations\Model::class);
-
-        // Retur de l'annotation
-        return $annotation instanceof Annotations\Model ? $annotation : null;
     }
 
     /**
@@ -709,13 +637,5 @@ class RecordManager
 
         // Retour de la différence
         return $diff;
-    }
-
-    /**
-     * @return ExternalApiClient
-     */
-    public function getClient()
-    {
-        return $this->client;
     }
 }

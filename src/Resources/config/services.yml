@@ -4,6 +4,10 @@ services:
     autoconfigure: true
     public: false
 
+  _instanceof:
+    Ang3\Bundle\OdooApiBundle\Model\RecordInterface:
+        tags: ['ang3_odoo_api.model']
+
   # Autowire
   Ang3\Component\OdooApiClient\Factory\ApiClientFactory: ~
 
@@ -25,6 +29,10 @@ services:
   # 
   # ORM
   # 
+  
+  Ang3\Bundle\OdooApiBundle\ORM\ModelRegistry:
+    arguments:
+      $parameters: '%ang3_odoo_api.models%'
   
   Ang3\Bundle\OdooApiBundle\ORM\RecordManager:
     arguments:

@@ -2,14 +2,14 @@
 
 namespace Ang3\Bundle\OdooApiBundle\Model\Res;
 
-use Ang3\Bundle\OdooApiBundle\Model\AbstractRecord;
-use Ang3\Bundle\OdooApiBundle\Model\ActivatableModelTrait;
+use Ang3\Bundle\OdooApiBundle\Model\Record;
+use Ang3\Bundle\OdooApiBundle\Model\ActivatableRecordTrait;
 
 /**
  * @author Joanis ROUANET
  */
-class User extends AbstractRecord
+class User extends Record
 {
-    use ActivatableModelTrait;
+    use ActivatableRecordTrait;
     use ContactTypeTrait;
 }

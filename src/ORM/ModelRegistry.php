@@ -3,11 +3,6 @@
 namespace Ang3\Bundle\OdooApiBundle\ORM;
 
 use InvalidArgumentException;
-use Ang3\Bundle\OdooApiBundle\Model\Res\Company;
-use Ang3\Bundle\OdooApiBundle\Model\Res\Country;
-use Ang3\Bundle\OdooApiBundle\Model\Res\Currency;
-use Ang3\Bundle\OdooApiBundle\Model\Res\Partner;
-use Ang3\Bundle\OdooApiBundle\Model\Res\User;
 use Doctrine\Common\Util\ClassUtils;
 
 /**
@@ -18,15 +13,15 @@ class ModelRegistry
     /**
      * @var array
      */
-    private $models = [];
+    private $mapping = [];
 
     /**
-     * @param array $models
+     * @param array $mapping
      */
-    public function __construct(array $models)
+    public function __construct(array $mapping)
     {
         // Hydratation
-        $this->models = $models;
+        $this->mapping = $mapping;
     }
 
     /**
@@ -47,7 +42,7 @@ class ModelRegistry
         }
 
         // Enregistrement
-        $this->models[$name] = $class;
+        $this->mapping[$name] = $class;
 
         // Retour du registre
         return $this;
@@ -68,7 +63,7 @@ class ModelRegistry
         $class = is_object($objectOrClass) ? ClassUtils::getClass($objectOrClass) : (string) $objectOrClass;
 
         // Recherche du modèle par la classe
-        $name = array_search($class, $this->models);
+        $name = array_search($class, $this->mapping);
 
         // Si la classe n'est pas un modèle Odoo
         if (false === $name) {
@@ -96,7 +91,7 @@ class ModelRegistry
         }
 
         // Retour de la classe du modèle
-        return $this->models[$name];
+        return $this->mapping[$name];
     }
 
     /**
@@ -108,7 +103,7 @@ class ModelRegistry
      */
     public function hasModel(string $name)
     {
-        return array_key_exists($name, $this->models);
+        return array_key_exists($name, $this->mapping);
     }
 
     /**
@@ -120,6 +115,6 @@ class ModelRegistry
      */
     public function hasClass(string $class)
     {
-        return in_array($class, $this->models);
+        return in_array($class, $this->mapping);
     }
 }

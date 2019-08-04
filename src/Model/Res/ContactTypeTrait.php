@@ -40,7 +40,7 @@ trait ContactTypeTrait
     /**
      * @var Country
      *
-     * @JMS\Type("Ang3\Bundle\OdooApiBundle\Model\Res\Country")
+     * @JMS\Type("Ang3\Bundle\OdooApiBundle\ORM\Mapping\ManyToOne")
      * @JMS\SerializedName("country_id")
      * @Odoo\ManyToOne("Ang3\Bundle\OdooApiBundle\Model\Res\Country")
      */
@@ -84,7 +84,7 @@ trait ContactTypeTrait
      * @JMS\Type("boolean")
      * @JMS\SerializedName("is_company")
      */
-    protected $company;
+    protected $company = false;
 
     /**
      * @var bool
@@ -92,7 +92,7 @@ trait ContactTypeTrait
      * @JMS\Type("boolean")
      * @JMS\SerializedName("customer")
      */
-    protected $customer;
+    protected $customer = false;
 
     /**
      * @var bool
@@ -100,7 +100,7 @@ trait ContactTypeTrait
      * @JMS\Type("boolean")
      * @JMS\SerializedName("supplier")
      */
-    protected $supplier;
+    protected $supplier = false;
 
     /**
      * @var bool
@@ -108,7 +108,7 @@ trait ContactTypeTrait
      * @JMS\Type("boolean")
      * @JMS\SerializedName("employee")
      */
-    protected $employee;
+    protected $employee = false;
 
     /**
      * @param string|null $street

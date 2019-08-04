@@ -2,70 +2,78 @@
 
 namespace Ang3\Bundle\OdooApiBundle\Model;
 
+use DateTime;
+use Ang3\Bundle\OdooApiBundle\Annotations as Odoo;
+use Ang3\Bundle\OdooApiBundle\Model\Res\User;
+use JMS\Serializer\Annotation as JMS;
+
 /**
  * @author Joanis ROUANET
  */
-class Record
+class Record implements RecordInterface
 {
     /**
-     * @var string
-     */
-    protected $model;
-
-    /**
-     * @var int
+     * @var int|null
+     *
+     * @JMS\Type("integer")
+     * @JMS\SerializedName("id")
      */
     protected $id;
 
     /**
-     * @var array
-     */
-    private $data = [];
-
-    /**
-     * Constructor of the record.
+     * @var DateTime
      *
-     * @param string $model
-     * @param int    $id
+     * @JMS\Type("DateTime<'Y-m-d H:i:s'>")
+     * @JMS\SerializedName("create_date")
+     * @JMS\Exclude(if="context.getDirection() == constant('JMS\\Serializer\\GraphNavigator::DIRECTION_SERIALIZATION')")
      */
-    public function __construct(string $model, int $id, array $data = [])
-    {
-        $this->model = $model;
-        $this->id = $id;
-        $this->data = $data;
-    }
+    protected $createdAt;
 
     /**
-     * @return string
-     */
-    public function __toString()
-    {
-        return json_encode([$this->model, $this->id]);
-    }
-
-    /**
-     * @param string $model
+     * @var User
      *
-     * @return self
+     * @JMS\Type("Ang3\Bundle\OdooApiBundle\ORM\Mapping\ManyToOne")
+     * @JMS\SerializedName("create_uid")
+     * @JMS\Exclude(if="context.getDirection() == constant('JMS\\Serializer\\GraphNavigator::DIRECTION_SERIALIZATION')")
+     * @Odoo\ManyToOne("Ang3\Bundle\OdooApiBundle\Model\Res\User")
      */
-    public function setModel(string $model)
-    {
-        $this->model = $model;
-
-        return $this;
-    }
-
-    public function getModel()
-    {
-        return $this->model;
-    }
+    protected $createdBy;
 
     /**
+     * @var DateTime
+     *
+     * @JMS\Type("DateTime<'Y-m-d H:i:s'>")
+     * @JMS\SerializedName("write_date")
+     * @JMS\Exclude(if="context.getDirection() == constant('JMS\\Serializer\\GraphNavigator::DIRECTION_SERIALIZATION')")
+     */
+    protected $updatedAt;
+
+    /**
+     * @var User
+     *
+     * @JMS\Type("Ang3\Bundle\OdooApiBundle\ORM\Mapping\ManyToOne")
+     * @JMS\SerializedName("write_uid")
+     * @JMS\Exclude(if="context.getDirection() == constant('JMS\\Serializer\\GraphNavigator::DIRECTION_SERIALIZATION')")
+     *
+     * @Odoo\ManyToOne("Ang3\Bundle\OdooApiBundle\Model\Res\User")
+     */
+    protected $updatedBy;
+
+    /**
+     * @var bool
+     *
+     * @JMS\Exclude
+     */
+    protected $__loaded = false;
+
+    /**
+     * @final
+     *
      * @param int $id
      *
      * @return self
      */
-    public function setId(int $id)
+    final public function setId(int $id)
     {
         $this->id = $id;
 
@@ -73,40 +81,108 @@ class Record
     }
 
     /**
+     * @final
+     *
      * {@inherited}.
      */
-    public function getId()
+    final public function getId()
     {
         return $this->id;
     }
 
     /**
-     * @param array $data
+     * @param DateTime $createdAt
      *
      * @return self
      */
-    public function setData(array $data)
+    public function setCreatedAt(DateTime $createdAt)
     {
-        $this->data = $data;
+        $this->createdAt = $createdAt;
 
         return $this;
     }
 
     /**
-     * @return array
+     * @return DateTime
      */
-    public function getData()
+    public function getCreatedAt()
     {
-        return $this->data;
+        return $this->createdAt;
     }
 
     /**
-     * Check if the record is new.
+     * @param User $createdBy
      *
+     * @return self
+     */
+    public function setCreatedBy(User $createdBy)
+    {
+        $this->createdBy = $createdBy;
+
+        return $this;
+    }
+
+    /**
+     * @return User
+     */
+    public function getCreatedBy()
+    {
+        return $this->createdBy;
+    }
+
+    /**
+     * @param DateTime $updatedAt
+     *
+     * @return self
+     */
+    public function setUpdatedAt(DateTime $updatedAt)
+    {
+        $this->updatedAt = $updatedAt;
+
+        return $this;
+    }
+
+    /**
+     * @return DateTime
+     */
+    public function getUpdatedAt()
+    {
+        return $this->updatedAt;
+    }
+
+    /**
+     * @param User $updatedBy
+     *
+     * @return self
+     */
+    public function setUpdatedBy(User $updatedBy)
+    {
+        $this->updatedBy = $updatedBy;
+
+        return $this;
+    }
+
+    /**
+     * @return User
+     */
+    public function getUpdatedBy()
+    {
+        return $this->updatedBy;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getDisplayName()
+    {
+        return null;
+    }
+
+    /**
      * @return bool
      */
-    public function isNew()
+    public function isLoaded()
     {
-        return null === $this->id;
+        return $this->__loaded;
     }
 }

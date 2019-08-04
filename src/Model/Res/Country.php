@@ -3,14 +3,17 @@
 namespace Ang3\Bundle\OdooApiBundle\Model\Res;
 
 use Ang3\Bundle\OdooApiBundle\Annotations as Odoo;
-use Ang3\Bundle\OdooApiBundle\Model\AbstractRecord;
+use Ang3\Bundle\OdooApiBundle\Model\Record;
+use Ang3\Bundle\OdooApiBundle\Model\NamedRecordTrait;
 use JMS\Serializer\Annotation as JMS;
 
 /**
  * @author Joanis ROUANET
  */
-class Country extends AbstractRecord
+class Country extends Record
 {
+    use NamedRecordTrait;
+
     /**
      * @var string|null
      *
@@ -30,7 +33,7 @@ class Country extends AbstractRecord
     /**
      * @var Currency
      *
-     * @JMS\Type("Ang3\Bundle\OdooApiBundle\Model\Res\Currency")
+     * @JMS\Type("Ang3\Bundle\OdooApiBundle\ORM\Mapping\ManyToOne")
      * @JMS\SerializedName("currency_id")
      * @Odoo\ManyToOne("Ang3\Bundle\OdooApiBundle\Model\Res\Currency")
      */

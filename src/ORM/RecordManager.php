@@ -2,34 +2,18 @@
 
 namespace Ang3\Bundle\OdooApiBundle\ORM;
 
-use Exception;
 use LogicException;
-use ReflectionClass;
 use ReflectionProperty;
 use Ang3\Component\OdooApiClient\ExternalApiClient;
-use Ang3\Bundle\OdooApiBundle\Annotations;
 use Ang3\Bundle\OdooApiBundle\Exception\RecordNotFoundException;
 use Ang3\Bundle\OdooApiBundle\Model\Record;
 use Ang3\Bundle\OdooApiBundle\Model\RecordInterface;
-use Doctrine\Common\Annotations\Reader;
-use JMS\Serializer\Annotation as JMS;
-use JMS\Serializer\ArrayTransformerInterface;
 
 /**
  * @author Joanis ROUANET
  */
 class RecordManager
 {
-    /**
-     * @var ArrayTransformerInterface
-     */
-    private $arrayTranformer;
-
-    /**
-     * @var Reader
-     */
-    private $reader;
-
     /**
      * @var ExternalApiClient
      */
@@ -41,6 +25,11 @@ class RecordManager
     private $modelRegistry;
 
     /**
+     * @var RecordNormalizer
+     */
+    private $normalizer;
+
+    /**
      * Original data of loaded records.
      *
      * @var array
@@ -50,23 +39,21 @@ class RecordManager
     /**
      * Constructor of the manager.
      *
-     * @param ArrayTransformerInterface $arrayTranformer
-     * @param Reader                    $reader
-     * @param ExternalApiClient         $client
-     * @param ModelRegistry             $modelRegistry
+     * @param ExternalApiClient $client
+     * @param ModelRegistry     $modelRegistry
+     * @param RecordNormalizer  $normalizer
      */
-    public function __construct(ArrayTransformerInterface $arrayTranformer, Reader $reader, ExternalApiClient $client, ModelRegistry $modelRegistry)
+    public function __construct(ExternalApiClient $client, ModelRegistry $modelRegistry, RecordNormalizer $normalizer)
     {
-        $this->arrayTranformer = $arrayTranformer;
-        $this->reader = $reader;
         $this->client = $client;
         $this->modelRegistry = $modelRegistry;
+        $this->normalizer = $normalizer;
     }
 
     /**
      * Persist a record.
      *
-     * @param RecordInterface $record
+     * @param Record $record
      *
      * @throws LogicException when a record cannot be created
      */
@@ -86,13 +73,13 @@ class RecordManager
             }
 
             // Création de l'enregitrement et récupération de l'ID
-            $id = $this->client->create($model, $this->normalize($record));
+            $id = $this->client->create($model, $data = $this->normalizer->normalize($record));
 
-            // Récupération de l'enregistrement enregistré
-            $record = $this->get($model, $id);
+            // Enregistrement de l'ID de l'enregistrement
+            $record->setId($id);
 
             // Enregistrement des données originelles
-            $this->setOriginalData($record);
+            $this->setOriginalData($record, $data);
         } else {
             // Récupération des changements
             $changeSet = $this->getChangeSet($record);
@@ -102,6 +89,9 @@ class RecordManager
                 // Retour de l'enregistrement
                 return $record;
             }
+
+            //dump($changeSet);
+            //die;
 
             // Mise-à-jour de l'enregistrement
             $this->client->update($model, $id, $changeSet);
@@ -176,9 +166,6 @@ class RecordManager
             // Pas d'enregistrement rechargé
             return null;
         }
-
-        // Enregistrement des données originelles
-        $this->setOriginalData($refreshed);
 
         // Retour de l'enregistrement mis-à-jour
         return $refreshed;
@@ -266,10 +253,10 @@ class RecordManager
         $model = $this->modelRegistry->resolve($class);
 
         // Normalisation des domaines
-        $domains = $this->normalizeDomains($class, $domains);
+        $domains = $this->normalizer->normalizeDomains($class, $domains);
 
         // Récupération du noms des propriétés et leur nom sérialisés
-        $serializedNames = $this->getSerializedNames($class);
+        $serializedNames = $this->normalizer->getSerializedNames($class);
 
         // Si pas d'options de champs particuliers
         if (!isset($options['fields'])) {
@@ -283,13 +270,10 @@ class RecordManager
         // Pour chaque ligne de données
         foreach ($result as $key => $data) {
             // Création de l'enregistrement
-            $record = $this->denormalize($data, $class);
-
-            // On définit l'enregistrement comme étant chargé
-            $this->setLoaded($record, true);
+            $record = $this->normalizer->denormalize($data, $class);
 
             // Mise-à-jour des données originelles
-            $this->setOriginalData($record, $data);
+            $this->setOriginalData($record);
 
             // Dénormalization des données
             $result[$key] = $record;
@@ -312,7 +296,7 @@ class RecordManager
         $model = $this->modelRegistry->resolve($record);
 
         // Normalization de l'enregistrement reçu
-        $normalized = $this->normalize($record);
+        $normalized = $this->normalizer->normalize($record);
 
         // Récupération de l'ID de l'enregistrement
         $id = $record->getId();
@@ -337,171 +321,6 @@ class RecordManager
     }
 
     /**
-     * Denormalize a record from Odoo data.
-     *
-     * @param array  $data
-     * @param string $class
-     *
-     * @throws Exception when the record class is not valid
-     *
-     * @return RecordInterface
-     */
-    public function denormalize(array $data, string $class)
-    {
-        
-
-        // Récupéraion du nom du modèle
-        $model = $this->modelRegistry->resolve($class);
-
-        // Dénormlization de l'enregistrement
-        $record = $this->arrayTranformer->fromArray($data, $class);
-
-        // Retour de l'enregistrement
-        return $record;
-    }
-
-    /**
-     * Normalize a record.
-     *
-     * @param RecordInterface $record
-     *
-     * @return array
-     */
-    public function normalize(RecordInterface $record)
-    {
-        return $this->arrayTranformer->toArray($record);
-    }
-
-    /**
-     * Normalize domains criteria names by Odoo model names.
-     *
-     * @internal
-     *
-     * @param string $class
-     * @param array  $domains
-     *
-     * @return array
-     */
-    private function normalizeDomains(string $class, array $domains = [])
-    {
-        // Récupération du noms des propriétés et leur nom sérialisés
-        $serializedNames = $this->getSerializedNames($class);
-
-        // Pour chaque domaine
-        foreach ($domains as $key => &$criteria) {
-            // Si on a un tableau (donc un critère)
-            if (is_array($criteria) && !empty($criteria[0])) {
-                // Noramlisation du nom du champ cible du critère
-                $criteria[0] = $this->normalizeFieldName($class, $criteria[0]);
-            }
-        }
-
-        // Retour des domaines
-        return $domains;
-    }
-
-    /**
-     * Normalize a flattened field name.
-     *
-     * @internal
-     *
-     * @param string $class
-     * @param string $fieldName
-     *
-     * @return string
-     */
-    private function normalizeFieldName(string $class, string $fieldName)
-    {
-        // Réflection de la classe
-        $reflection = new ReflectionClass($class);
-
-        // Récupération des champs par explosion selon les points
-        $fields = explode('.', $fieldName);
-
-        // Récupération du noms des propriétés et leur nom sérialisés
-        $serializedNames = $this->getSerializedNames($class);
-
-        // Pour chaque champ à traverser
-        foreach ($fields as $key => &$field) {
-            // Récupération du nom de la propriété
-            $propertyName = $field;
-
-            // Mise-à-jour du nom du champ
-            $field = array_key_exists($field, $serializedNames) ? $serializedNames[$field] : $field;
-
-            // Si la classe possède la propriété
-            if ($reflection->hasProperty($propertyName)) {
-                // Récupération de la réflection de la propriété
-                $property = $reflection->getProperty($propertyName);
-
-                // Récupération éventuelle d'une annotation de relation simple
-                $manyToOne = $this->findManyToOneAssociation($property);
-
-                // Si pas d'annotation
-                if (null === $manyToOne) {
-                    // Champ suivant
-                    continue;
-                }
-
-                // Changement de classe courante
-                $reflection = new ReflectionClass($manyToOne->class);
-
-                // Mise-à-jour des nom de champs sérialisés selon la nouvelle classe
-                $serializedNames = $this->getSerializedNames($manyToOne->class);
-            }
-        }
-
-        // Retour du champ aplati normalisé
-        return implode('.', $fields);
-    }
-
-    /**
-     * Get serialized names of class properties by property name.
-     *
-     * @internal
-     *
-     * @param string $class
-     *
-     * @return array
-     */
-    private function getSerializedNames(string $class)
-    {
-        // Réflection de la classe
-        $reflection = new ReflectionClass($class);
-
-        // Récupération des propriétés de la classe
-        $properties = $reflection->getProperties();
-
-        // Initialisation des noms de propriété sérialisés
-        $serializedNames = [];
-
-        // Pour chaque propriété
-        foreach ($properties as $property) {
-            /**
-             * Récupération d'une annotation éventuelle du nom sérialisé de la propriété.
-             *
-             * @var JMS\SerializedName|null
-             */
-            $annotation = $this->reader->getPropertyAnnotation($property, JMS\SerializedName::class);
-
-            // Si pas d'annotation
-            if (null === $annotation) {
-                // Enregistrement du nom sérialisé de la propriété par rapport à son nom
-                $serializedNames[$property->getName()] = $property->getName();
-
-                // Propriété suivante
-                continue;
-            }
-
-            // Enregistrement du nom sérialisé de la propriété par rapport à son nom
-            $serializedNames[$property->getName()] = $annotation->name;
-        }
-
-        // Retour des noms de propriété sérialisés
-        return $serializedNames;
-    }
-
-    /**
      * Set data for a model.
      *
      * @internal
@@ -522,6 +341,9 @@ class RecordManager
             return $this;
         }
 
+        // On renseigne l'enregistrement comme étant chargé
+        $this->setLoaded($record, true);
+
         // Récupéraion du nom du modèle
         $model = $this->modelRegistry->resolve($record);
 
@@ -532,7 +354,7 @@ class RecordManager
         }
 
         // Enregistrement des données identifiées
-        self::$cache[$model][$id] = $data;
+        self::$cache[$model][$id] = $data ?: $this->normalizer->normalize($record);
 
         // Retour du cache
         return $this;
@@ -572,10 +394,12 @@ class RecordManager
     /**
      * Record setter on '__loaded' property.
      *
+     * @internal
+     *
      * @param RecordInterface $record
      * @param bool|bool       $isLoaded
      */
-    public function setLoaded(RecordInterface $record, bool $isLoaded = true)
+    private function setLoaded(RecordInterface $record, bool $isLoaded = true)
     {
         // Réflection de la propriété cible
         $property = new ReflectionProperty(get_class($record), '__loaded');
@@ -585,22 +409,6 @@ class RecordManager
 
         // On assigne la valeur à la propriété
         $property->setValue($record, $isLoaded);
-    }
-
-    /**
-     * Find ManyToOne association on property.
-     * 
-     * @param  ReflectionProperty $property
-     * 
-     * @return Annotations\ManyToOne|null
-     */
-    public function findManyToOneAssociation(ReflectionProperty $property)
-    {
-        /** @var Annotations\ManyToOne|null */
-        $manyToOne = $this->reader->getPropertyAnnotation($property, Annotations\ManyToOne::class);
-
-        // Retour de l'association éventuelle
-        return $manyToOne;
     }
 
     /**
@@ -645,5 +453,29 @@ class RecordManager
 
         // Retour de la différence
         return $diff;
+    }
+
+    /**
+     * @return ExternalApiClient
+     */
+    public function getClient()
+    {
+        return $this->client;
+    }
+
+    /**
+     * @return ModelRegistry
+     */
+    public function getModelRegistry()
+    {
+        return $this->modelRegistry;
+    }
+
+    /**
+     * @return RecordNormalizer
+     */
+    public function getNormalizer()
+    {
+        return $this->normalizer;
     }
 }

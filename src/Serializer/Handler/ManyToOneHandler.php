@@ -3,13 +3,8 @@
 namespace Ang3\Bundle\OdooApiBundle\Serializer\Handler;
 
 use InvalidArgumentException;
-use ReflectionClass;
-use Ang3\Bundle\OdooApiBundle\Model\AbstractRecord;
-use Ang3\Bundle\OdooApiBundle\Model\ManyToOne;
+use Ang3\Bundle\OdooApiBundle\ORM\Mapping\ManyToOne;
 use Ang3\Bundle\OdooApiBundle\Model\RecordInterface;
-use Ang3\Bundle\OdooApiBundle\ORM\ModelRegistry;
-use Ang3\Bundle\OdooApiBundle\ORM\RecordManager;
-use Doctrine\Common\Annotations\Reader;
 use JMS\Serializer\Handler\SubscribingHandlerInterface;
 use JMS\Serializer\GraphNavigator;
 use JMS\Serializer\DeserializationContext;
@@ -48,28 +43,44 @@ class ManyToOneHandler implements SubscribingHandlerInterface
      * Serialize a many to one.
      *
      * @param JsonSerializationVisitor $visitor
-     * @param ManyToOne                $manyToOne
+     * @param object                   $object
      * @param array                    $type
      * @param SerializationContext     $context
      *
-     * @return array|bool|null
+     * @throws InvalidArgumentException when the objet is not instance of class ManyToOne or RecordInterface
+     *
+     * @return int|false
      */
-    public function serializeManyToOneToJson(JsonSerializationVisitor $visitor, ManyToOne $manyToOne, array $type, SerializationContext $context)
+    public function serializeManyToOneToJson(JsonSerializationVisitor $visitor, object $object, array $type, SerializationContext $context)
     {
-        // Récupération de la classe et de l'ID de l'association
-        list($class, $id) = [
-            $manyToOne->getClass(),
-            $manyToOne->getId()
-        ];
+        // Si l'instance est une association simple
+        if ($object instanceof ManyToOne) {
+            // Récupération de la classe et de l'ID de l'association
+            list($class, $id) = [
+                $object->getClass(),
+                $object->getId(),
+            ];
 
-        // Si pas de classe ou d'identifiant
-        if(null === $class || null === $id) {
-            // Retour négatif pour Odoo
-            return false;
+            // Si pas de classe ou d'identifiant
+            if (null === $class || null === $id) {
+                // Retour négatif pour Odoo
+                return false;
+            }
+
+            // Retour du tableau de la relation pour Odoo
+            return $id;
         }
 
-        // Retour du tableau de la relation pour Odoo
-        return [ $id, $manyToOne->getDisplayName() ];
+        // Si l'objet est un enregistrement
+        if ($object instanceof RecordInterface) {
+            // Récupération de l'ID de l'enregistrement
+            $id = $object->getId();
+
+            // Retour du tableau de la relation pour Odoo
+            return $id ?: false;
+        }
+
+        throw new InvalidArgumentException(sprintf('Expected instance of class "%s" or "%s", "%s" given', ManyToOne::class, RecordInterface::class, get_class($object)));
     }
 
     /**
@@ -85,7 +96,7 @@ class ManyToOneHandler implements SubscribingHandlerInterface
     public function deserializeManyToOneFromJson(JsonDeserializationVisitor $visitor, $data, array $type, DeserializationContext $context)
     {
         // Si on a pas un tableau
-        if(!is_array($data)) {
+        if (!is_array($data)) {
             // Retour nul
             return null;
         }
@@ -97,7 +108,7 @@ class ManyToOneHandler implements SubscribingHandlerInterface
         ];
 
         // Si pas d'identifiant
-        if(null === $id) {
+        if (null === $id) {
             // Retour nul
             return null;
         }

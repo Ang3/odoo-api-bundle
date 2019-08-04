@@ -3,20 +3,20 @@
 namespace Ang3\Bundle\OdooApiBundle\Model\Res;
 
 use Ang3\Bundle\OdooApiBundle\Annotations as Odoo;
-use Ang3\Bundle\OdooApiBundle\Model\AbstractRecord;
+use Ang3\Bundle\OdooApiBundle\Model\Record;
 use JMS\Serializer\Annotation as JMS;
 
 /**
  * @author Joanis ROUANET
  */
-class Company extends AbstractRecord
+class Company extends Record
 {
     use ContactTypeTrait;
 
     /**
      * @var Partner
      *
-     * @JMS\Type("Ang3\Bundle\OdooApiBundle\Model\Res\Partner")
+     * @JMS\Type("Ang3\Bundle\OdooApiBundle\ORM\Mapping\ManyToOne")
      * @JMS\SerializedName("partner_id")
      * @Odoo\ManyToOne("Ang3\Bundle\OdooApiBundle\Model\Res\Partner")
      */

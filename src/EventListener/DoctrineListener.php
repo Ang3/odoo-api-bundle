@@ -3,7 +3,7 @@
 namespace Ang3\Bundle\OdooApiBundle\EventListener;
 
 use ReflectionClass;
-use Ang3\Bundle\OdooApiBundle\ORM\RecordManager;
+use Ang3\Bundle\OdooApiBundle\ORM\RecordNormalizer;
 use Doctrine\Common\Util\ClassUtils;
 use Doctrine\ORM\Event\LifecycleEventArgs;
 
@@ -13,16 +13,16 @@ use Doctrine\ORM\Event\LifecycleEventArgs;
 class DoctrineListener
 {
     /**
-     * @var RecordManager
+     * @var RecordNormalizer
      */
-    private $recordManager;
+    private $recordNormalizer;
 
     /**
-     * @param RecordManager $recordManager
+     * @param RecordNormalizer $recordNormalizer
      */
-    public function __construct(RecordManager $recordManager)
+    public function __construct(RecordNormalizer $recordNormalizer)
     {
-        $this->recordManager = $recordManager;
+        $this->recordNormalizer = $recordNormalizer;
     }
 
     /**
@@ -44,7 +44,7 @@ class DoctrineListener
         // Pour chaque propriété de l'objet
         foreach ($properties as $property) {
             // Si on a une annotation de relation simple
-            if($manyToOne = $this->recordManager->findManyToOneAssociation($property)) {
+            if ($manyToOne = $this->recordNormalizer->findManyToOneAssociation($property)) {
                 // On rend accessible la propriété
                 $property->setAccessible(true);
 

@@ -7,7 +7,7 @@ use JMS\Serializer\Annotation as JMS;
 /**
  * @author Joanis ROUANET
  */
-trait ActivatableModelTrait
+trait ActivatableRecordTrait
 {
     /**
      * @var bool

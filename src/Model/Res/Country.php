@@ -4,7 +4,6 @@ namespace Ang3\Bundle\OdooApiBundle\Model\Res;
 
 use Ang3\Bundle\OdooApiBundle\Annotations as Odoo;
 use Ang3\Bundle\OdooApiBundle\Model\AbstractRecord;
-use Ang3\Bundle\OdooApiBundle\Model\ManyToOne;
 use JMS\Serializer\Annotation as JMS;
 
 /**
@@ -29,11 +28,10 @@ class Country extends AbstractRecord
     protected $phoneCode;
 
     /**
-     * @var ManyToOne
+     * @var Currency
      *
-     * @JMS\Type("Ang3\Bundle\OdooApiBundle\Model\ManyToOne")
+     * @JMS\Type("Ang3\Bundle\OdooApiBundle\Model\Res\Currency")
      * @JMS\SerializedName("currency_id")
-     *
      * @Odoo\ManyToOne("Ang3\Bundle\OdooApiBundle\Model\Res\Currency")
      */
     protected $currency;
@@ -79,11 +77,11 @@ class Country extends AbstractRecord
     }
 
     /**
-     * @param ManyToOne $currency
+     * @param Currency $currency
      *
      * @return self
      */
-    public function setCurrency(ManyToOne $currency)
+    public function setCurrency(Currency $currency)
     {
         $this->currency = $currency;
 
@@ -91,7 +89,7 @@ class Country extends AbstractRecord
     }
 
     /**
-     * @return ManyToOne
+     * @return Currency
      */
     public function getCurrency()
     {

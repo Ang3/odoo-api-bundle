@@ -3,6 +3,12 @@
 namespace Ang3\Bundle\OdooApiBundle\ORM;
 
 use InvalidArgumentException;
+use Ang3\Bundle\OdooApiBundle\Model\Res\Company;
+use Ang3\Bundle\OdooApiBundle\Model\Res\Country;
+use Ang3\Bundle\OdooApiBundle\Model\Res\Currency;
+use Ang3\Bundle\OdooApiBundle\Model\Res\Partner;
+use Ang3\Bundle\OdooApiBundle\Model\Res\User;
+use Doctrine\Common\Util\ClassUtils;
 
 /**
  * @author Joanis ROUANET
@@ -59,7 +65,7 @@ class ModelRegistry
     public function resolve($objectOrClass)
     {
         // Récuépration du nom complet de la classe
-        $class = is_object($objectOrClass) ? get_class($objectOrClass) : (string) $objectOrClass;
+        $class = is_object($objectOrClass) ? ClassUtils::getClass($objectOrClass) : (string) $objectOrClass;
 
         // Recherche du modèle par la classe
         $name = array_search($class, $this->models);

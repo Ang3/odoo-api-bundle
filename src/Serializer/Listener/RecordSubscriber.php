@@ -5,6 +5,7 @@ namespace Ang3\Bundle\OdooApiBundle\Serializer\Listener;
 use ReflectionClass;
 use Ang3\Bundle\OdooApiBundle\Annotations;
 use Ang3\Bundle\OdooApiBundle\ORM\RecordManager;
+use Ang3\Bundle\OdooApiBundle\Model\AbstractRecord;
 use Ang3\Bundle\OdooApiBundle\Model\ManyToOne;
 use Ang3\Bundle\OdooApiBundle\Model\RecordInterface;
 use Doctrine\Common\Annotations\Reader;
@@ -18,25 +19,23 @@ use JMS\Serializer\EventDispatcher\ObjectEvent;
 class RecordSubscriber implements EventSubscriberInterface
 {
     /**
-     * @var RecordManager
-     */
-    private $recordManager;
-
-    /**
      * @var Reader
      */
     private $reader;
 
     /**
-     * Constructor of the record.
-     *
-     * @param RecordManager $recordManager
-     * @param Reader        $reader
+     * @var RecordManager
      */
-    public function __construct(RecordManager $recordManager, Reader $reader)
+    private $recordManager;
+
+    /**
+     * @param Reader        $reader
+     * @param RecordManager $recordManager
+     */
+    public function __construct(Reader $reader, RecordManager $recordManager)
     {
-        $this->recordManager = $recordManager;
         $this->reader = $reader;
+        $this->recordManager = $recordManager;
     }
 
     /**
@@ -48,6 +47,7 @@ class RecordSubscriber implements EventSubscriberInterface
             [
                 'event' => Events::POST_DESERIALIZE,
                 'method' => 'onPostDeserialize',
+                'class' => AbstractRecord::class
             ],
         ];
     }
@@ -62,22 +62,24 @@ class RecordSubscriber implements EventSubscriberInterface
         // Récupération de l'objet désérialisé
         $object = $event->getObject();
 
+        // Récupération du visiteur de données
+        $visitor = $event->getVisitor();
+
         // Si l'objet est bien l'instance d'un enregistrement
         if ($object instanceof RecordInterface) {
-            // Réflection de la classe
-            $reflection = new ReflectionClass(get_class($object));
+            // Création d'une réflection de la classe de l'objet
+            $reflection = new ReflectionClass($object);
 
-            // Pour chaque propriété de la classe
-            foreach ($reflection->getProperties() as $property) {
-                /**
-                 * Récupération de l'annotation de l'association.
-                 *
-                 * @var Annotations\ManyToOne|null
-                 */
-                $manyToOne = $this->reader->getPropertyAnnotation($property, Annotations\ManyToOne::class);
+            // Récupération des propriété de la classe de l'enregistrement
+            $properties = $reflection->getProperties();
 
-                // Si on a une annotation de relation
-                if (null === $manyToOne) {
+            // Pour chaque propriété de l'objet
+            foreach ($properties as $property) {
+                // Récupération d'une association simple éventuelle
+                $manyToOne = $this->recordManager->findManyToOneAssociation($property);
+
+                // Si pas d'association simple
+                if(null === $manyToOne) {
                     // Propriété suivante
                     continue;
                 }
@@ -85,20 +87,65 @@ class RecordSubscriber implements EventSubscriberInterface
                 // On rend accessible la propriété
                 $property->setAccessible(true);
 
-                // Récupératio de la valeur de la propriété
+                // Récupération de la valeur  de la propriété
                 $value = $property->getValue($object);
 
-                // Si la valeur n'est pas une relation
-                if (!($value instanceof ManyToOne)) {
+                // Si la propriété est déjà un enregistrement
+                if($value instanceof RecordInterface) {
                     // Propriété suivante
                     continue;
                 }
 
-                // Si la cible est nulle
-                if (null === $value->getClass()) {
-                    // Assignation de la classe cible de la relation
-                    $value->setClass($manyToOne->class);
+                // Si la valeur n'est pas une association simple
+                if(!($value instanceof ManyToOne)) {
+                    // On met la propriété à NULL
+                    $property->setValue($object, null);
+
+                    // Propriété suivante
+                    continue;
                 }
+
+                // Enregistrement de la classe de l'association
+                $value->setClass($manyToOne->class);
+
+                // Récupération de l'ID de l'enregistrement cible de la relation
+                $id = $value->getId();
+
+                // Si pas d'identifiant
+                if(null === $id) {
+                    // Réinitialisation de la valeur
+                    $property->setValue($object, null);
+
+                    // Propriété suivante
+                    continue;
+                }
+
+                // Création d'une réflection de la classe associée
+                $targetReflection = new ReflectionClass($manyToOne->class);
+
+                // Création de l'enregistrement
+                $record = $targetReflection->newInstanceWithoutConstructor();
+
+                // Assignation de l'ID de l'enregistrement
+                $record->setId($id);
+
+                // Récupération du nom affiché de la classe
+                $displayName = $value->getDisplayName();
+
+                // Si on a un nom affiché
+                if(null !== $displayName && $targetReflection->hasProperty('displayName')) {
+                    // Récupération de la propriété
+                    $displayNameProperty = $targetReflection->getProperty('displayName');
+
+                    // On rend accessible la propriété
+                    $displayNameProperty->setAccessible(true);
+
+                    // Récupération de la valeur de la propriété
+                    $displayNameProperty->setValue($object, $displayName);
+                }
+
+                // Mise-à-jour ed la valeur par une instance d'enregistrement
+                $property->setValue($object, $record);
             }
         }
     }

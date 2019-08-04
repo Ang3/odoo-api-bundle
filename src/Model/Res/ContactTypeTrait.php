@@ -3,7 +3,6 @@
 namespace Ang3\Bundle\OdooApiBundle\Model\Res;
 
 use Ang3\Bundle\OdooApiBundle\Annotations as Odoo;
-use Ang3\Bundle\OdooApiBundle\Model\ManyToOne;
 use Ang3\Bundle\OdooApiBundle\Model\NamedRecordTrait;
 use JMS\Serializer\Annotation as JMS;
 
@@ -39,11 +38,10 @@ trait ContactTypeTrait
     protected $zip;
 
     /**
-     * @var ManyToOne
+     * @var Country
      *
-     * @JMS\Type("Ang3\Bundle\OdooApiBundle\Model\ManyToOne")
+     * @JMS\Type("Ang3\Bundle\OdooApiBundle\Model\Res\Country")
      * @JMS\SerializedName("country_id")
-     *
      * @Odoo\ManyToOne("Ang3\Bundle\OdooApiBundle\Model\Res\Country")
      */
     protected $country;
@@ -173,11 +171,11 @@ trait ContactTypeTrait
     }
 
     /**
-     * @param ManyToOne $country
+     * @param Country $country
      *
      * @return self
      */
-    public function setCountry(ManyToOne $country)
+    public function setCountry(Country $country)
     {
         $this->country = $country;
 
@@ -185,7 +183,7 @@ trait ContactTypeTrait
     }
 
     /**
-     * @return ManyToOne
+     * @return Country
      */
     public function getCountry()
     {

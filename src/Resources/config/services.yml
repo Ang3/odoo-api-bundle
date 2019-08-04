@@ -37,6 +37,21 @@ services:
     public: true
 
   # 
+  # DOCTRINE
+  # 
+  
+  Ang3\Bundle\OdooApiBundle\EventListener\DoctrineListener:
+    tags:
+      - { name: doctrine.event_listener, event: postLoad }
+
+  # 
+  # FAKER
+  # 
+  
+  Ang3\Bundle\OdooApiBundle\DataFixtures\Faker\Provider\ModelProvider:
+    tags: [ { name: nelmio_alice.faker.provider } ]
+
+  # 
   # LISTENERS AND SUBSCRIBERS
   # 
 
@@ -46,4 +61,4 @@ services:
 
   Ang3\Bundle\OdooApiBundle\Serializer\Listener\RecordSubscriber:
     tags:
-      - { name: jms_serializer.event_subscriber, event: serializer.post_deserialize }
+      - { name: jms_serializer.event_subscriber }

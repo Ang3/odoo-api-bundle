@@ -4,6 +4,7 @@ namespace Ang3\Bundle\OdooApiBundle\Model;
 
 use DateTime;
 use Ang3\Bundle\OdooApiBundle\Annotations as Odoo;
+use Ang3\Bundle\OdooApiBundle\Model\Res\User;
 use JMS\Serializer\Annotation as JMS;
 
 /**
@@ -31,12 +32,11 @@ abstract class AbstractRecord implements RecordInterface
     protected $createdAt;
 
     /**
-     * @var ManyToOne
+     * @var User
      *
-     * @JMS\Type("Ang3\Bundle\OdooApiBundle\Model\ManyToOne")
+     * @JMS\Type("Ang3\Bundle\OdooApiBundle\Model\Res\User")
      * @JMS\SerializedName("create_uid")
      * @JMS\Exclude(if="context.getDirection() == constant('JMS\\Serializer\\GraphNavigator::DIRECTION_SERIALIZATION')")
-     *
      * @Odoo\ManyToOne("Ang3\Bundle\OdooApiBundle\Model\Res\User")
      */
     protected $createdBy;
@@ -51,9 +51,9 @@ abstract class AbstractRecord implements RecordInterface
     protected $updatedAt;
 
     /**
-     * @var ManyToOne
+     * @var User
      *
-     * @JMS\Type("Ang3\Bundle\OdooApiBundle\Model\ManyToOne")
+     * @JMS\Type("Ang3\Bundle\OdooApiBundle\Model\Res\User")
      * @JMS\SerializedName("write_uid")
      * @JMS\Exclude(if="context.getDirection() == constant('JMS\\Serializer\\GraphNavigator::DIRECTION_SERIALIZATION')")
      *
@@ -62,11 +62,18 @@ abstract class AbstractRecord implements RecordInterface
     protected $updatedBy;
 
     /**
+     * @var bool
+     */
+    protected $__loaded = false;
+
+    /**
+     * @final
+     *
      * @param int $id
      *
      * @return self
      */
-    public function setId(int $id)
+    final public function setId(int $id)
     {
         $this->id = $id;
 
@@ -74,9 +81,11 @@ abstract class AbstractRecord implements RecordInterface
     }
 
     /**
+     * @final
+     *
      * {@inherited}.
      */
-    public function getId()
+    final public function getId()
     {
         return $this->id;
     }
@@ -102,11 +111,11 @@ abstract class AbstractRecord implements RecordInterface
     }
 
     /**
-     * @param ManyToOne $createdBy
+     * @param User $createdBy
      *
      * @return self
      */
-    public function setCreatedBy(ManyToOne $createdBy)
+    public function setCreatedBy(User $createdBy)
     {
         $this->createdBy = $createdBy;
 
@@ -114,7 +123,7 @@ abstract class AbstractRecord implements RecordInterface
     }
 
     /**
-     * @return ManyToOne
+     * @return User
      */
     public function getCreatedBy()
     {
@@ -142,11 +151,11 @@ abstract class AbstractRecord implements RecordInterface
     }
 
     /**
-     * @param ManyToOne $updatedBy
+     * @param User $updatedBy
      *
      * @return self
      */
-    public function setUpdatedBy(ManyToOne $updatedBy)
+    public function setUpdatedBy(User $updatedBy)
     {
         $this->updatedBy = $updatedBy;
 
@@ -154,10 +163,26 @@ abstract class AbstractRecord implements RecordInterface
     }
 
     /**
-     * @return ManyToOne
+     * @return User
      */
     public function getUpdatedBy()
     {
         return $this->updatedBy;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getDisplayName()
+    {
+        return null;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isLoaded()
+    {
+        return $this->__loaded;
     }
 }

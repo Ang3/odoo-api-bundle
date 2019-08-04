@@ -5,11 +5,11 @@ namespace Ang3\Bundle\OdooApiBundle\ORM;
 use Exception;
 use LogicException;
 use ReflectionClass;
-use Ang3\Component\OdooApiClient\Client\ExternalApiClient;
+use ReflectionProperty;
+use Ang3\Component\OdooApiClient\ExternalApiClient;
 use Ang3\Bundle\OdooApiBundle\Annotations;
 use Ang3\Bundle\OdooApiBundle\Exception\RecordNotFoundException;
 use Ang3\Bundle\OdooApiBundle\Model\Record;
-use Ang3\Bundle\OdooApiBundle\Model\ManyToOne;
 use Ang3\Bundle\OdooApiBundle\Model\RecordInterface;
 use Doctrine\Common\Annotations\Reader;
 use JMS\Serializer\Annotation as JMS;
@@ -159,9 +159,6 @@ class RecordManager
      */
     public function reload(RecordInterface $record)
     {
-        // Récupéraion du nom du modèle
-        $model = $this->modelRegistry->resolve($record);
-
         // Récupération de l'ID de l'enregistrement
         $id = $record->getId();
 
@@ -172,7 +169,7 @@ class RecordManager
         }
 
         // Récupération de l'enregistrement
-        $refreshed = $this->find($model, $id);
+        $refreshed = $this->find(get_class($record), $id);
 
         // Si pas d'enregistrement
         if (null === $refreshed) {
@@ -188,9 +185,9 @@ class RecordManager
     }
 
     /**
-     * Get a record by model and ID.
+     * Get a record by class and ID.
      *
-     * @param string $model
+     * @param string $class
      * @param int    $id
      * @param array  $options
      *
@@ -198,43 +195,18 @@ class RecordManager
      *
      * @return RecordInterface
      */
-    public function get(string $model, int $id, array $options = [])
+    public function get(string $class, int $id, array $options = [])
     {
         // Récupération du modèle
-        $record = $this->find($model, $id, $options);
+        $record = $this->find($class, $id, $options);
 
         // Si pas de modèle trouvé
         if (null === $record) {
-            throw new RecordNotFoundException($this->client, $model, $id);
+            throw new RecordNotFoundException($this->client, $class, $id);
         }
 
         // Retour de l'enregistrement
         return $record;
-    }
-
-    /**
-     * Load a record from many to one association.
-     *
-     * @param ManyToOne $manyToOne
-     *
-     * @return RecordInterface|null
-     */
-    public function load(ManyToOne $manyToOne)
-    {
-        // Récupération de la cible et de l'ID
-        list($class, $id) = [
-            $manyToOne->getClass(),
-            $manyToOne->getId(),
-        ];
-
-        // Si pas de cible ou d'identifiant
-        if (null === $class || null === $id) {
-            // Pas d'enregistrement
-            return null;
-        }
-
-        // Retour de la recherche de l'entité
-        return $this->find($class, $id);
     }
 
     /**
@@ -313,6 +285,9 @@ class RecordManager
             // Création de l'enregistrement
             $record = $this->denormalize($data, $class);
 
+            // On définit l'enregistrement comme étant chargé
+            $this->setLoaded($record, true);
+
             // Mise-à-jour des données originelles
             $this->setOriginalData($record, $data);
 
@@ -373,6 +348,8 @@ class RecordManager
      */
     public function denormalize(array $data, string $class)
     {
+        
+
         // Récupéraion du nom du modèle
         $model = $this->modelRegistry->resolve($class);
 
@@ -457,17 +434,13 @@ class RecordManager
                 // Récupération de la réflection de la propriété
                 $property = $reflection->getProperty($propertyName);
 
-                /**
-                 * On recherche une annotation ManyToOne sur la propriété.
-                 *
-                 * @var Annotations\ManyToOne|null
-                 */
-                $manyToOne = $this->reader->getPropertyAnnotation($property, Annotations\ManyToOne::class);
+                // Récupération éventuelle d'une annotation de relation simple
+                $manyToOne = $this->findManyToOneAssociation($property);
 
                 // Si pas d'annotation
                 if (null === $manyToOne) {
                     // Champ suivant
-                    break;
+                    continue;
                 }
 
                 // Changement de classe courante
@@ -594,6 +567,40 @@ class RecordManager
 
         // Pas de données
         return [];
+    }
+
+    /**
+     * Record setter on '__loaded' property.
+     *
+     * @param RecordInterface $record
+     * @param bool|bool       $isLoaded
+     */
+    public function setLoaded(RecordInterface $record, bool $isLoaded = true)
+    {
+        // Réflection de la propriété cible
+        $property = new ReflectionProperty(get_class($record), '__loaded');
+
+        // On rend accessible la propriété privée
+        $property->setAccessible(true);
+
+        // On assigne la valeur à la propriété
+        $property->setValue($record, $isLoaded);
+    }
+
+    /**
+     * Find ManyToOne association on property.
+     * 
+     * @param  ReflectionProperty $property
+     * 
+     * @return Annotations\ManyToOne|null
+     */
+    public function findManyToOneAssociation(ReflectionProperty $property)
+    {
+        /** @var Annotations\ManyToOne|null */
+        $manyToOne = $this->reader->getPropertyAnnotation($property, Annotations\ManyToOne::class);
+
+        // Retour de l'association éventuelle
+        return $manyToOne;
     }
 
     /**

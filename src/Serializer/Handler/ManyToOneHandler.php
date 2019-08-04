@@ -2,13 +2,20 @@
 
 namespace Ang3\Bundle\OdooApiBundle\Serializer\Handler;
 
+use InvalidArgumentException;
+use ReflectionClass;
+use Ang3\Bundle\OdooApiBundle\Model\AbstractRecord;
 use Ang3\Bundle\OdooApiBundle\Model\ManyToOne;
+use Ang3\Bundle\OdooApiBundle\Model\RecordInterface;
 use Ang3\Bundle\OdooApiBundle\ORM\ModelRegistry;
+use Ang3\Bundle\OdooApiBundle\ORM\RecordManager;
 use Doctrine\Common\Annotations\Reader;
 use JMS\Serializer\Handler\SubscribingHandlerInterface;
 use JMS\Serializer\GraphNavigator;
+use JMS\Serializer\DeserializationContext;
 use JMS\Serializer\JsonSerializationVisitor;
 use JMS\Serializer\JsonDeserializationVisitor;
+use JMS\Serializer\SerializationContext;
 use JMS\Serializer\Context;
 
 /**
@@ -16,28 +23,6 @@ use JMS\Serializer\Context;
  */
 class ManyToOneHandler implements SubscribingHandlerInterface
 {
-    /**
-     * @var Reader
-     */
-    private $annotationReader;
-
-    /**
-     * @var ModelRegistry
-     */
-    private $modelRegistry;
-
-    /**
-     * Constructor of the handler.
-     *
-     * @param Reader        $annotationReader
-     * @param ModelRegistry $modelRegistry
-     */
-    public function __construct(Reader $annotationReader, ModelRegistry $modelRegistry)
-    {
-        $this->annotationReader = $annotationReader;
-        $this->modelRegistry = $modelRegistry;
-    }
-
     /**
      * {@inherited}.
      */
@@ -65,49 +50,59 @@ class ManyToOneHandler implements SubscribingHandlerInterface
      * @param JsonSerializationVisitor $visitor
      * @param ManyToOne                $manyToOne
      * @param array                    $type
-     * @param Context                  $context
+     * @param SerializationContext     $context
      *
-     * @return array
+     * @return array|bool|null
      */
-    public function serializeManyToOneToJson(JsonSerializationVisitor $visitor, ManyToOne $manyToOne, array $type, Context $context)
+    public function serializeManyToOneToJson(JsonSerializationVisitor $visitor, ManyToOne $manyToOne, array $type, SerializationContext $context)
     {
-        return $manyToOne->serialize();
+        // Récupération de la classe et de l'ID de l'association
+        list($class, $id) = [
+            $manyToOne->getClass(),
+            $manyToOne->getId()
+        ];
+
+        // Si pas de classe ou d'identifiant
+        if(null === $class || null === $id) {
+            // Retour négatif pour Odoo
+            return false;
+        }
+
+        // Retour du tableau de la relation pour Odoo
+        return [ $id, $manyToOne->getDisplayName() ];
     }
 
     /**
      * Deserialize a many to one.
      *
      * @param JsonDeserializationVisitor $visitor
-     * @param bool|int|array             $params
+     * @param mixed                      $data
      * @param array                      $type
-     * @param Context                    $context
+     * @param DeserializationContext     $context
      *
      * @return ManyToOne|null
      */
-    public function deserializeManyToOneFromJson(JsonDeserializationVisitor $visitor, $params, array $type, Context $context)
+    public function deserializeManyToOneFromJson(JsonDeserializationVisitor $visitor, $data, array $type, DeserializationContext $context)
     {
-        // i on a pas un tableau de paramètres
-        if (!is_array($params)) {
-            // Si ce n'est pas non plus un entier
-            if (!is_int($params)) {
-                // Retour null
-                return null;
-            }
-
-            // Initialisation des paramètres selon l'ID
-            $params = [$params, null];
-        }
-
-        // Si on a moins de deux valeurs
-        if (count($params) < 2) {
-            // Pas d'ID
+        // Si on a pas un tableau
+        if(!is_array($data)) {
+            // Retour nul
             return null;
         }
 
-        // Récupération du modèle et de l'ID
-        list($id, $displayName) = $params;
+        // Récupération de l'identifiant
+        list($id, $displayName) = [
+            !empty($data[0]) ? $data[0] : null,
+            !empty($data[1]) ? $data[1] : null,
+        ];
 
-        // Retour de la relation
+        // Si pas d'identifiant
+        if(null === $id) {
+            // Retour nul
+            return null;
+        }
+
+        // Retour de l'association simple
         return ManyToOne::create(null, $id, $displayName);
     }
 }

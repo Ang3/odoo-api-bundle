@@ -11,4 +11,9 @@ interface RecordInterface
      * @return int|null
      */
     public function getId();
+
+    /**
+     * @return string|null
+     */
+    public function getDisplayName();
 }

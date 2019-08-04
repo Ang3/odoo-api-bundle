@@ -3,7 +3,7 @@
 namespace Ang3\Bundle\OdooApiBundle\Exception;
 
 use RuntimeException;
-use Ang3\Component\OdooApiClient\Client\ExternalApiClient;
+use Ang3\Component\OdooApiClient\ExternalApiClient;
 
 /**
  * @author Joanis ROUANET
@@ -18,7 +18,7 @@ class RecordNotFoundException extends RuntimeException
     /**
      * @var string
      */
-    private $model;
+    private $class;
 
     /**
      * @var int
@@ -29,18 +29,18 @@ class RecordNotFoundException extends RuntimeException
      * Constructor of the exception.
      *
      * @param ExternalApiClient $client
-     * @param string            $model
+     * @param string            $class
      * @param int               $id
      */
-    public function __construct(ExternalApiClient $client, string $model, int $id)
+    public function __construct(ExternalApiClient $client, string $class, int $id)
     {
         // Hydratation
         $this->client = $client;
-        $this->model = $model;
+        $this->class = $class;
         $this->id = $id;
 
         // Construction de l'exception parente
-        parent::__construct(sprintf('Record %d of model "%s" not found', $id, $model));
+        parent::__construct(sprintf('Record %d of class "%s" not found', $id, $class));
     }
 
     /**
@@ -54,9 +54,9 @@ class RecordNotFoundException extends RuntimeException
     /**
      * @return string
      */
-    public function getModel()
+    public function getClass()
     {
-        return $this->model;
+        return $this->class;
     }
 
     /**

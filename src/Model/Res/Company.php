@@ -4,7 +4,6 @@ namespace Ang3\Bundle\OdooApiBundle\Model\Res;
 
 use Ang3\Bundle\OdooApiBundle\Annotations as Odoo;
 use Ang3\Bundle\OdooApiBundle\Model\AbstractRecord;
-use Ang3\Bundle\OdooApiBundle\Model\ManyToOne;
 use JMS\Serializer\Annotation as JMS;
 
 /**
@@ -15,21 +14,20 @@ class Company extends AbstractRecord
     use ContactTypeTrait;
 
     /**
-     * @var ManyToOne
+     * @var Partner
      *
-     * @JMS\Type("Ang3\Bundle\OdooApiBundle\Model\ManyToOne")
+     * @JMS\Type("Ang3\Bundle\OdooApiBundle\Model\Res\Partner")
      * @JMS\SerializedName("partner_id")
-     *
      * @Odoo\ManyToOne("Ang3\Bundle\OdooApiBundle\Model\Res\Partner")
      */
     protected $partner;
 
     /**
-     * @param ManyToOne $partner
+     * @param Partner $partner
      *
      * @return self
      */
-    public function setPartner(ManyToOne $partner)
+    public function setPartner(Partner $partner)
     {
         $this->partner = $partner;
 
@@ -37,7 +35,7 @@ class Company extends AbstractRecord
     }
 
     /**
-     * @return ManyToOne
+     * @return Partner
      */
     public function getPartner()
     {

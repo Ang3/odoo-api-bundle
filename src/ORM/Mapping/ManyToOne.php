@@ -87,24 +87,4 @@ class ManyToOne
     {
         return $this->id;
     }
-
-    /**
-     * Serialize the association.
-     *
-     * @return array
-     */
-    public function serialize()
-    {
-        return [$this->id, $this->displayName];
-    }
-
-    /**
-     * Check if the association is loadable.
-     *
-     * @return bool
-     */
-    public function isLoadable()
-    {
-        return null !== $this->class && null !== $this->id;
-    }
 }

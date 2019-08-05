@@ -3,7 +3,7 @@
 namespace Ang3\Bundle\OdooApiBundle\ORM\Mapping;
 
 use JMS\Serializer\Annotation as JMS;
-use Ang3\Bundle\OdooApiBundle\Model\DisplayedRecordTrait;
+use Ang3\Bundle\OdooApiBundle\ORM\Model\DisplayedRecordTrait;
 
 /**
  * @author Joanis ROUANET

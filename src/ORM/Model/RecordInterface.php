@@ -1,6 +1,6 @@
 <?php
 
-namespace Ang3\Bundle\OdooApiBundle\Model;
+namespace Ang3\Bundle\OdooApiBundle\ORM\Model;
 
 /**
  * @author Joanis ROUANET

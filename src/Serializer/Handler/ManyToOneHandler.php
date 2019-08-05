@@ -4,14 +4,13 @@ namespace Ang3\Bundle\OdooApiBundle\Serializer\Handler;
 
 use InvalidArgumentException;
 use Ang3\Bundle\OdooApiBundle\ORM\Mapping\ManyToOne;
-use Ang3\Bundle\OdooApiBundle\Model\RecordInterface;
+use Ang3\Bundle\OdooApiBundle\ORM\Model\RecordInterface;
 use JMS\Serializer\Handler\SubscribingHandlerInterface;
 use JMS\Serializer\GraphNavigator;
 use JMS\Serializer\DeserializationContext;
 use JMS\Serializer\JsonSerializationVisitor;
 use JMS\Serializer\JsonDeserializationVisitor;
 use JMS\Serializer\SerializationContext;
-use JMS\Serializer\Context;
 
 /**
  * @author Joanis ROUANET

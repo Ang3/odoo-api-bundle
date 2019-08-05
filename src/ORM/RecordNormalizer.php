@@ -3,11 +3,13 @@
 namespace Ang3\Bundle\OdooApiBundle\ORM;
 
 use Exception;
+use InvalidArgumentException;
 use ReflectionClass;
 use ReflectionProperty;
 use Ang3\Bundle\OdooApiBundle\Annotations;
+use Ang3\Bundle\OdooApiBundle\ORM\Mapping\ManyToMany;
 use Ang3\Bundle\OdooApiBundle\ORM\Mapping\ManyToOne;
-use Ang3\Bundle\OdooApiBundle\Model\RecordInterface;
+use Ang3\Bundle\OdooApiBundle\ORM\Model\RecordInterface;
 use Doctrine\Common\Annotations\Reader;
 use JMS\Serializer\Annotation as JMS;
 use JMS\Serializer\ArrayTransformerInterface;
@@ -66,74 +68,26 @@ class RecordNormalizer
             // Récupération d'une association simple éventuelle
             $manyToOne = $this->findManyToOneAssociation($property);
 
-            // Si pas d'association simple
-            if (null === $manyToOne) {
-                // Propriété suivante
-                continue;
-            }
-
-            // On rend accessible la propriété
-            $property->setAccessible(true);
-
-            // Récupération de la valeur  de la propriété
-            $value = $property->getValue($record);
-
-            // Si la propriété est déjà un enregistrement
-            if ($value instanceof RecordInterface) {
-                // Propriété suivante
-                continue;
-            }
-
-            // Si la valeur n'est pas une association simple
-            if (!($value instanceof ManyToOne)) {
-                // On met la propriété à NULL
-                $property->setValue($record, null);
+            // Si on a une association simple
+            if (null !== $manyToOne) {
+                // Normalisation de la relation
+                $this->denormalizeManyToOne($record, $property, $manyToOne);
 
                 // Propriété suivante
                 continue;
             }
 
-            // Enregistrement de la classe de l'association
-            $value->setClass($manyToOne->class);
+            // Récupération d'une association multiple éventuelle
+            $manyToMany = $this->findManyToManyAssociation($property);
 
-            // Récupération de l'ID de l'enregistrement cible de la relation
-            $id = $value->getId();
-
-            // Si pas d'identifiant
-            if (null === $id) {
-                // Réinitialisation de la valeur
-                $property->setValue($record, null);
+            // Si on a une association multiple
+            if (null !== $manyToMany) {
+                // Normalisation de la relation
+                $this->denormalizeManyToMany($record, $property, $manyToMany);
 
                 // Propriété suivante
                 continue;
             }
-
-            // Création d'une réflection de la classe associée
-            $targetReflection = new ReflectionClass($manyToOne->class);
-
-            // Création de l'enregistrement
-            $targetRecord = $targetReflection->newInstanceWithoutConstructor();
-
-            // Assignation de l'ID de l'enregistrement
-            $targetRecord->setId($id);
-
-            // Récupération du nom affiché de la classe
-            $displayName = $value->getDisplayName();
-
-            // Si on a un nom affiché
-            if (null !== $displayName && $targetReflection->hasProperty('displayName')) {
-                // Récupération de la propriété
-                $displayNameProperty = $targetReflection->getProperty('displayName');
-
-                // On rend accessible la propriété
-                $displayNameProperty->setAccessible(true);
-
-                // Récupération de la valeur de la propriété
-                $displayNameProperty->setValue($targetRecord, $displayName);
-            }
-
-            // Mise-à-jour ed la valeur par une instance d'enregistrement
-            $property->setValue($record, $targetRecord);
         }
 
         // Retour de l'enregistrement
@@ -283,6 +237,137 @@ class RecordNormalizer
     }
 
     /**
+     * Denormalize ManyToOne association of property.
+     *
+     * @param RecordInterface       $record
+     * @param ReflectionProperty    $property
+     * @param Annotations\ManyToOne $manyToOne
+     */
+    public function denormalizeManyToOne(RecordInterface $record, ReflectionProperty $property, Annotations\ManyToOne $manyToOne)
+    {
+        // On rend accessible la propriété
+        $property->setAccessible(true);
+
+        // Récupération de la valeur  de la propriété
+        $value = $property->getValue($record);
+
+        // Si la propriété est déjà un enregistrement
+        if ($value instanceof RecordInterface) {
+            // Fin des traitements
+            return;
+        }
+
+        // Si la valeur n'est pas une association simple
+        if (!($value instanceof ManyToOne)) {
+            // On met la propriété à NULL
+            $property->setValue($record, null);
+
+            // Fin des traitements
+            return;
+        }
+
+        // Enregistrement de la classe de l'association
+        $value->setClass($manyToOne->class);
+
+        // Récupération de l'ID de l'enregistrement cible de la relation
+        $id = $value->getId();
+
+        // Si pas d'identifiant
+        if (null === $id) {
+            // Réinitialisation de la valeur
+            $property->setValue($record, null);
+
+            // Fin des traitements
+            return;
+        }
+
+        // Création d'une réflection de la classe associée
+        $targetReflection = new ReflectionClass($manyToOne->class);
+
+        // Création de l'enregistrement
+        $targetRecord = $targetReflection->newInstanceWithoutConstructor();
+
+        // Assignation de l'ID de l'enregistrement
+        $this->setRecordId($targetRecord, $id);
+
+        // Récupération du nom affiché de la classe
+        $displayName = $value->getDisplayName();
+
+        // Si on a un nom affiché
+        if (null !== $displayName && $targetReflection->hasProperty('displayName')) {
+            // Récupération de la propriété
+            $displayNameProperty = $targetReflection->getProperty('displayName');
+
+            // On rend accessible la propriété
+            $displayNameProperty->setAccessible(true);
+
+            // Récupération de la valeur de la propriété
+            $displayNameProperty->setValue($targetRecord, $displayName);
+        }
+
+        // Mise-à-jour ed la valeur par une instance d'enregistrement
+        $property->setValue($record, $targetRecord);
+    }
+
+    /**
+     * Denormalize ManyToMany association of property.
+     *
+     * @param RecordInterface        $record
+     * @param ReflectionProperty     $property
+     * @param Annotations\ManyToMany $manyToMany
+     */
+    public function denormalizeManyToMany(RecordInterface $record, ReflectionProperty $property, Annotations\ManyToMany $manyToMany)
+    {
+        // On rend accessible la propriété
+        $property->setAccessible(true);
+
+        // Récupération de la valeur  de la propriété
+        $value = $property->getValue($record);
+
+        // Si la propriété est déjà un enregistrement
+        if ($value instanceof RecordInterface) {
+            // On met la propriété dans un tableau
+            $property->setValue($record, [$value]);
+
+            // Fin des traitements
+            return;
+        }
+
+        // Si la valeur n'est pas une association simple
+        if (!($value instanceof ManyToMany)) {
+            // On met la propriété à NULL
+            $property->setValue($record, null);
+
+            // Fin des traitements
+            return;
+        }
+
+        // Enregistrement de la classe de l'association
+        $value->setClass($manyToMany->class);
+
+        // Initialisation des enregistrements
+        $records = [];
+
+        // Création d'une réflection de la classe associée
+        $targetReflection = new ReflectionClass($manyToMany->class);
+
+        // Pour chaque identifiant de la relation
+        foreach (array_unique($value->getIds()) as $id) {
+            // Création de l'enregistrement
+            $targetRecord = $targetReflection->newInstanceWithoutConstructor();
+
+            // Assignation de l'ID de l'enregistrement
+            $this->setRecordId($targetRecord, $id);
+
+            // Enregistrement de l'enregistrement dans la collection
+            $records[] = $targetRecord;
+        }
+
+        // Mise-à-jour ed la valeur par la collection d'enregistrements
+        $property->setValue($record, $records);
+    }
+
+    /**
      * Find ManyToOne association on property.
      *
      * @param ReflectionProperty $property
@@ -296,5 +381,49 @@ class RecordNormalizer
 
         // Retour de l'association éventuelle
         return $manyToOne;
+    }
+
+    /**
+     * Find ManyToMany association on property.
+     *
+     * @param ReflectionProperty $property
+     *
+     * @return Annotations\ManyToMany|null
+     */
+    public function findManyToManyAssociation(ReflectionProperty $property)
+    {
+        /** @var Annotations\ManyToMany|null */
+        $manyToOne = $this->reader->getPropertyAnnotation($property, Annotations\ManyToMany::class);
+
+        // Retour de l'association éventuelle
+        return $manyToOne;
+    }
+
+    /**
+     * Set ID to a record.
+     *
+     * @internal
+     *
+     * @param RecordInterface $record
+     * @param int|null        $id
+     */
+    private function setRecordId(RecordInterface $record, int $id = null)
+    {
+        // Réfléction de la classe de l'enregistrement
+        $reflection = new ReflectionClass($record);
+
+        // Si l'enregistrement ne possède pas de propriété d'identifiant
+        if (!$reflection->hasProperty('id')) {
+            throw new InvalidArgumentException(sprintf('Missing property "id" in record class "%s"', get_class($record)));
+        }
+
+        // Récupération de la propriété de l'identifiant
+        $property = $reflection->getProperty('id');
+
+        // On rend accessible la propriété
+        $property->setAccessible(true);
+
+        // Enregistrement de l'identifiant au sein de l'enregistrement
+        $property->setValue($record, $id);
     }
 }

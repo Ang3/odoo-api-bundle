@@ -1,9 +1,9 @@
 <?php
 
-namespace Ang3\Bundle\OdooApiBundle\Model\Res;
+namespace Ang3\Bundle\OdooApiBundle\ORM\Model\Res;
 
 use Ang3\Bundle\OdooApiBundle\Annotations as Odoo;
-use Ang3\Bundle\OdooApiBundle\Model\Record;
+use Ang3\Bundle\OdooApiBundle\ORM\Model\Record;
 use JMS\Serializer\Annotation as JMS;
 
 /**
@@ -18,7 +18,7 @@ class Company extends Record
      *
      * @JMS\Type("Ang3\Bundle\OdooApiBundle\ORM\Mapping\ManyToOne")
      * @JMS\SerializedName("partner_id")
-     * @Odoo\ManyToOne("Ang3\Bundle\OdooApiBundle\Model\Res\Partner")
+     * @Odoo\ManyToOne("Ang3\Bundle\OdooApiBundle\ORM\Model\Res\Partner")
      */
     protected $partner;
 

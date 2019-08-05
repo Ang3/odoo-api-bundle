@@ -1,9 +1,9 @@
 <?php
 
-namespace Ang3\Bundle\OdooApiBundle\Model\Res;
+namespace Ang3\Bundle\OdooApiBundle\ORM\Model\Res;
 
 use Ang3\Bundle\OdooApiBundle\Annotations as Odoo;
-use Ang3\Bundle\OdooApiBundle\Model\NamedRecordTrait;
+use Ang3\Bundle\OdooApiBundle\ORM\Model\NamedRecordTrait;
 use JMS\Serializer\Annotation as JMS;
 
 /**
@@ -42,7 +42,7 @@ trait ContactTypeTrait
      *
      * @JMS\Type("Ang3\Bundle\OdooApiBundle\ORM\Mapping\ManyToOne")
      * @JMS\SerializedName("country_id")
-     * @Odoo\ManyToOne("Ang3\Bundle\OdooApiBundle\Model\Res\Country")
+     * @Odoo\ManyToOne("Ang3\Bundle\OdooApiBundle\ORM\Model\Res\Country")
      */
     protected $country;
 

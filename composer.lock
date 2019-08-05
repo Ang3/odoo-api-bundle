@@ -1,7 +1,7 @@
 {
     "_readme": [
         "This file locks the dependencies of your project to a known state",
-        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
     "content-hash": "b1ad4e5f29f84163c77e8d66a6cd0fe5",
@@ -12,12 +12,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/Ang3/php-odoo-api-client.git",
-                "reference": "7f6c442b78c6bef5fb913bb2a85b246704de3454"
+                "reference": "eea8f44cd2cb62f3711f5b7689c14f696a5aff39"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Ang3/php-odoo-api-client/zipball/7f6c442b78c6bef5fb913bb2a85b246704de3454",
-                "reference": "7f6c442b78c6bef5fb913bb2a85b246704de3454",
+                "url": "https://api.github.com/repos/Ang3/php-odoo-api-client/zipball/eea8f44cd2cb62f3711f5b7689c14f696a5aff39",
+                "reference": "eea8f44cd2cb62f3711f5b7689c14f696a5aff39",
                 "shasum": ""
             },
             "require": {
@@ -52,7 +52,7 @@
                 "external",
                 "odoo"
             ],
-            "time": "2019-08-04T13:06:54+00:00"
+            "time": "2019-08-04T13:13:38+00:00"
         },
         {
             "name": "darkaonline/ripcord",
@@ -3174,16 +3174,16 @@
         },
         {
             "name": "hautelook/alice-bundle",
-            "version": "2.5.0",
+            "version": "v2.5.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/hautelook/AliceBundle.git",
-                "reference": "b9fa7985a522a7aed335976c168019cadb07396e"
+                "reference": "a4d25ba319b551d14082cd7e9916f5ddcd8bc0f2"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/hautelook/AliceBundle/zipball/b9fa7985a522a7aed335976c168019cadb07396e",
-                "reference": "b9fa7985a522a7aed335976c168019cadb07396e",
+                "url": "https://api.github.com/repos/hautelook/AliceBundle/zipball/a4d25ba319b551d14082cd7e9916f5ddcd8bc0f2",
+                "reference": "a4d25ba319b551d14082cd7e9916f5ddcd8bc0f2",
                 "shasum": ""
             },
             "require": {
@@ -3238,7 +3238,7 @@
                 "orm",
                 "symfony"
             ],
-            "time": "2019-04-10T10:32:44+00:00"
+            "time": "2019-08-04T18:39:27+00:00"
         },
         {
             "name": "jdorn/sql-formatter",

@@ -1,12 +1,12 @@
 <?php
 
-namespace Ang3\Bundle\OdooApiBundle\Model\Account;
+namespace Ang3\Bundle\OdooApiBundle\ORM\Model\Account;
 
 use Ang3\Bundle\OdooApiBundle\Annotations as Odoo;
-use Ang3\Bundle\OdooApiBundle\Model\Record;
-use Ang3\Bundle\OdooApiBundle\Model\ActivatableRecordTrait;
-use Ang3\Bundle\OdooApiBundle\Model\NamedRecordTrait;
-use Ang3\Bundle\OdooApiBundle\Model\Res\Company;
+use Ang3\Bundle\OdooApiBundle\ORM\Model\Record;
+use Ang3\Bundle\OdooApiBundle\ORM\Model\ActivatableRecordTrait;
+use Ang3\Bundle\OdooApiBundle\ORM\Model\NamedRecordTrait;
+use Ang3\Bundle\OdooApiBundle\ORM\Model\Res\Company;
 use JMS\Serializer\Annotation as JMS;
 
 /**
@@ -70,7 +70,7 @@ class Tax extends Record
      *
      * @JMS\Type("Ang3\Bundle\OdooApiBundle\ORM\Mapping\ManyToOne")
      * @JMS\SerializedName("company_id")
-     * @Odoo\ManyToOne("Ang3\Bundle\OdooApiBundle\Model\Account\TaxGroup")
+     * @Odoo\ManyToOne("Ang3\Bundle\OdooApiBundle\ORM\Model\Account\TaxGroup")
      */
     protected $group;
 
@@ -79,7 +79,7 @@ class Tax extends Record
      *
      * @JMS\Type("Ang3\Bundle\OdooApiBundle\ORM\Mapping\ManyToOne")
      * @JMS\SerializedName("company_id")
-     * @Odoo\ManyToOne("Ang3\Bundle\OdooApiBundle\Model\Res\Company")
+     * @Odoo\ManyToOne("Ang3\Bundle\OdooApiBundle\ORM\Model\Res\Company")
      */
     protected $company;
 

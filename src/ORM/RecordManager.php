@@ -6,8 +6,8 @@ use LogicException;
 use ReflectionProperty;
 use Ang3\Component\OdooApiClient\ExternalApiClient;
 use Ang3\Bundle\OdooApiBundle\Exception\RecordNotFoundException;
-use Ang3\Bundle\OdooApiBundle\Model\Record;
-use Ang3\Bundle\OdooApiBundle\Model\RecordInterface;
+use Ang3\Bundle\OdooApiBundle\ORM\Model\Record;
+use Ang3\Bundle\OdooApiBundle\ORM\Model\RecordInterface;
 
 /**
  * @author Joanis ROUANET
@@ -20,9 +20,9 @@ class RecordManager
     private $client;
 
     /**
-     * @var ModelRegistry
+     * @var Mapping
      */
-    private $modelRegistry;
+    private $mapping;
 
     /**
      * @var RecordNormalizer
@@ -40,13 +40,13 @@ class RecordManager
      * Constructor of the manager.
      *
      * @param ExternalApiClient $client
-     * @param ModelRegistry     $modelRegistry
+     * @param Mapping           $mapping
      * @param RecordNormalizer  $normalizer
      */
-    public function __construct(ExternalApiClient $client, ModelRegistry $modelRegistry, RecordNormalizer $normalizer)
+    public function __construct(ExternalApiClient $client, Mapping $mapping, RecordNormalizer $normalizer)
     {
         $this->client = $client;
-        $this->modelRegistry = $modelRegistry;
+        $this->mapping = $mapping;
         $this->normalizer = $normalizer;
     }
 
@@ -60,7 +60,7 @@ class RecordManager
     public function persist(RecordInterface $record)
     {
         // Récupération du nom du modèle de l'enregistrement
-        $model = $this->modelRegistry->resolve($record);
+        $model = $this->mapping->resolve($record);
 
         // Récupération de l'ID de l'enregistrement
         $id = $record->getId();
@@ -84,14 +84,13 @@ class RecordManager
             // Récupération des changements
             $changeSet = $this->getChangeSet($record);
 
+            //dump($changeSet); die;
+
             // Si pas de changement
             if (!$changeSet) {
                 // Retour de l'enregistrement
                 return $record;
             }
-
-            //dump($changeSet);
-            //die;
 
             // Mise-à-jour de l'enregistrement
             $this->client->update($model, $id, $changeSet);
@@ -114,7 +113,7 @@ class RecordManager
         }
 
         // Récupéraion du nom du modèle
-        $model = $this->modelRegistry->resolve($record);
+        $model = $this->mapping->resolve($record);
 
         // Retour de la suppression par l'ID
         return $this->deleteById($model, $record->getId());
@@ -131,7 +130,7 @@ class RecordManager
     public function deleteById(string $class, $ids)
     {
         // Récupéraion du nom du modèle
-        $model = $this->modelRegistry->resolve($class);
+        $model = $this->mapping->resolve($class);
 
         // Lancement de la requête de suppression
         $this->client->delete($model, $ids);
@@ -250,7 +249,7 @@ class RecordManager
     public function findBy(string $class, array $domains = [], array $options = [])
     {
         // Récupéraion du nom du modèle
-        $model = $this->modelRegistry->resolve($class);
+        $model = $this->mapping->resolve($class);
 
         // Normalisation des domaines
         $domains = $this->normalizer->normalizeDomains($class, $domains);
@@ -293,7 +292,7 @@ class RecordManager
     public function getChangeSet(RecordInterface $record)
     {
         // Récupéraion du nom du modèle
-        $model = $this->modelRegistry->resolve($record);
+        $model = $this->mapping->resolve($record);
 
         // Normalization de l'enregistrement reçu
         $normalized = $this->normalizer->normalize($record);
@@ -345,7 +344,7 @@ class RecordManager
         $this->setLoaded($record, true);
 
         // Récupéraion du nom du modèle
-        $model = $this->modelRegistry->resolve($record);
+        $model = $this->mapping->resolve($record);
 
         // Si le modèle n'est pas encore déclaré
         if (array_key_exists($model, self::$cache)) {
@@ -379,7 +378,7 @@ class RecordManager
         }
 
         // Récupéraion du nom du modèle
-        $model = $this->modelRegistry->resolve($record);
+        $model = $this->mapping->resolve($record);
 
         // Si on a des données pour ce mocèle identifié
         if (!empty(self::$cache[$model][$id])) {
@@ -464,11 +463,11 @@ class RecordManager
     }
 
     /**
-     * @return ModelRegistry
+     * @return Mapping
      */
-    public function getModelRegistry()
+    public function getMapping()
     {
-        return $this->modelRegistry;
+        return $this->mapping;
     }
 
     /**

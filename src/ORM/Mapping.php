@@ -8,7 +8,7 @@ use Doctrine\Common\Util\ClassUtils;
 /**
  * @author Joanis ROUANET
  */
-class ModelRegistry
+class Mapping
 {
     /**
      * @var array

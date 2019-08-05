@@ -32,16 +32,20 @@ services:
       - { name: doctrine.event_listener, event: postLoad }
 
   # 
-  # FAKER
-  # 
-  
-  Ang3\Bundle\OdooApiBundle\DataFixtures\Faker\Provider\ModelProvider:
-    tags: [ { name: nelmio_alice.faker.provider } ]
-
-  # 
   # LISTENERS AND SUBSCRIBERS
   # 
 
   Ang3\Bundle\OdooApiBundle\Serializer\Handler\ManyToOneHandler:
     tags:
       - { name: jms_serializer.subscribing_handler }
+
+  Ang3\Bundle\OdooApiBundle\Serializer\Handler\ManyToManyHandler:
+    tags:
+      - { name: jms_serializer.subscribing_handler }
+
+  # 
+  # FAKER
+  # 
+  
+  Ang3\Bundle\OdooApiBundle\DataFixtures\Faker\Provider\ModelProvider:
+    tags: [ { name: nelmio_alice.faker.provider } ]

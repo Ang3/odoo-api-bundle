@@ -1,9 +1,9 @@
 <?php
 
-namespace Ang3\Bundle\OdooApiBundle\Model\Account;
+namespace Ang3\Bundle\OdooApiBundle\ORM\Model\Account;
 
-use Ang3\Bundle\OdooApiBundle\Model\Record;
-use Ang3\Bundle\OdooApiBundle\Model\NamedRecordTrait;
+use Ang3\Bundle\OdooApiBundle\ORM\Model\Record;
+use Ang3\Bundle\OdooApiBundle\ORM\Model\NamedRecordTrait;
 use JMS\Serializer\Annotation as JMS;
 
 /**

@@ -6,7 +6,7 @@ use Exception;
 use InvalidArgumentException;
 use ReflectionClass;
 use ReflectionProperty;
-use Ang3\Bundle\OdooApiBundle\Annotations;
+use Ang3\Bundle\OdooApiBundle\ORM\Annotation as ORM;
 use Ang3\Bundle\OdooApiBundle\ORM\Mapping\ManyToMany;
 use Ang3\Bundle\OdooApiBundle\ORM\Mapping\ManyToOne;
 use Ang3\Bundle\OdooApiBundle\ORM\Model\RecordInterface;
@@ -31,8 +31,6 @@ class RecordNormalizer
     private $reader;
 
     /**
-     * Constructor of the manager.
-     *
      * @param ArrayTransformerInterface $arrayTranformer
      * @param Reader                    $reader
      */
@@ -239,11 +237,11 @@ class RecordNormalizer
     /**
      * Denormalize ManyToOne association of property.
      *
-     * @param RecordInterface       $record
-     * @param ReflectionProperty    $property
-     * @param Annotations\ManyToOne $manyToOne
+     * @param RecordInterface    $record
+     * @param ReflectionProperty $property
+     * @param ORM\ManyToOne      $manyToOne
      */
-    public function denormalizeManyToOne(RecordInterface $record, ReflectionProperty $property, Annotations\ManyToOne $manyToOne)
+    public function denormalizeManyToOne(RecordInterface $record, ReflectionProperty $property, ORM\ManyToOne $manyToOne)
     {
         // On rend accessible la propriété
         $property->setAccessible(true);
@@ -312,11 +310,11 @@ class RecordNormalizer
     /**
      * Denormalize ManyToMany association of property.
      *
-     * @param RecordInterface        $record
-     * @param ReflectionProperty     $property
-     * @param Annotations\ManyToMany $manyToMany
+     * @param RecordInterface    $record
+     * @param ReflectionProperty $property
+     * @param ORM\ManyToMany     $manyToMany
      */
-    public function denormalizeManyToMany(RecordInterface $record, ReflectionProperty $property, Annotations\ManyToMany $manyToMany)
+    public function denormalizeManyToMany(RecordInterface $record, ReflectionProperty $property, ORM\ManyToMany $manyToMany)
     {
         // On rend accessible la propriété
         $property->setAccessible(true);
@@ -372,12 +370,12 @@ class RecordNormalizer
      *
      * @param ReflectionProperty $property
      *
-     * @return Annotations\ManyToOne|null
+     * @return ORM\ManyToOne|null
      */
     public function findManyToOneAssociation(ReflectionProperty $property)
     {
-        /** @var Annotations\ManyToOne|null */
-        $manyToOne = $this->reader->getPropertyAnnotation($property, Annotations\ManyToOne::class);
+        /** @var ORM\ManyToOne|null */
+        $manyToOne = $this->reader->getPropertyAnnotation($property, ORM\ManyToOne::class);
 
         // Retour de l'association éventuelle
         return $manyToOne;
@@ -388,12 +386,12 @@ class RecordNormalizer
      *
      * @param ReflectionProperty $property
      *
-     * @return Annotations\ManyToMany|null
+     * @return ORM\ManyToMany|null
      */
     public function findManyToManyAssociation(ReflectionProperty $property)
     {
-        /** @var Annotations\ManyToMany|null */
-        $manyToOne = $this->reader->getPropertyAnnotation($property, Annotations\ManyToMany::class);
+        /** @var ORM\ManyToMany|null */
+        $manyToOne = $this->reader->getPropertyAnnotation($property, ORM\ManyToMany::class);
 
         // Retour de l'association éventuelle
         return $manyToOne;

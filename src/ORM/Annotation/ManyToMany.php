@@ -1,6 +1,6 @@
 <?php
 
-namespace Ang3\Bundle\OdooApiBundle\Annotations;
+namespace Ang3\Bundle\OdooApiBundle\ORM\Annotation;
 
 /**
  * @author Joanis ROUANET

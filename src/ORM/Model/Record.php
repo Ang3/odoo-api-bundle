@@ -3,7 +3,7 @@
 namespace Ang3\Bundle\OdooApiBundle\ORM\Model;
 
 use DateTime;
-use Ang3\Bundle\OdooApiBundle\Annotations as Odoo;
+use Ang3\Bundle\OdooApiBundle\ORM\Annotation as ORM;
 use Ang3\Bundle\OdooApiBundle\ORM\Model\Res\User;
 use JMS\Serializer\Annotation as JMS;
 
@@ -35,7 +35,7 @@ class Record implements RecordInterface
      * @JMS\Type("Ang3\Bundle\OdooApiBundle\ORM\Mapping\ManyToOne")
      * @JMS\SerializedName("create_uid")
      * @JMS\Exclude(if="context.getDirection() == constant('JMS\\Serializer\\GraphNavigator::DIRECTION_SERIALIZATION')")
-     * @Odoo\ManyToOne("Ang3\Bundle\OdooApiBundle\ORM\Model\Res\User")
+     * @ORM\ManyToOne("Ang3\Bundle\OdooApiBundle\ORM\Model\Res\User")
      */
     protected $createdBy;
 
@@ -54,8 +54,7 @@ class Record implements RecordInterface
      * @JMS\Type("Ang3\Bundle\OdooApiBundle\ORM\Mapping\ManyToOne")
      * @JMS\SerializedName("write_uid")
      * @JMS\Exclude(if="context.getDirection() == constant('JMS\\Serializer\\GraphNavigator::DIRECTION_SERIALIZATION')")
-     *
-     * @Odoo\ManyToOne("Ang3\Bundle\OdooApiBundle\ORM\Model\Res\User")
+     * @ORM\ManyToOne("Ang3\Bundle\OdooApiBundle\ORM\Model\Res\User")
      */
     protected $updatedBy;
 

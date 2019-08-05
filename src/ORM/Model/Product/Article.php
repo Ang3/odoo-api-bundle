@@ -2,7 +2,7 @@
 
 namespace Ang3\Bundle\OdooApiBundle\ORM\Model\Product;
 
-use Ang3\Bundle\OdooApiBundle\Annotations as Odoo;
+use Ang3\Bundle\OdooApiBundle\ORM\Annotation as ORM;
 use Ang3\Bundle\OdooApiBundle\ORM\Model\Record;
 use Ang3\Bundle\OdooApiBundle\ORM\Model\ActivatableRecordTrait;
 use Ang3\Bundle\OdooApiBundle\ORM\Model\NamedRecordTrait;
@@ -71,7 +71,7 @@ class Article extends Record
      *
      * @JMS\Type("Ang3\Bundle\OdooApiBundle\ORM\Mapping\ManyToMany")
      * @JMS\SerializedName("taxes_id")
-     * @Odoo\ManyToMany("Ang3\Bundle\OdooApiBundle\ORM\Model\Account\Tax")
+     * @ORM\ManyToMany("Ang3\Bundle\OdooApiBundle\ORM\Model\Account\Tax")
      */
     protected $taxes = [];
 
@@ -80,7 +80,7 @@ class Article extends Record
      *
      * @JMS\Type("Ang3\Bundle\OdooApiBundle\ORM\Mapping\ManyToMany")
      * @JMS\SerializedName("supplier_taxes_id")
-     * @Odoo\ManyToMany("Ang3\Bundle\OdooApiBundle\ORM\Model\Account\Tax")
+     * @ORM\ManyToMany("Ang3\Bundle\OdooApiBundle\ORM\Model\Account\Tax")
      */
     protected $supplierTaxes = [];
 
@@ -89,7 +89,7 @@ class Article extends Record
      *
      * @JMS\Type("Ang3\Bundle\OdooApiBundle\ORM\Mapping\ManyToOne")
      * @JMS\SerializedName("categ_id")
-     * @Odoo\ManyToOne("Ang3\Bundle\OdooApiBundle\ORM\Model\Product\Category")
+     * @ORM\ManyToOne("Ang3\Bundle\OdooApiBundle\ORM\Model\Product\Category")
      */
     protected $category;
 
@@ -98,7 +98,7 @@ class Article extends Record
      *
      * @JMS\Type("Ang3\Bundle\OdooApiBundle\ORM\Mapping\ManyToOne")
      * @JMS\SerializedName("company_id")
-     * @Odoo\ManyToOne("Ang3\Bundle\OdooApiBundle\ORM\Model\Res\Company")
+     * @ORM\ManyToOne("Ang3\Bundle\OdooApiBundle\ORM\Model\Res\Company")
      */
     protected $company;
 

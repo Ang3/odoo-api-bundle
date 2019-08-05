@@ -2,8 +2,9 @@
 
 namespace Ang3\Bundle\OdooApiBundle\ORM\Mapping;
 
-use InvalidArgumentException;
+use Generator;
 use ReflectionClass;
+use ReflectionProperty;
 
 /**
  * @author Joanis ROUANET
@@ -16,26 +17,34 @@ class ClassMetadata
     private $class;
 
     /**
-     * @var string
+     * @var ReflectionClass
      */
-    private $model;
+    private $reflection;
 
     /**
      * @var array
      */
-    private $fields = [];
+    private $properties = [];
 
     /**
      * @param string $class
-     * @param string $model
-     * @param array  $fields
      */
-    public function __construct(string $class, string $model, array $fields = [])
+    public function __construct(string $class)
     {
-        // Hydratation
+        $this->setClass($class);
+    }
+
+    /**
+     * @param string $class
+     *
+     * @return self
+     */
+    public function setClass(string $class)
+    {
         $this->class = $class;
-        $this->model = $model;
-        $this->fields = $fields;
+        $this->reflection = new ReflectionClass($class);
+
+        return $this;
     }
 
     /**
@@ -47,76 +56,95 @@ class ClassMetadata
     }
 
     /**
-     * @return string
-     */
-    public function getModel()
-    {
-        return $this->model;
-    }
-
-    /**
-     * @return array
-     */
-    public function getFields()
-    {
-        return $this->fields;
-    }
-
-    /**
-     * @param  string $name
-     * 
-     * @return array
-     */
-    public function getField($name)
-    {
-        // Si le champ n'existe pas
-        if(!$this->hasField($name)) {
-            throw new InvalidArgumentException(sprintf('The field "%s" does not exist in class "%s"', $name, $this->class));
-        }
-
-        // Retour du champ
-        return $this->fields[$name];
-    }
-
-    /**
-     * Get reflection a the class.
-     * 
      * @return ReflectionClass
      */
     public function getReflectionClass()
     {
-        return new ReflectionClass($this->class);
+        return $this->reflection;
     }
 
     /**
-     * @return bool
+     * @param PropertyInterface $property
+     *
+     * @return self
      */
-    public function isSimpleField(string $name)
+    public function addProperty(PropertyInterface $property)
     {
-        return $this->hasField($name) && Field::SIMPLE === $this->fields[$name]->getType();
+        // Enregistrement du champ
+        $this->properties[$property->getName()] = $property;
+
+        // Retour des métadonnées
+        return $this;
     }
 
     /**
-     * @return bool
+     * @param string $name
+     *
+     * @return self
      */
-    public function isSingledValueAssociation(string $name)
+    public function removeProperty(string $name)
     {
-        return $this->hasField($name) && Field::MANY_TO_ONE === $this->fields[$name]['type'];
+        // Si le champ est déjà enregistré
+        if ($this->hasProperty($name)) {
+            // Suppression du champ
+            unset($this->properties[$name]);
+        }
+
+        // Retour des métadonnées
+        return $this;
     }
 
     /**
-     * @return bool
+     * @return array
      */
-    public function isMultipledValueAssociation(string $name)
+    public function getPropertys()
     {
-        return $this->hasField($name) && in_array($this->fields[$name]['type'], [Field::ONE_TO_MANY, Field::MANY_TO_MANY]);
+        return $this->properties;
     }
 
     /**
+     * @return Generator
+     */
+    public function iteratePropertys()
+    {
+        // Pour chaque champ
+        foreach ($this->properties as $name => $property) {
+            // On rend le champ avec son nom en clé
+            yield $name => $property;
+        }
+    }
+
+    /**
+     * Iterate on reflection properties.
+     *
+     * @return Generator
+     */
+    public function iterateProperties()
+    {
+        // Pour chaque champ
+        foreach ($this->getProperties() as $name => $property) {
+            // On rend le champ avec son nom en clé
+            yield $name => $property;
+        }
+    }
+
+    /**
+     * Get reflection properties.
+     *
+     * @return ReflectionProperty[]
+     */
+    public function getProperties()
+    {
+        return $this->reflection->getProperties();
+    }
+
+    /**
+     * @param string $name
+     *
      * @return bool
      */
-    public function hasField(string $name)
+    public function hasProperty(string $name)
     {
-        return array_key_exists($name, $this->fields);
+        return array_key_exists($name, $this->properties);
     }
 }

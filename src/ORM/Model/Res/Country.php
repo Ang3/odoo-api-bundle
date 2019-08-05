@@ -2,7 +2,7 @@
 
 namespace Ang3\Bundle\OdooApiBundle\ORM\Model\Res;
 
-use Ang3\Bundle\OdooApiBundle\Annotations as Odoo;
+use Ang3\Bundle\OdooApiBundle\ORM\Annotation as ORM;
 use Ang3\Bundle\OdooApiBundle\ORM\Model\Record;
 use Ang3\Bundle\OdooApiBundle\ORM\Model\NamedRecordTrait;
 use JMS\Serializer\Annotation as JMS;
@@ -35,7 +35,7 @@ class Country extends Record
      *
      * @JMS\Type("Ang3\Bundle\OdooApiBundle\ORM\Mapping\ManyToOne")
      * @JMS\SerializedName("currency_id")
-     * @Odoo\ManyToOne("Ang3\Bundle\OdooApiBundle\ORM\Model\Res\Currency")
+     * @ORM\ManyToOne("Ang3\Bundle\OdooApiBundle\ORM\Model\Res\Currency")
      */
     protected $currency;
 

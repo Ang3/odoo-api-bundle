@@ -2,7 +2,7 @@
 
 namespace Ang3\Bundle\OdooApiBundle\ORM\Model\Account;
 
-use Ang3\Bundle\OdooApiBundle\Annotations as Odoo;
+use Ang3\Bundle\OdooApiBundle\ORM\Annotation as ORM;
 use Ang3\Bundle\OdooApiBundle\ORM\Model\Record;
 use Ang3\Bundle\OdooApiBundle\ORM\Model\ActivatableRecordTrait;
 use Ang3\Bundle\OdooApiBundle\ORM\Model\NamedRecordTrait;
@@ -70,7 +70,7 @@ class Tax extends Record
      *
      * @JMS\Type("Ang3\Bundle\OdooApiBundle\ORM\Mapping\ManyToOne")
      * @JMS\SerializedName("company_id")
-     * @Odoo\ManyToOne("Ang3\Bundle\OdooApiBundle\ORM\Model\Account\TaxGroup")
+     * @ORM\ManyToOne("Ang3\Bundle\OdooApiBundle\ORM\Model\Account\TaxGroup")
      */
     protected $group;
 
@@ -79,7 +79,7 @@ class Tax extends Record
      *
      * @JMS\Type("Ang3\Bundle\OdooApiBundle\ORM\Mapping\ManyToOne")
      * @JMS\SerializedName("company_id")
-     * @Odoo\ManyToOne("Ang3\Bundle\OdooApiBundle\ORM\Model\Res\Company")
+     * @ORM\ManyToOne("Ang3\Bundle\OdooApiBundle\ORM\Model\Res\Company")
      */
     protected $company;
 

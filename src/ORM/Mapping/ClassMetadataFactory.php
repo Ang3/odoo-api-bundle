@@ -20,11 +20,6 @@ class ClassMetadataFactory
     /**
      * @var array
      */
-    private $mapping;
-
-    /**
-     * @var array
-     */
     private $loadedMetadata;
 
     /**

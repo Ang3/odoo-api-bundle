@@ -2,8 +2,8 @@
 
 namespace Ang3\Bundle\OdooApiBundle\DBAL\Types;
 
-use Ang3\Bundle\OdooApiBundle\ORM\Mapping\ManyToOne;
 use Ang3\Bundle\OdooApiBundle\ORM\Model\RecordInterface;
+use Ang3\Bundle\OdooApiBundle\ORM\Serializer\Type\SingleAssociation;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\DBAL\Types\ConversionException;
 use Doctrine\DBAL\Types\Type;
@@ -45,8 +45,8 @@ class RecordType extends Type
             return $value;
         }
 
-        // Si la valeur est une ManyToOne
-        if ($value instanceof ManyToOne) {
+        // Si la valeur est une association simple
+        if ($value instanceof SingleAssociation) {
             // Retour de l'identifiant
             return $value->getId();
         }
@@ -57,7 +57,7 @@ class RecordType extends Type
             return $value->getId();
         }
 
-        throw ConversionException::conversionFailedInvalidType($value, 'integer', [ManyToOne::class, RecordInterface::class]);
+        throw ConversionException::conversionFailedInvalidType($value, 'integer', [SingleAssociation::class, RecordInterface::class]);
     }
 
     /**

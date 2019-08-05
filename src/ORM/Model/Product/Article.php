@@ -69,7 +69,7 @@ class Article extends Record
     /**
      * @var Tax[]
      *
-     * @JMS\Type("Ang3\Bundle\OdooApiBundle\ORM\Mapping\ManyToMany")
+     * @JMS\Type("Ang3\Bundle\OdooApiBundle\ORM\Serializer\Type\MultipleAssociation")
      * @JMS\SerializedName("taxes_id")
      * @ORM\ManyToMany("Ang3\Bundle\OdooApiBundle\ORM\Model\Account\Tax")
      */
@@ -78,7 +78,7 @@ class Article extends Record
     /**
      * @var Tax[]
      *
-     * @JMS\Type("Ang3\Bundle\OdooApiBundle\ORM\Mapping\ManyToMany")
+     * @JMS\Type("Ang3\Bundle\OdooApiBundle\ORM\Serializer\Type\MultipleAssociation")
      * @JMS\SerializedName("supplier_taxes_id")
      * @ORM\ManyToMany("Ang3\Bundle\OdooApiBundle\ORM\Model\Account\Tax")
      */
@@ -87,7 +87,7 @@ class Article extends Record
     /**
      * @var Category
      *
-     * @JMS\Type("Ang3\Bundle\OdooApiBundle\ORM\Mapping\ManyToOne")
+     * @JMS\Type("Ang3\Bundle\OdooApiBundle\ORM\Serializer\Type\SingleAssociation")
      * @JMS\SerializedName("categ_id")
      * @ORM\ManyToOne("Ang3\Bundle\OdooApiBundle\ORM\Model\Product\Category")
      */
@@ -96,7 +96,7 @@ class Article extends Record
     /**
      * @var Company
      *
-     * @JMS\Type("Ang3\Bundle\OdooApiBundle\ORM\Mapping\ManyToOne")
+     * @JMS\Type("Ang3\Bundle\OdooApiBundle\ORM\Serializer\Type\SingleAssociation")
      * @JMS\SerializedName("company_id")
      * @ORM\ManyToOne("Ang3\Bundle\OdooApiBundle\ORM\Model\Res\Company")
      */

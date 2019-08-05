@@ -16,7 +16,7 @@ class Company extends Record
     /**
      * @var Partner
      *
-     * @JMS\Type("Ang3\Bundle\OdooApiBundle\ORM\Mapping\ManyToOne")
+     * @JMS\Type("Ang3\Bundle\OdooApiBundle\ORM\Serializer\Type\SingleAssociation")
      * @JMS\SerializedName("partner_id")
      * @ORM\ManyToOne("Ang3\Bundle\OdooApiBundle\ORM\Model\Res\Partner")
      */

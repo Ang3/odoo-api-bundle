@@ -105,6 +105,24 @@ abstract class AbstractProperty implements PropertyInterface
     /**
      * {@inheritdoc}.
      */
+    public function setValue(object $object, $value = null)
+    {
+        $this->reflection->setValue($object, $value);
+
+        return $this;
+    }
+
+    /**
+     * {@inheritdoc}.
+     */
+    public function getValue(object $object)
+    {
+        return $this->reflection->getValue($object);
+    }
+
+    /**
+     * {@inheritdoc}.
+     */
     public function isField()
     {
         return true;

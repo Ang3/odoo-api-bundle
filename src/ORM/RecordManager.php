@@ -84,8 +84,6 @@ class RecordManager
             // Récupération des changements
             $changeSet = $this->getChangeSet($record);
 
-            //dump($changeSet); die;
-
             // Si pas de changement
             if (!$changeSet) {
                 // Retour de l'enregistrement

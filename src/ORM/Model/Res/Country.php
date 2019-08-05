@@ -33,7 +33,7 @@ class Country extends Record
     /**
      * @var Currency
      *
-     * @JMS\Type("Ang3\Bundle\OdooApiBundle\ORM\Mapping\ManyToOne")
+     * @JMS\Type("Ang3\Bundle\OdooApiBundle\ORM\Serializer\Type\SingleAssociation")
      * @JMS\SerializedName("currency_id")
      * @ORM\ManyToOne("Ang3\Bundle\OdooApiBundle\ORM\Model\Res\Currency")
      */

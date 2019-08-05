@@ -20,7 +20,7 @@ class ClassMetadataFactory
     /**
      * @var array
      */
-    private $loadedMetadata;
+    private $loadedMetadata = [];
 
     /**
      * @param Reader $reader
@@ -48,8 +48,11 @@ class ClassMetadataFactory
         // Retour de la construction de l'instance des mtadonnées
         $classMetadata = new ClassMetadata($class);
 
+        // Relevé de la réflection de la classe
+        $reflection = $classMetadata->getReflection();
+
         // Pour chaque propriété de la classe
-        foreach ($classMetadata->iterateProperties() as $property) {
+        foreach ($reflection->getProperties() as $property) {
             /**
              * Récupération d'une annotation d'exclusion éventuelle.
              *

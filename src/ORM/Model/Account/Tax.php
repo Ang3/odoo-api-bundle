@@ -68,7 +68,7 @@ class Tax extends Record
     /**
      * @var TaxGroup
      *
-     * @JMS\Type("Ang3\Bundle\OdooApiBundle\ORM\Mapping\ManyToOne")
+     * @JMS\Type("Ang3\Bundle\OdooApiBundle\ORM\Serializer\Type\SingleAssociation")
      * @JMS\SerializedName("company_id")
      * @ORM\ManyToOne("Ang3\Bundle\OdooApiBundle\ORM\Model\Account\TaxGroup")
      */
@@ -77,7 +77,7 @@ class Tax extends Record
     /**
      * @var Company
      *
-     * @JMS\Type("Ang3\Bundle\OdooApiBundle\ORM\Mapping\ManyToOne")
+     * @JMS\Type("Ang3\Bundle\OdooApiBundle\ORM\Serializer\Type\SingleAssociation")
      * @JMS\SerializedName("company_id")
      * @ORM\ManyToOne("Ang3\Bundle\OdooApiBundle\ORM\Model\Res\Company")
      */

@@ -5,13 +5,17 @@ namespace Ang3\Bundle\OdooApiBundle\ORM;
 use Exception;
 use InvalidArgumentException;
 use ReflectionClass;
-use ReflectionProperty;
-use Ang3\Bundle\OdooApiBundle\ORM\Annotation as ORM;
-use Ang3\Bundle\OdooApiBundle\ORM\Mapping\ManyToMany;
-use Ang3\Bundle\OdooApiBundle\ORM\Mapping\ManyToOne;
+use Ang3\Bundle\OdooApiBundle\ORM\Mapping\AssociationMetadata;
+use Ang3\Bundle\OdooApiBundle\ORM\Mapping\ClassMetadata;
+use Ang3\Bundle\OdooApiBundle\ORM\Mapping\ClassMetadataFactory;
+use Ang3\Bundle\OdooApiBundle\ORM\Mapping\ManyToManyAssociationMetadata;
+use Ang3\Bundle\OdooApiBundle\ORM\Mapping\ManyToOneAssociationMetadata;
+use Ang3\Bundle\OdooApiBundle\ORM\Mapping\MultipleAssociationMetadata;
+use Ang3\Bundle\OdooApiBundle\ORM\Mapping\OneToManyAssociationMetadata;
+use Ang3\Bundle\OdooApiBundle\ORM\Serializer\Type\SingleAssociation;
+use Ang3\Bundle\OdooApiBundle\ORM\Serializer\Type\MultipleAssociation;
 use Ang3\Bundle\OdooApiBundle\ORM\Model\RecordInterface;
 use Doctrine\Common\Annotations\Reader;
-use JMS\Serializer\Annotation as JMS;
 use JMS\Serializer\ArrayTransformerInterface;
 use JMS\Serializer\SerializationContext;
 
@@ -31,13 +35,20 @@ class RecordNormalizer
     private $reader;
 
     /**
+     * @var ClassMetadataFactory
+     */
+    private $classMetadataFactory;
+
+    /**
      * @param ArrayTransformerInterface $arrayTranformer
      * @param Reader                    $reader
+     * @param ClassMetadataFactory      $classMetadataFactory
      */
-    public function __construct(ArrayTransformerInterface $arrayTranformer, Reader $reader)
+    public function __construct(ArrayTransformerInterface $arrayTranformer, Reader $reader, ClassMetadataFactory $classMetadataFactory)
     {
         $this->arrayTranformer = $arrayTranformer;
         $this->reader = $reader;
+        $this->classMetadataFactory = $classMetadataFactory;
     }
 
     /**
@@ -52,36 +63,36 @@ class RecordNormalizer
      */
     public function denormalize(array $data, string $class)
     {
+        // Chargement des métadonnées de la classe
+        $classMetadata = $this->classMetadataFactory->load($class);
+
         // Dénormlization de l'enregistrement
         $record = $this->arrayTranformer->fromArray($data, $class);
 
-        // Création d'une réflection de la classe de l'objet
-        $reflection = new ReflectionClass($record);
-
-        // Récupération des propriété de la classe de l'enregistrement
-        $properties = $reflection->getProperties();
-
-        // Pour chaque propriété de l'objet
-        foreach ($properties as $property) {
-            // Récupération d'une association simple éventuelle
-            $manyToOne = $this->findManyToOneAssociation($property);
-
-            // Si on a une association simple
-            if (null !== $manyToOne) {
+        // Pour chaque propriété d'association
+        foreach ($classMetadata->iterateAssociations() as $property) {
+            // Si c'est une association de type ManyToOne
+            if ($property instanceof ManyToOneAssociationMetadata) {
                 // Normalisation de la relation
-                $this->denormalizeManyToOne($record, $property, $manyToOne);
+                $this->denormalizeManyToOne($record, $property);
 
                 // Propriété suivante
                 continue;
             }
 
-            // Récupération d'une association multiple éventuelle
-            $manyToMany = $this->findManyToManyAssociation($property);
-
-            // Si on a une association multiple
-            if (null !== $manyToMany) {
+            // Si c'est une association de type ManyToMany
+            if ($property instanceof ManyToManyAssociationMetadata) {
                 // Normalisation de la relation
-                $this->denormalizeManyToMany($record, $property, $manyToMany);
+                $this->denormalizeManyToMany($record, $property);
+
+                // Propriété suivante
+                continue;
+            }
+
+            // Si c'est une association de type OneToMany
+            if ($property instanceof OneToManyAssociationMetadata) {
+                // Normalisation de la relation
+                $this->denormalizeOneToMany($record, $property);
 
                 // Propriété suivante
                 continue;
@@ -148,7 +159,7 @@ class RecordNormalizer
     public function normalizeFieldName(string $class, string $fieldName)
     {
         // Réflection de la classe
-        $reflection = new ReflectionClass($class);
+        $classMetadata = $this->classMetadataFactory->load($class);
 
         // Récupération des champs par explosion selon les points
         $fields = explode('.', $fieldName);
@@ -165,24 +176,21 @@ class RecordNormalizer
             $field = array_key_exists($field, $serializedNames) ? $serializedNames[$field] : $field;
 
             // Si la classe possède la propriété
-            if ($reflection->hasProperty($propertyName)) {
+            if ($classMetadata->hasProperty($propertyName)) {
                 // Récupération de la réflection de la propriété
-                $property = $reflection->getProperty($propertyName);
+                $property = $classMetadata->getProperty($propertyName);
 
-                // Récupération éventuelle d'une annotation de relation simple
-                $manyToOne = $this->findManyToOneAssociation($property);
-
-                // Si pas d'annotation
-                if (null === $manyToOne) {
+                // Si la propriété n'est pas une association
+                if (!($property instanceof AssociationMetadata)) {
                     // Champ suivant
                     continue;
                 }
 
                 // Changement de classe courante
-                $reflection = new ReflectionClass($manyToOne->class);
+                $classMetadata = $this->classMetadataFactory->load($property->getTargetClass());
 
                 // Mise-à-jour des nom de champs sérialisés selon la nouvelle classe
-                $serializedNames = $this->getSerializedNames($manyToOne->class);
+                $serializedNames = $this->getSerializedNames($property->getTargetClass());
             }
         }
 
@@ -199,55 +207,45 @@ class RecordNormalizer
      */
     public function getSerializedNames(string $class)
     {
-        // Réflection de la classe
-        $reflection = new ReflectionClass($class);
+        return $this
+            ->getClassMetadata($class)
+            ->getSerializedNames()
+        ;
+    }
 
-        // Récupération des propriétés de la classe
-        $properties = $reflection->getProperties();
-
-        // Initialisation des noms de propriété sérialisés
-        $serializedNames = [];
-
-        // Pour chaque propriété
-        foreach ($properties as $property) {
-            /**
-             * Récupération d'une annotation éventuelle du nom sérialisé de la propriété.
-             *
-             * @var JMS\SerializedName|null
-             */
-            $annotation = $this->reader->getPropertyAnnotation($property, JMS\SerializedName::class);
-
-            // Si pas d'annotation
-            if (null === $annotation) {
-                // Enregistrement du nom sérialisé de la propriété par rapport à son nom
-                $serializedNames[$property->getName()] = $property->getName();
-
-                // Propriété suivante
-                continue;
-            }
-
-            // Enregistrement du nom sérialisé de la propriété par rapport à son nom
-            $serializedNames[$property->getName()] = $annotation->name;
-        }
-
-        // Retour des noms de propriété sérialisés
-        return $serializedNames;
+    /**
+     * Get metadata of a class.
+     *
+     * @param string $class
+     *
+     * @return ClassMetadata
+     */
+    public function getClassMetadata(string $class)
+    {
+        return $this->classMetadataFactory->load($class);
     }
 
     /**
      * Denormalize ManyToOne association of property.
      *
-     * @param RecordInterface    $record
-     * @param ReflectionProperty $property
-     * @param ORM\ManyToOne      $manyToOne
+     * @param RecordInterface              $record
+     * @param ManyToOneAssociationMetadata $property
+     *
+     * @throws InvalidArgumentException when the value of an association property is not valid
      */
-    public function denormalizeManyToOne(RecordInterface $record, ReflectionProperty $property, ORM\ManyToOne $manyToOne)
+    public function denormalizeManyToOne(RecordInterface $record, ManyToOneAssociationMetadata $property)
     {
-        // On rend accessible la propriété
-        $property->setAccessible(true);
-
         // Récupération de la valeur  de la propriété
         $value = $property->getValue($record);
+
+        // Si pas de valeur
+        if (false === $value || null === $value) {
+            // Mise-à-jour ed la valeur par une instance d'enregistrement
+            $property->setValue($record, null);
+
+            // Fin des traitements
+            return;
+        }
 
         // Si la propriété est déjà un enregistrement
         if ($value instanceof RecordInterface) {
@@ -256,7 +254,7 @@ class RecordNormalizer
         }
 
         // Si la valeur n'est pas une association simple
-        if (!($value instanceof ManyToOne)) {
+        if (!($value instanceof SingleAssociation)) {
             // On met la propriété à NULL
             $property->setValue($record, null);
 
@@ -264,35 +262,17 @@ class RecordNormalizer
             return;
         }
 
-        // Enregistrement de la classe de l'association
-        $value->setClass($manyToOne->class);
-
-        // Récupération de l'ID de l'enregistrement cible de la relation
-        $id = $value->getId();
-
-        // Si pas d'identifiant
-        if (null === $id) {
-            // Réinitialisation de la valeur
-            $property->setValue($record, null);
-
-            // Fin des traitements
-            return;
-        }
-
         // Création d'une réflection de la classe associée
-        $targetReflection = new ReflectionClass($manyToOne->class);
+        $targetReflection = new ReflectionClass($property->getTargetClass());
 
         // Création de l'enregistrement
         $targetRecord = $targetReflection->newInstanceWithoutConstructor();
 
         // Assignation de l'ID de l'enregistrement
-        $this->setRecordId($targetRecord, $id);
-
-        // Récupération du nom affiché de la classe
-        $displayName = $value->getDisplayName();
+        $this->setRecordId($targetRecord, $value->getId());
 
         // Si on a un nom affiché
-        if (null !== $displayName && $targetReflection->hasProperty('displayName')) {
+        if (null !== $value->getDisplayName() && $targetReflection->hasProperty('displayName')) {
             // Récupération de la propriété
             $displayNameProperty = $targetReflection->getProperty('displayName');
 
@@ -300,25 +280,45 @@ class RecordNormalizer
             $displayNameProperty->setAccessible(true);
 
             // Récupération de la valeur de la propriété
-            $displayNameProperty->setValue($targetRecord, $displayName);
+            $displayNameProperty->setValue($targetRecord, $value->getDisplayName());
         }
 
-        // Mise-à-jour ed la valeur par une instance d'enregistrement
+        // Mise-à-jour de la valeur par l'instance de l'enregistrement
         $property->setValue($record, $targetRecord);
     }
 
     /**
      * Denormalize ManyToMany association of property.
      *
-     * @param RecordInterface    $record
-     * @param ReflectionProperty $property
-     * @param ORM\ManyToMany     $manyToMany
+     * @param RecordInterface               $record
+     * @param ManyToManyAssociationMetadata $property
      */
-    public function denormalizeManyToMany(RecordInterface $record, ReflectionProperty $property, ORM\ManyToMany $manyToMany)
+    public function denormalizeManyToMany(RecordInterface $record, ManyToManyAssociationMetadata $property)
     {
-        // On rend accessible la propriété
-        $property->setAccessible(true);
+        return $this->denormalizeToManyAssociation($record, $property);
+    }
 
+    /**
+     * Denormalize ManyToMany association of property.
+     *
+     * @param RecordInterface              $record
+     * @param OneToManyAssociationMetadata $property
+     */
+    public function denormalizeOneToMany(RecordInterface $record, OneToManyAssociationMetadata $property)
+    {
+        return $this->denormalizeToManyAssociation($record, $property);
+    }
+
+    /**
+     * Denormalize ManyToMany association of property.
+     *
+     * @internal
+     *
+     * @param RecordInterface             $record
+     * @param MultipleAssociationMetadata $property
+     */
+    private function denormalizeToManyAssociation(RecordInterface $record, MultipleAssociationMetadata $property)
+    {
         // Récupération de la valeur  de la propriété
         $value = $property->getValue($record);
 
@@ -332,7 +332,7 @@ class RecordNormalizer
         }
 
         // Si la valeur n'est pas une association simple
-        if (!($value instanceof ManyToMany)) {
+        if (!($value instanceof MultipleAssociation)) {
             // On met la propriété à NULL
             $property->setValue($record, null);
 
@@ -340,14 +340,11 @@ class RecordNormalizer
             return;
         }
 
-        // Enregistrement de la classe de l'association
-        $value->setClass($manyToMany->class);
-
         // Initialisation des enregistrements
         $records = [];
 
         // Création d'une réflection de la classe associée
-        $targetReflection = new ReflectionClass($manyToMany->class);
+        $targetReflection = new ReflectionClass($property->getTargetClass());
 
         // Pour chaque identifiant de la relation
         foreach (array_unique($value->getIds()) as $id) {
@@ -366,46 +363,12 @@ class RecordNormalizer
     }
 
     /**
-     * Find ManyToOne association on property.
-     *
-     * @param ReflectionProperty $property
-     *
-     * @return ORM\ManyToOne|null
-     */
-    public function findManyToOneAssociation(ReflectionProperty $property)
-    {
-        /** @var ORM\ManyToOne|null */
-        $manyToOne = $this->reader->getPropertyAnnotation($property, ORM\ManyToOne::class);
-
-        // Retour de l'association éventuelle
-        return $manyToOne;
-    }
-
-    /**
-     * Find ManyToMany association on property.
-     *
-     * @param ReflectionProperty $property
-     *
-     * @return ORM\ManyToMany|null
-     */
-    public function findManyToManyAssociation(ReflectionProperty $property)
-    {
-        /** @var ORM\ManyToMany|null */
-        $manyToOne = $this->reader->getPropertyAnnotation($property, ORM\ManyToMany::class);
-
-        // Retour de l'association éventuelle
-        return $manyToOne;
-    }
-
-    /**
      * Set ID to a record.
-     *
-     * @internal
      *
      * @param RecordInterface $record
      * @param int|null        $id
      */
-    private function setRecordId(RecordInterface $record, int $id = null)
+    public function setRecordId(RecordInterface $record, int $id = null)
     {
         // Réfléction de la classe de l'enregistrement
         $reflection = new ReflectionClass($record);

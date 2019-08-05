@@ -32,7 +32,7 @@ class Record implements RecordInterface
     /**
      * @var User
      *
-     * @JMS\Type("Ang3\Bundle\OdooApiBundle\ORM\Mapping\ManyToOne")
+     * @JMS\Type("Ang3\Bundle\OdooApiBundle\ORM\Serializer\Type\SingleAssociation")
      * @JMS\SerializedName("create_uid")
      * @JMS\Exclude(if="context.getDirection() == constant('JMS\\Serializer\\GraphNavigator::DIRECTION_SERIALIZATION')")
      * @ORM\ManyToOne("Ang3\Bundle\OdooApiBundle\ORM\Model\Res\User")
@@ -51,7 +51,7 @@ class Record implements RecordInterface
     /**
      * @var User
      *
-     * @JMS\Type("Ang3\Bundle\OdooApiBundle\ORM\Mapping\ManyToOne")
+     * @JMS\Type("Ang3\Bundle\OdooApiBundle\ORM\Serializer\Type\SingleAssociation")
      * @JMS\SerializedName("write_uid")
      * @JMS\Exclude(if="context.getDirection() == constant('JMS\\Serializer\\GraphNavigator::DIRECTION_SERIALIZATION')")
      * @ORM\ManyToOne("Ang3\Bundle\OdooApiBundle\ORM\Model\Res\User")

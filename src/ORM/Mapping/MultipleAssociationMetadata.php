@@ -5,6 +5,6 @@ namespace Ang3\Bundle\OdooApiBundle\ORM\Mapping;
 /**
  * @author Joanis ROUANET
  */
-class ManyToOneAssociationMetadata extends SingleAssociationMetadata
+class MultipleAssociationMetadata extends AssociationMetadata
 {
 }

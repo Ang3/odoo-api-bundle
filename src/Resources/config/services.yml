@@ -7,21 +7,7 @@ services:
   # Autowire
   Ang3\Component\OdooApiClient\Factory\ApiClientFactory: ~
   Ang3\Bundle\OdooApiBundle\ORM\RecordNormalizer: ~
-
-  # 
-  # Client
-  # 
-
-  # ang3_odoo_api.factory.api_client_factory:
-  #   alias: Ang3\Component\OdooApiClient\Factory\ApiClientFactory
-  #   public: true
-
-  # ang3_odoo_api.default_external_api_client:
-  #   class: Ang3\Component\OdooApiClient\Client\ExternalApiClient
-  #   factory: 'Ang3\Component\OdooApiClient\Factory\ApiClientFactory:createExternalApiClient'
-  #   arguments:
-  #     $parameters: '%ang3_odoo_api.parameters%'
-  #   public: true
+  Ang3\Bundle\OdooApiBundle\ORM\Mapping\ClassMetadataFactory: ~
 
   # 
   # DOCTRINE
@@ -32,17 +18,15 @@ services:
       - { name: doctrine.event_listener, event: postLoad }
 
   # 
-  # LISTENERS AND SUBSCRIBERS
+  # SERIALIZER
   # 
 
-  Ang3\Bundle\OdooApiBundle\Serializer\Handler\ManyToOneHandler:
+  Ang3\Bundle\OdooApiBundle\ORM\Serializer\Handler\RecordAssociationHandler:
     tags:
-      - { name: jms_serializer.subscribing_handler }
-
-  Ang3\Bundle\OdooApiBundle\Serializer\Handler\ManyToManyHandler:
-    tags:
-      - { name: jms_serializer.subscribing_handler }
-
+      - { name: jms_serializer.handler, type: Ang3\Bundle\OdooApiBundle\ORM\Serializer\Type\SingleAssociation, direction: serialization, format: json, method: serializeSingleAssociationToJson }
+      - { name: jms_serializer.handler, type: Ang3\Bundle\OdooApiBundle\ORM\Serializer\Type\SingleAssociation, direction: deserialization, format: json, method: deserializeSingleAssociationFromJson }
+      - { name: jms_serializer.handler, type: Ang3\Bundle\OdooApiBundle\ORM\Serializer\Type\MultipleAssociation, direction: serialization, format: json, method: serializeMultipleAssociationToJson }
+      - { name: jms_serializer.handler, type: Ang3\Bundle\OdooApiBundle\ORM\Serializer\Type\MultipleAssociation, direction: deserialization, format: json, method: deserializeMultipleAssociationFromJson }
   # 
   # FAKER
   # 

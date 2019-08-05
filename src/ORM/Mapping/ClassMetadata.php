@@ -4,7 +4,7 @@ namespace Ang3\Bundle\OdooApiBundle\ORM\Mapping;
 
 use Generator;
 use ReflectionClass;
-use ReflectionProperty;
+use Ang3\Bundle\OdooApiBundle\ORM\Exception\MappingException;
 
 /**
  * @author Joanis ROUANET
@@ -58,7 +58,7 @@ class ClassMetadata
     /**
      * @return ReflectionClass
      */
-    public function getReflectionClass()
+    public function getReflection()
     {
         return $this->reflection;
     }
@@ -95,47 +95,28 @@ class ClassMetadata
     }
 
     /**
+     * @param string $name
+     *
+     * @throws MappingException when the property was not found
+     *
+     * @return PropertyInterface
+     */
+    public function getProperty(string $name)
+    {
+        if (!$this->hasProperty($name)) {
+            throw new MappingException(sprintf('The property "%s" does not exists in metadata of class "%s"', $name, $this->class));
+        }
+
+        // Retour de la propriété
+        return $this->properties[$name];
+    }
+
+    /**
      * @return array
-     */
-    public function getPropertys()
-    {
-        return $this->properties;
-    }
-
-    /**
-     * @return Generator
-     */
-    public function iteratePropertys()
-    {
-        // Pour chaque champ
-        foreach ($this->properties as $name => $property) {
-            // On rend le champ avec son nom en clé
-            yield $name => $property;
-        }
-    }
-
-    /**
-     * Iterate on reflection properties.
-     *
-     * @return Generator
-     */
-    public function iterateProperties()
-    {
-        // Pour chaque champ
-        foreach ($this->getProperties() as $name => $property) {
-            // On rend le champ avec son nom en clé
-            yield $name => $property;
-        }
-    }
-
-    /**
-     * Get reflection properties.
-     *
-     * @return ReflectionProperty[]
      */
     public function getProperties()
     {
-        return $this->reflection->getProperties();
+        return $this->properties;
     }
 
     /**
@@ -146,5 +127,87 @@ class ClassMetadata
     public function hasProperty(string $name)
     {
         return array_key_exists($name, $this->properties);
+    }
+
+    /**
+     * @param string $name
+     *
+     * @return bool
+     */
+    public function hasField(string $name)
+    {
+        return $this->hasProperty($name) && $this->properties[$name]->isField();
+    }
+
+    /**
+     * @param string $name
+     *
+     * @return bool
+     */
+    public function hasAssociation(string $name)
+    {
+        return $this->hasProperty($name) && $this->properties[$name]->isAssociation();
+    }
+
+    /**
+     * Get all serialized properties names.
+     *
+     * @return array
+     */
+    public function getSerializedNames()
+    {
+        // Initialisation de la liste des noms sérialisés
+        $serializedNames = [];
+
+        // Pour chaque propriété
+        foreach ($this->properties as $name => $property) {
+            // Enregistrement du nom sérialisé
+            $serializedNames[$property->getName()] = $property->getSerializedName();
+        }
+
+        // Retour des noms sérialisés
+        return $serializedNames;
+    }
+
+    /**
+     * @return Generator
+     */
+    public function iterateProperties()
+    {
+        // Pour chaque propriété
+        foreach ($this->properties as $name => $property) {
+            // On rend le champ avec son nom en clé
+            yield $name => $property;
+        }
+    }
+
+    /**
+     * @return Generator
+     */
+    public function iterateFields()
+    {
+        // Pour chaque propriété
+        foreach ($this->properties as $name => $property) {
+            // Si c'est un champ simple
+            if ($property->isField()) {
+                // On rend le champ avec son nom en clé
+                yield $name => $property;
+            }
+        }
+    }
+
+    /**
+     * @return Generator
+     */
+    public function iterateAssociations()
+    {
+        // Pour chaque propriété
+        foreach ($this->properties as $name => $property) {
+            // Si c'est une association
+            if ($property->isAssociation()) {
+                // On rend le champ avec son nom en clé
+                yield $name => $property;
+            }
+        }
     }
 }

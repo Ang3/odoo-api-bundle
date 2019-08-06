@@ -87,7 +87,7 @@ class Article extends Record
     /**
      * @var Category
      *
-     * @JMS\Type("Ang3\Bundle\OdooApiBundle\ORM\Serializer\Type\SingleAssociation")
+     * @JMS\Type("Ang3\Bundle\OdooApiBundle\ORM\Serializer\Type\SingleAssociation<'Ang3\Bundle\OdooApiBundle\ORM\Model\Product\Category'>")
      * @JMS\SerializedName("categ_id")
      * @ORM\ManyToOne("Ang3\Bundle\OdooApiBundle\ORM\Model\Product\Category")
      */

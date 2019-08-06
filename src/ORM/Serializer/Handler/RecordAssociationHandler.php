@@ -30,6 +30,7 @@ class RecordAssociationHandler
      */
     public function serializeSingleAssociationToJson(JsonSerializationVisitor $visitor, $data, array $type, SerializationContext $context)
     {
+        dump($type);
         // Si pas de données
         if (null === $data || false === $data) {
             // Retour négatif

@@ -2,7 +2,6 @@
 
 namespace Ang3\Bundle\OdooApiBundle\ORM\Model\Product;
 
-use Ang3\Bundle\OdooApiBundle\ORM\Annotation as ORM;
 use Ang3\Bundle\OdooApiBundle\ORM\Model\Record;
 use Ang3\Bundle\OdooApiBundle\ORM\Model\ActivatableRecordTrait;
 use Ang3\Bundle\OdooApiBundle\ORM\Model\NamedRecordTrait;
@@ -69,18 +68,16 @@ class Article extends Record
     /**
      * @var Tax[]
      *
-     * @JMS\Type("Ang3\Bundle\OdooApiBundle\ORM\Serializer\Type\MultipleAssociation")
+     * @JMS\Type("Ang3\Bundle\OdooApiBundle\ORM\Serializer\Type\MultipleAssociation<'Ang3\Bundle\OdooApiBundle\ORM\Model\Account\Tax'>")
      * @JMS\SerializedName("taxes_id")
-     * @ORM\ManyToMany("Ang3\Bundle\OdooApiBundle\ORM\Model\Account\Tax")
      */
     protected $taxes = [];
 
     /**
      * @var Tax[]
      *
-     * @JMS\Type("Ang3\Bundle\OdooApiBundle\ORM\Serializer\Type\MultipleAssociation")
+     * @JMS\Type("Ang3\Bundle\OdooApiBundle\ORM\Serializer\Type\MultipleAssociation<'Ang3\Bundle\OdooApiBundle\ORM\Model\Account\Tax'>")
      * @JMS\SerializedName("supplier_taxes_id")
-     * @ORM\ManyToMany("Ang3\Bundle\OdooApiBundle\ORM\Model\Account\Tax")
      */
     protected $supplierTaxes = [];
 
@@ -89,16 +86,14 @@ class Article extends Record
      *
      * @JMS\Type("Ang3\Bundle\OdooApiBundle\ORM\Serializer\Type\SingleAssociation<'Ang3\Bundle\OdooApiBundle\ORM\Model\Product\Category'>")
      * @JMS\SerializedName("categ_id")
-     * @ORM\ManyToOne("Ang3\Bundle\OdooApiBundle\ORM\Model\Product\Category")
      */
     protected $category;
 
     /**
      * @var Company
      *
-     * @JMS\Type("Ang3\Bundle\OdooApiBundle\ORM\Serializer\Type\SingleAssociation")
+     * @JMS\Type("Ang3\Bundle\OdooApiBundle\ORM\Serializer\Type\SingleAssociation<'Ang3\Bundle\OdooApiBundle\ORM\Model\Res\Company'>")
      * @JMS\SerializedName("company_id")
-     * @ORM\ManyToOne("Ang3\Bundle\OdooApiBundle\ORM\Model\Res\Company")
      */
     protected $company;
 

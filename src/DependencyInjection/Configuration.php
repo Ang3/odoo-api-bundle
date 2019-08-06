@@ -23,7 +23,7 @@ class Configuration implements ConfigurationInterface
 
         $rootNode
             ->children()
-                ->scalarNode('default_client')
+                ->scalarNode('default_connection')
                     ->isRequired()
                     ->cannotBeEmpty()
                     ->defaultValue('default')
@@ -32,7 +32,7 @@ class Configuration implements ConfigurationInterface
                     ->useAttributeAsKey('name')
                     ->scalarPrototype()->end()
                 ->end()
-                ->arrayNode('clients')
+                ->arrayNode('connections')
                     ->requiresAtLeastOneElement()
                     ->useAttributeAsKey('name')
                     ->arrayPrototype()

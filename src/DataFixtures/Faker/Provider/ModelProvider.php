@@ -3,7 +3,7 @@
 namespace Ang3\Bundle\OdooApiBundle\DataFixtures\Faker\Provider;
 
 use ReflectionClass;
-use Ang3\Bundle\OdooApiBundle\ORM\Mapping;
+use Ang3\Bundle\OdooApiBundle\ORM\ModelRegistry;
 use Ang3\Bundle\OdooApiBundle\ORM\Model\RecordInterface;
 use Faker\Provider\Base as BaseProvider;
 
@@ -13,9 +13,9 @@ use Faker\Provider\Base as BaseProvider;
 final class ModelProvider extends BaseProvider
 {
     /**
-     * @var Mapping
+     * @var ModelRegistry
      */
-    private $mapping;
+    private $modelRegistry;
 
     /**
      * @static
@@ -27,11 +27,11 @@ final class ModelProvider extends BaseProvider
     /**
      * @required
      *
-     * @param Mapping $mapping
+     * @param ModelRegistry $modelRegistry
      */
-    public function setMapping(Mapping $mapping)
+    public function setModelRegistry(ModelRegistry $modelRegistry)
     {
-        $this->mapping = $mapping;
+        $this->modelRegistry = $modelRegistry;
     }
 
     /**
@@ -43,7 +43,7 @@ final class ModelProvider extends BaseProvider
     public function odooRecord(string $name, int $id = null)
     {
         // Création d'une réflection de la classe
-        $reflection = new ReflectionClass($this->mapping->getClass($name));
+        $reflection = new ReflectionClass($this->modelRegistry->getClass($name));
 
         // Création de l'enregistrement
         $record = $reflection->newInstanceWithoutConstructor();

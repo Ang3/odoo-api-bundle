@@ -3,7 +3,7 @@
 namespace Ang3\Bundle\OdooApiBundle\DependencyInjection;
 
 use Ang3\Component\OdooApiClient\ExternalApiClient;
-use Ang3\Bundle\OdooApiBundle\ORM\Mapping;
+use Ang3\Bundle\OdooApiBundle\ORM\ModelRegistry;
 use Ang3\Bundle\OdooApiBundle\ORM\RecordManager;
 use Ang3\Bundle\OdooApiBundle\ORM\RecordNormalizer;
 use Ang3\Bundle\OdooApiBundle\ORM\Registry;
@@ -39,7 +39,7 @@ class Ang3OdooApiExtension extends Extension implements PrependExtensionInterfac
         // Chargement des services
         $loader->load('services.yml');
 
-        // Chargement du registre des clients
+        // Chargement du registre des connections
         $this->loadRegistry($container, $config);
     }
 
@@ -61,7 +61,7 @@ class Ang3OdooApiExtension extends Extension implements PrependExtensionInterfac
     }
 
     /**
-     * Load clients and ORM.
+     * Load registry.
      *
      * @param ContainerBuilder $container
      * @param array            $config
@@ -71,11 +71,14 @@ class Ang3OdooApiExtension extends Extension implements PrependExtensionInterfac
         // Récupération mapping par défaut
         $defaultMapping = $this->getDefaultMapping();
 
-        // Récupération du registre des clients
+        // Récupération du registre des connections
         $registryDefinition = new Definition(Registry::class);
 
+        // Enregistrement du client par défaut
+        $registryDefinition->addArgument($config['default_connection']);
+
         // Pour chaque client à créer
-        foreach ($config['clients'] as $name => $params) {
+        foreach ($config['connections'] as $name => $params) {
             // Création de la définition
             $clientDefinition = new Definition(ExternalApiClient::class);
 
@@ -89,7 +92,7 @@ class Ang3OdooApiExtension extends Extension implements PrependExtensionInterfac
             $container->setDefinition($clientName, $clientDefinition);
 
             // Création de la définition du registre des modèles
-            $mappingDefinition = new Definition(Mapping::class);
+            $modelRegistryDefinition = new Definition(ModelRegistry::class);
 
             // Initialisation du mapping
             $mapping = array_merge($config['mapping'], $params['mapping']);
@@ -101,13 +104,13 @@ class Ang3OdooApiExtension extends Extension implements PrependExtensionInterfac
             }
 
             // Ajout en argument des modèles du client
-            $mappingDefinition->addArgument($mapping);
+            $modelRegistryDefinition->addArgument($mapping);
 
             // Définition du nom du client
-            $mappingName = sprintf('ang3_odoo_api.%s.mapping', $name);
+            $modelRegistryName = sprintf('ang3_odoo_api.%s.model_registry', $name);
 
             // Enregistrement du client dans le container
-            $container->setDefinition($mappingName, $mappingDefinition);
+            $container->setDefinition($modelRegistryName, $modelRegistryDefinition);
 
             // Création de la définition du manager
             $managerDefinition = new Definition(RecordManager::class);
@@ -116,31 +119,31 @@ class Ang3OdooApiExtension extends Extension implements PrependExtensionInterfac
             $managerName = sprintf('ang3_odoo_api.%s.record_manager', $name);
 
             // Enregistrement des arguments de la définition
-            $managerDefinition->setArguments([new Reference($clientName), new Reference($mappingName), new Reference(RecordNormalizer::class)]);
+            $managerDefinition->setArguments([new Reference($clientName), new Reference($modelRegistryName), new Reference(RecordNormalizer::class)]);
 
             // Enregistrement du manager dans le container
             $container->setDefinition($managerName, $managerDefinition);
 
             // S'il s'agit du client par défaut
-            if ($name === $config['default_client']) {
+            if ($name === $config['default_connection']) {
                 // Enregistrement du client par défaut dans le container
                 $container->setDefinition('ang3_odoo_api.client', $clientDefinition);
                 $container->setDefinition(ExternalApiClient::class, $clientDefinition);
 
                 // Enregistrement du registre de modèle par défaut dans le container
-                $container->setDefinition('ang3_odoo_api.mapping', $mappingDefinition);
-                $container->setDefinition(Mapping::class, $mappingDefinition);
+                $container->setDefinition('ang3_odoo_api.model_registry', $modelRegistryDefinition);
+                $container->setDefinition(ModelRegistry::class, $modelRegistryDefinition);
 
                 // Enregistrement du registre de modèle par défaut dans le container
                 $container->setDefinition('ang3_odoo_api.record_manager', $managerDefinition);
                 $container->setDefinition(RecordManager::class, $managerDefinition);
             }
 
-            // Enregistrement du client au sein du registre des clients
+            // Enregistrement du client au sein du registre des connections
             $registryDefinition->addMethodCall('register', [$name, new Reference($managerName)]);
         }
 
-        // Enregistrement du registre des clients dans le container
+        // Enregistrement du registre des connections dans le container
         $container->setDefinition(Registry::class, $registryDefinition);
     }
 

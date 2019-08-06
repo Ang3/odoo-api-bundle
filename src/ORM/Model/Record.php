@@ -3,7 +3,6 @@
 namespace Ang3\Bundle\OdooApiBundle\ORM\Model;
 
 use DateTime;
-use Ang3\Bundle\OdooApiBundle\ORM\Annotation as ORM;
 use Ang3\Bundle\OdooApiBundle\ORM\Model\Res\User;
 use JMS\Serializer\Annotation as JMS;
 
@@ -25,17 +24,14 @@ class Record implements RecordInterface
      *
      * @JMS\Type("DateTime<'Y-m-d H:i:s'>")
      * @JMS\SerializedName("create_date")
-     * @JMS\Exclude(if="context.getDirection() == constant('JMS\\Serializer\\GraphNavigator::DIRECTION_SERIALIZATION')")
      */
     protected $createdAt;
 
     /**
      * @var User
      *
-     * @JMS\Type("Ang3\Bundle\OdooApiBundle\ORM\Serializer\Type\SingleAssociation")
+     * @JMS\Type("Ang3\Bundle\OdooApiBundle\ORM\Serializer\Type\SingleAssociation<'Ang3\Bundle\OdooApiBundle\ORM\Model\Res\User'>")
      * @JMS\SerializedName("create_uid")
-     * @JMS\Exclude(if="context.getDirection() == constant('JMS\\Serializer\\GraphNavigator::DIRECTION_SERIALIZATION')")
-     * @ORM\ManyToOne("Ang3\Bundle\OdooApiBundle\ORM\Model\Res\User")
      */
     protected $createdBy;
 
@@ -44,17 +40,14 @@ class Record implements RecordInterface
      *
      * @JMS\Type("DateTime<'Y-m-d H:i:s'>")
      * @JMS\SerializedName("write_date")
-     * @JMS\Exclude(if="context.getDirection() == constant('JMS\\Serializer\\GraphNavigator::DIRECTION_SERIALIZATION')")
      */
     protected $updatedAt;
 
     /**
      * @var User
      *
-     * @JMS\Type("Ang3\Bundle\OdooApiBundle\ORM\Serializer\Type\SingleAssociation")
+     * @JMS\Type("Ang3\Bundle\OdooApiBundle\ORM\Serializer\Type\SingleAssociation<'Ang3\Bundle\OdooApiBundle\ORM\Model\Res\User'>")
      * @JMS\SerializedName("write_uid")
-     * @JMS\Exclude(if="context.getDirection() == constant('JMS\\Serializer\\GraphNavigator::DIRECTION_SERIALIZATION')")
-     * @ORM\ManyToOne("Ang3\Bundle\OdooApiBundle\ORM\Model\Res\User")
      */
     protected $updatedBy;
 

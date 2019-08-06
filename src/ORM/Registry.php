@@ -10,14 +10,22 @@ use Exception;
 class Registry
 {
     /**
-     * Default registry name.
+     * @var string
      */
-    const DEFAULT_NAME = 'default';
+    private $defaultConnection;
 
     /**
      * @var RecordManager[]
      */
     private $managers = [];
+
+    /**
+     * @param string $defaultConnection
+     */
+    public function __construct(string $defaultConnection)
+    {
+        $this->defaultConnection = $defaultConnection;
+    }
 
     /**
      * Register a manager by name.
@@ -37,14 +45,20 @@ class Registry
     /**
      * Get a manager by name.
      *
-     * @param string $name
+     * @param string|null $name
      *
      * @throws Exception when the manager was not found
      *
      * @return RecordManager
      */
-    public function get(string $name = self::DEFAULT_NAME)
+    public function get(string $name = null)
     {
+        // Si pas de nom
+        if (null === $name) {
+            // Retour du manager de la connection par défaut
+            return $this->get($this->defaultConnection);
+        }
+
         // Si pas de manager
         if (!$this->has($name)) {
             throw new Exception(sprintf('Odoo record manager "%s" not found.', $name));

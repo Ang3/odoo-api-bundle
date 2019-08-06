@@ -3,6 +3,9 @@
 namespace Ang3\Bundle\OdooApiBundle\ORM\Serializer\Handler;
 
 use InvalidArgumentException;
+use ReflectionClass;
+use Ang3\Bundle\OdooApiBundle\ORM\RecordManager;
+use Ang3\Bundle\OdooApiBundle\ORM\Registry;
 use Ang3\Bundle\OdooApiBundle\ORM\Model\RecordInterface;
 use Ang3\Bundle\OdooApiBundle\ORM\Serializer\Type\MultipleAssociation;
 use Ang3\Bundle\OdooApiBundle\ORM\Serializer\Type\SingleAssociation;
@@ -17,8 +20,23 @@ use JMS\Serializer\SerializationContext;
 class RecordAssociationHandler
 {
     /**
+     * @var Registry
+     */
+    private $registry;
+
+    /**
+     * Constructor of registry.
+     *
+     * @param Registry $registry
+     */
+    public function __construct(Registry $registry)
+    {
+        $this->registry = $registry;
+    }
+
+    /**
      * Serialize a single association.
-     * 
+     *
      * @param JsonSerializationVisitor $visitor
      * @param mixed                    $data
      * @param array                    $type
@@ -30,13 +48,6 @@ class RecordAssociationHandler
      */
     public function serializeSingleAssociationToJson(JsonSerializationVisitor $visitor, $data, array $type, SerializationContext $context)
     {
-        dump($type);
-        // Si pas de données
-        if (null === $data || false === $data) {
-            // Retour négatif
-            return false;
-        }
-
         // Si l'objet est un enregistrement une association simple
         if ($data instanceof RecordInterface || $data instanceof SingleAssociation) {
             // Récupération de l'ID de l'enregistrement
@@ -63,10 +74,15 @@ class RecordAssociationHandler
      * @param array                      $type
      * @param DeserializationContext     $context
      *
-     * @return SingleAssociation|null
+     * @throws InvalidArgumentException when the target class is not mapped
+     *
+     * @return RecordInterface|SingleAssociation|null
      */
     public function deserializeSingleAssociationFromJson(JsonDeserializationVisitor $visitor, $data, array $type, DeserializationContext $context)
     {
+        // Récupération des paramètres
+        $params = $type['params'];
+
         // Si pas de données
         if (null === $data || false === $data) {
             // Retour nulle
@@ -75,30 +91,71 @@ class RecordAssociationHandler
 
         // Si on a un entier
         if (is_int($data)) {
-            // Retour de l'association simple
-            return new SingleAssociation($data);
+            // Création de l'association simple
+            $association = new SingleAssociation($data);
+        } else {
+            // Si on a pas un tableau
+            if (!is_array($data)) {
+                // Retour nul
+                return null;
+            }
+
+            // Récupération de l'identifiant
+            list($id, $displayName) = [
+                !empty($data[0]) ? $data[0] : null,
+                !empty($data[1]) ? $data[1] : null,
+            ];
+
+            // Si pas d'identifiant
+            if (null === $id) {
+                // Retour nul
+                return null;
+            }
+
+            // Création de l'association simple
+            $association = new SingleAssociation($id, $displayName);
         }
 
-        // Si on a pas un tableau
-        if (!is_array($data)) {
-            // Retour nul
-            return null;
+        // Si pas de classe cible
+        if (!isset($params[0])) {
+            // Retour de l'association
+            return $association;
         }
 
-        // Récupération de l'identifiant
-        list($id, $displayName) = [
-            !empty($data[0]) ? $data[0] : null,
-            !empty($data[1]) ? $data[1] : null,
-        ];
+        // Récupération de la classe cible
+        $targetClass = $params[0];
 
-        // Si pas d'identifiant
-        if (null === $id) {
-            // Retour nul
-            return null;
+        // Récupération du manager des enregistrement concerné
+        $recordManager = $this->getRecordManager(isset($params[1]) ? $params[1] : null);
+
+        // Si la classe n'est pas mappée
+        if (!$recordManager->getModelRegistry()->hasClass($targetClass)) {
+            throw new InvalidArgumentException(sprintf('The target class "%s" of single association is not mapped.', $targetClass));
         }
 
-        // Retour de l'association simple
-        return new SingleAssociation($id, $displayName);
+        // Création d'une réflection de la classe associée
+        $targetReflection = new ReflectionClass($targetClass);
+
+        // Création de l'enregistrement
+        $targetRecord = $targetReflection->newInstanceWithoutConstructor();
+
+        // Assignation de l'ID de l'enregistrement
+        $recordManager->getNormalizer()->setRecordId($targetRecord, $association->getId());
+
+        // Si on a un nom affiché
+        if (null !== $association->getDisplayName() && $targetReflection->hasProperty('displayName')) {
+            // Récupération de la propriété
+            $displayNameProperty = $targetReflection->getProperty('displayName');
+
+            // On rend accessible la propriété
+            $displayNameProperty->setAccessible(true);
+
+            // Récupération de la valeur de la propriété
+            $displayNameProperty->setValue($targetRecord, $association->getDisplayName());
+        }
+
+        // Retour du dossier
+        return $targetRecord;
     }
 
     /**
@@ -173,14 +230,67 @@ class RecordAssociationHandler
      * @param array                      $type
      * @param DeserializationContext     $context
      *
-     * @return MultipleAssociation
+     * @return RecordInterface[]|MultipleAssociation|null
      */
     public function deserializeMultipleAssociationFromJson(JsonDeserializationVisitor $visitor, $data, array $type, DeserializationContext $context)
     {
+        // Récupération des paramètres
+        $params = $type['params'];
+
         // Formatage des données en tableau
         $data = is_array($data) ? $data : [];
 
-        // Retour de l'association multiple
-        return new MultipleAssociation($data);
+        // Création de l'association multiple
+        $association = new MultipleAssociation($data);
+
+        // Si pas de classe cible
+        if (!isset($params[0])) {
+            // Retour de l'association
+            return $association;
+        }
+
+        // Récupération de la classe cible
+        $targetClass = $params[0];
+
+        // Récupération du manager des enregistrement concerné
+        $recordManager = $this->getRecordManager(isset($params[1]) ? $params[1] : null);
+
+        // Si la classe n'est pas mappée
+        if (!$recordManager->getModelRegistry()->hasClass($targetClass)) {
+            throw new InvalidArgumentException(sprintf('The target class "%s" of single association is not mapped.', $targetClass));
+        }
+
+        // Initialisation des enregistrements
+        $records = [];
+
+        // Création d'une réflection de la classe associée
+        $targetReflection = new ReflectionClass($targetClass);
+
+        // Pour chaque identifiant de la relation
+        foreach (array_unique($association->getIds()) as $id) {
+            // Création de l'enregistrement
+            $targetRecord = $targetReflection->newInstanceWithoutConstructor();
+
+            // Assignation de l'ID de l'enregistrement
+            $recordManager->getNormalizer()->setRecordId($targetRecord, $id);
+
+            // Enregistrement de l'enregistrement dans la collection
+            $records[] = $targetRecord;
+        }
+
+        // Retour des enregistrements
+        return $records;
+    }
+
+    /**
+     * Get a record manager by name.
+     *
+     * @param string|null $name
+     *
+     * @return RecordManager
+     */
+    public function getRecordManager(string $name = null)
+    {
+        return $this->registry->get($name);
     }
 }

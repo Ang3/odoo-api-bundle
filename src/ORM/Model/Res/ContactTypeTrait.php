@@ -2,7 +2,6 @@
 
 namespace Ang3\Bundle\OdooApiBundle\ORM\Model\Res;
 
-use Ang3\Bundle\OdooApiBundle\ORM\Annotation as ORM;
 use Ang3\Bundle\OdooApiBundle\ORM\Model\NamedRecordTrait;
 use JMS\Serializer\Annotation as JMS;
 
@@ -40,9 +39,8 @@ trait ContactTypeTrait
     /**
      * @var Country
      *
-     * @JMS\Type("Ang3\Bundle\OdooApiBundle\ORM\Serializer\Type\SingleAssociation")
+     * @JMS\Type("Ang3\Bundle\OdooApiBundle\ORM\Serializer\Type\SingleAssociation<'Ang3\Bundle\OdooApiBundle\ORM\Model\Res\Country'>")
      * @JMS\SerializedName("country_id")
-     * @ORM\ManyToOne("Ang3\Bundle\OdooApiBundle\ORM\Model\Res\Country")
      */
     protected $country;
 

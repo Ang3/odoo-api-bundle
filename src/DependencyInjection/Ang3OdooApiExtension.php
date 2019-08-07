@@ -4,13 +4,13 @@ namespace Ang3\Bundle\OdooApiBundle\DependencyInjection;
 
 use Ang3\Component\OdooApiClient\ExternalApiClient;
 use Ang3\Component\OdooApiClient\Factory\ApiClientFactory;
+use Ang3\Bundle\OdooApiBundle\Doctrine\DBAL\Types\RecordType;
 use Ang3\Bundle\OdooApiBundle\ORM\Factory\CatalogFactory;
-use Ang3\Bundle\OdooApiBundle\ORM\Catalog;
+use Ang3\Bundle\OdooApiBundle\ORM\Mapping\Catalog;
 use Ang3\Bundle\OdooApiBundle\ORM\RecordManager;
-use Ang3\Bundle\OdooApiBundle\ORM\RecordNormalizer;
+use Ang3\Bundle\OdooApiBundle\ORM\Serializer\RecordNormalizer;
 use Ang3\Bundle\OdooApiBundle\ORM\Registry;
 use Ang3\Bundle\OdooApiBundle\ORM\Model as Models;
-use Ang3\Bundle\OdooApiBundle\DBAL\Types\RecordType;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
@@ -99,7 +99,7 @@ class Ang3OdooApiExtension extends Extension implements PrependExtensionInterfac
             // Ajout en argument des modèles du client
             $catalogDefinition
                 ->setFactory([$catalogFactory, 'create'])
-                ->setArguments([$params['mapping'], true === $params['defaults']])
+                ->setArguments([$params['mapping'], true === $params['load_default_mapping']])
             ;
 
             // Définition du nom du client
@@ -145,12 +145,12 @@ class Ang3OdooApiExtension extends Extension implements PrependExtensionInterfac
 
     /**
      * Create client and returns its reference.
-     * 
-     * @param  ContainerBuilder $container
-     * @param  string           $name
-     * @param  array            $params
-     * @param  bool             $isDefaultClient
-     * 
+     *
+     * @param ContainerBuilder $container
+     * @param string           $name
+     * @param array            $params
+     * @param bool             $isDefaultClient
+     *
      * @return Reference
      */
     public function createClient(ContainerBuilder $container, string $name, array $params, bool $isDefaultClient)
@@ -171,7 +171,7 @@ class Ang3OdooApiExtension extends Extension implements PrependExtensionInterfac
         $container->setDefinition($clientName, $definition);
 
         // S'il s'agit du client par défaut
-        if(true === $isDefaultClient) {
+        if (true === $isDefaultClient) {
             // Enregistrement du client par défaut
             $container
                 ->setAlias('ang3_odoo_api.client', $clientName)

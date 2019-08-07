@@ -8,15 +8,13 @@ namespace Ang3\Bundle\OdooApiBundle\ORM\Annotation;
  * @Annotation
  * @Target({"PROPERTY"})
  * @Attributes({
- *   @Attribute("class", type = "string")
+ *   @Attribute("type", type = "string")
  * })
  */
-class ManyToMany
+class Field
 {
     /**
-     * @Required
-     *
-     * @var string
+     * @var string|null
      */
-    public $class;
+    public $type;
 }

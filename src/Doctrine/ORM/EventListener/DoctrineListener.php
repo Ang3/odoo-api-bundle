@@ -1,10 +1,10 @@
 <?php
 
-namespace Ang3\Bundle\OdooApiBundle\EventListener;
+namespace Ang3\Bundle\OdooApiBundle\Doctrine\ORM\EventListener;
 
 use ReflectionClass;
-use Ang3\Bundle\OdooApiBundle\ORM\RecordNormalizer;
-use Ang3\Bundle\OdooApiBundle\ORM\Mapping\ClassMetadataFactory;
+use Ang3\Bundle\OdooApiBundle\ORM\Serializer\RecordNormalizer;
+use Ang3\Bundle\OdooApiBundle\ORM\Factory\ClassMetadataFactory;
 use Doctrine\Common\Util\ClassUtils;
 use Doctrine\ORM\Event\LifecycleEventArgs;
 
@@ -52,7 +52,7 @@ class DoctrineListener
         // Pour chaque propriété de l'objet
         foreach ($classMetadata->getReflectionProperties() as $property) {
             // Si on a une annotation de relation simple
-            if ($manyToOne = $this->classMetadataFactory->findManyToOneAssociation($property)) {
+            if ($association = $this->classMetadataFactory->findSingleAssociation($property)) {
                 // On rend accessible la propriété
                 $property->setAccessible(true);
 
@@ -72,7 +72,7 @@ class DoctrineListener
                 }
 
                 // Création d'une réflection de la classe associée
-                $reflection = new ReflectionClass($manyToOne->class);
+                $reflection = new ReflectionClass($association->class);
 
                 // Création de l'enregistrement
                 $record = $reflection->newInstanceWithoutConstructor();

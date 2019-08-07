@@ -1,6 +1,6 @@
 <?php
 
-namespace Ang3\Bundle\OdooApiBundle\DBAL\Types;
+namespace Ang3\Bundle\OdooApiBundle\Doctrine\DBAL\Types;
 
 use Ang3\Bundle\OdooApiBundle\ORM\Model\RecordInterface;
 use Ang3\Bundle\OdooApiBundle\ORM\Serializer\Type\SingleAssociation;
@@ -63,7 +63,7 @@ class RecordType extends Type
     /**
      * {@inheritdoc}
      *
-     * @return ManyToOne|null
+     * @return int
      */
     public function convertToPHPValue($value, AbstractPlatform $platform)
     {

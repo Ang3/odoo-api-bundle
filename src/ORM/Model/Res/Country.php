@@ -9,7 +9,7 @@ use JMS\Serializer\Annotation as JMS;
 
 /**
  * @ORM\Model("res.country")
- * 
+ *
  * @author Joanis ROUANET
  */
 class Country extends Record

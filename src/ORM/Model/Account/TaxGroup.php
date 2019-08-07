@@ -9,7 +9,7 @@ use JMS\Serializer\Annotation as JMS;
 
 /**
  * @ORM\Model("account.tax.group")
- * 
+ *
  * @author Joanis ROUANET
  */
 class TaxGroup extends Record

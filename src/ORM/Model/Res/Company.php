@@ -8,7 +8,7 @@ use JMS\Serializer\Annotation as JMS;
 
 /**
  * @ORM\Model("res.company")
- * 
+ *
  * @author Joanis ROUANET
  */
 class Company extends Record

@@ -8,7 +8,7 @@ use Ang3\Bundle\OdooApiBundle\ORM\Model\ActivatableRecordTrait;
 
 /**
  * @ORM\Model("res.user")
- * 
+ *
  * @author Joanis ROUANET
  */
 class User extends Record

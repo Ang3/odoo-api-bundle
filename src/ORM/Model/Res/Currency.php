@@ -10,7 +10,7 @@ use JMS\Serializer\Annotation as JMS;
 
 /**
  * @ORM\Model("res.currency")
- * 
+ *
  * @author Joanis ROUANET
  */
 class Currency extends Record

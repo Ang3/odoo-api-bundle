@@ -9,17 +9,12 @@ use Ang3\Bundle\OdooApiBundle\ORM\Exception\MappingException;
 /**
  * @author Joanis ROUANET
  */
-class ClassMetadata
+class ClassMetadata extends ReflectionClass
 {
     /**
      * @var string
      */
-    private $class;
-
-    /**
-     * @var ReflectionClass
-     */
-    private $reflection;
+    private $model;
 
     /**
      * @var array
@@ -27,22 +22,13 @@ class ClassMetadata
     private $properties = [];
 
     /**
-     * @param string $class
-     */
-    public function __construct(string $class)
-    {
-        $this->setClass($class);
-    }
-
-    /**
-     * @param string $class
+     * @param string $model
      *
      * @return self
      */
-    public function setClass(string $class)
+    public function setModel(string $model)
     {
-        $this->class = $class;
-        $this->reflection = new ReflectionClass($class);
+        $this->model = $model;
 
         return $this;
     }
@@ -50,17 +36,9 @@ class ClassMetadata
     /**
      * @return string
      */
-    public function getClass()
+    public function getModel()
     {
-        return $this->class;
-    }
-
-    /**
-     * @return ReflectionClass
-     */
-    public function getReflection()
-    {
-        return $this->reflection;
+        return $this->model;
     }
 
     /**
@@ -101,10 +79,11 @@ class ClassMetadata
      *
      * @return PropertyInterface
      */
-    public function getProperty(string $name)
+    public function getProperty($name)
     {
+        // Si pas cette propriété
         if (!$this->hasProperty($name)) {
-            throw new MappingException(sprintf('The property "%s" does not exists in metadata of class "%s"', $name, $this->class));
+            throw new MappingException(sprintf('The property "%s" does not exists in metadata of class "%s"', $name, $this->getName()));
         }
 
         // Retour de la propriété
@@ -112,9 +91,11 @@ class ClassMetadata
     }
 
     /**
+     * @param null $filter
+     *
      * @return array
      */
-    public function getProperties()
+    public function getProperties($filter = null)
     {
         return $this->properties;
     }
@@ -124,7 +105,7 @@ class ClassMetadata
      *
      * @return bool
      */
-    public function hasProperty(string $name)
+    public function hasProperty($name)
     {
         return array_key_exists($name, $this->properties);
     }

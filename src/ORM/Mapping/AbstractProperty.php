@@ -9,57 +9,27 @@ use ReflectionProperty;
  *
  * @author Joanis ROUANET
  */
-abstract class AbstractProperty implements PropertyInterface
+abstract class AbstractProperty extends ReflectionProperty implements PropertyInterface
 {
-    /**
-     * @var string
-     */
-    private $name;
-
     /**
      * @var string
      */
     private $serializedName;
 
     /**
-     * @var ReflectionProperty
+     * @param string $class
+     * @param string $name
      */
-    private $reflection;
-
-    /**
-     * @param string             $name
-     * @param string             $serializedName
-     * @param ReflectionProperty $reflection
-     */
-    public function __construct(string $name, string $serializedName, ReflectionProperty $reflection)
+    public function __construct(string $class, string $name)
     {
         // Hydratation
         $this->name = $name;
-        $this->serializedName = $serializedName;
-        $this->reflection = $reflection;
+
+        // Construction de la réflection
+        parent::__construct($class, $name);
 
         // On rend accessible la propriété
-        $this->reflection->setAccessible(true);
-    }
-
-    /**
-     * @param string $name
-     *
-     * @return self
-     */
-    public function setName(string $name)
-    {
-        $this->name = $name;
-
-        return $this;
-    }
-
-    /**
-     * {@inheritdoc}.
-     */
-    public function getName()
-    {
-        return $this->name;
+        $this->setAccessible(true);
     }
 
     /**
@@ -83,13 +53,11 @@ abstract class AbstractProperty implements PropertyInterface
     }
 
     /**
-     * @param ReflectionProperty $reflection
-     *
-     * @return self
+     * {@inheritdoc}.
      */
-    public function setReflection(ReflectionProperty $reflection)
+    public function setValue($object, $value = null)
     {
-        $this->reflection = $reflection;
+        parent::setValue($object, $value);
 
         return $this;
     }
@@ -97,27 +65,9 @@ abstract class AbstractProperty implements PropertyInterface
     /**
      * {@inheritdoc}.
      */
-    public function getReflection()
+    public function getValue($object = null)
     {
-        return $this->reflection;
-    }
-
-    /**
-     * {@inheritdoc}.
-     */
-    public function setValue(object $object, $value = null)
-    {
-        $this->reflection->setValue($object, $value);
-
-        return $this;
-    }
-
-    /**
-     * {@inheritdoc}.
-     */
-    public function getValue(object $object)
-    {
-        return $this->reflection->getValue($object);
+        return $object ? parent::getValue($object) : null;
     }
 
     /**

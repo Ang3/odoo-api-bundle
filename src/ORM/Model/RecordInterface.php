@@ -8,6 +8,13 @@ namespace Ang3\Bundle\OdooApiBundle\ORM\Model;
 interface RecordInterface
 {
     /**
+     * @param int|null $id
+     *
+     * @return self
+     */
+    public function setId(int $id = null);
+
+    /**
      * @return int|null
      */
     public function getId();

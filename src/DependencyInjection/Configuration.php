@@ -61,7 +61,7 @@ class Configuration implements ConfigurationInterface
                                 ->useAttributeAsKey('name')
                                 ->scalarPrototype()->end()
                             ->end()
-                            ->booleanNode('defaults')
+                            ->booleanNode('load_default_mapping')
                                 ->defaultTrue()
                             ->end()
                         ->end()

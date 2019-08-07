@@ -12,7 +12,7 @@ use JMS\Serializer\Annotation as JMS;
 
 /**
  * @ORM\Model("product.template")
- * 
+ *
  * @author Joanis ROUANET
  */
 class Article extends Record

@@ -9,7 +9,7 @@ use JMS\Serializer\Annotation as JMS;
 
 /**
  * @ORM\Model("product.category")
- * 
+ *
  * @author Joanis ROUANET
  */
 class Category extends Record

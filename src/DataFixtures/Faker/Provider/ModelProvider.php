@@ -3,7 +3,7 @@
 namespace Ang3\Bundle\OdooApiBundle\DataFixtures\Faker\Provider;
 
 use ReflectionClass;
-use Ang3\Bundle\OdooApiBundle\ORM\Catalog;
+use Ang3\Bundle\OdooApiBundle\ORM\Mapping\Catalog;
 use Ang3\Bundle\OdooApiBundle\ORM\Model\RecordInterface;
 use Faker\Provider\Base as BaseProvider;
 
@@ -35,15 +35,15 @@ final class ModelProvider extends BaseProvider
     }
 
     /**
-     * @param string   $name
+     * @param string   $class
      * @param int|null $id
      *
      * @return RecordInterface
      */
-    public function odooRecord(string $name, int $id = null)
+    public function odooRecord(string $class, int $id = null)
     {
         // Création d'une réflection de la classe
-        $reflection = new ReflectionClass($this->catalog->getClass($name));
+        $reflection = new ReflectionClass($class);
 
         // Création de l'enregistrement
         $record = $reflection->newInstanceWithoutConstructor();

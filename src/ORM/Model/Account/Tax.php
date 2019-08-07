@@ -11,7 +11,7 @@ use JMS\Serializer\Annotation as JMS;
 
 /**
  * @ORM\Model("account.tax")
- * 
+ *
  * @author Joanis ROUANET
  */
 class Tax extends Record

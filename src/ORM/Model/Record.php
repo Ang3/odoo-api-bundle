@@ -59,13 +59,9 @@ class Record implements RecordInterface
     protected $__loaded = false;
 
     /**
-     * @final
-     *
-     * @param int $id
-     *
-     * @return self
+     * {@inherited}.
      */
-    final public function setId(int $id)
+    public function setId(int $id = null)
     {
         $this->id = $id;
 
@@ -73,11 +69,9 @@ class Record implements RecordInterface
     }
 
     /**
-     * @final
-     *
      * {@inherited}.
      */
-    final public function getId()
+    public function getId()
     {
         return $this->id;
     }

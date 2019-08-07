@@ -1,15 +1,16 @@
 <?php
 
-namespace Ang3\Bundle\OdooApiBundle\ORM;
+namespace Ang3\Bundle\OdooApiBundle\ORM\Serializer;
 
 use Exception;
 use InvalidArgumentException;
 use ReflectionClass;
 use Ang3\Bundle\OdooApiBundle\ORM\Mapping\AssociationMetadata;
 use Ang3\Bundle\OdooApiBundle\ORM\Mapping\ClassMetadata;
-use Ang3\Bundle\OdooApiBundle\ORM\Mapping\ClassMetadataFactory;
+use Ang3\Bundle\OdooApiBundle\ORM\Factory\ClassMetadataFactory;
 use Ang3\Bundle\OdooApiBundle\ORM\Model\RecordInterface;
 use Doctrine\Common\Annotations\Reader;
+use Doctrine\Common\Util\ClassUtils;
 use JMS\Serializer\ArrayTransformerInterface;
 use JMS\Serializer\SerializationContext;
 
@@ -199,7 +200,7 @@ class RecordNormalizer
 
         // Si l'enregistrement ne possède pas de propriété d'identifiant
         if (!$reflection->hasProperty('id')) {
-            throw new InvalidArgumentException(sprintf('Missing property "id" in record class "%s"', get_class($record)));
+            throw new InvalidArgumentException(sprintf('Missing property "id" in record class "%s"', ClassUtils::getClass($record)));
         }
 
         // Récupération de la propriété de l'identifiant

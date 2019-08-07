@@ -71,44 +71,8 @@ class CatalogFactory
 
 				// Si pas d'entrée dans le cache
 				if(!$cacheItem->isHit()) {
-					// Initialisation des modèles
-					$models = [];
-
-					// Création d'un rechercheur de fichiers
-					$finder = new Finder;
-
-					// Recherche des fichiers PHP depuis le répertoire
-					$finder->files()->in($directory)->name('*.php');
-
-					// Pour chaque fichier
-					foreach ($finder as $file) {
-						// Définition du FQCN de la classe
-					    $class = str_replace(DIRECTORY_SEPARATOR, '\\', substr(sprintf('%s/%s', $prefix, $file->getRelativePathname()), 0, -4));
-
-					    // Si on a une classe
-					    if(class_exists($class)) {
-					    	// Réflection de la classe
-					    	$reflection = new ReflectionClass($class);
-
-					    	/**
-					    	 * Tentative de récupération de l'annotation du modèle
-					    	 * 
-					    	 * @var ORM\Model|null
-					    	 */
-					    	$model = $this->reader->getClassAnnotation($reflection, ORM\Model::class);
-
-					    	// Si on a une annotation de modèle
-					    	if(null !== $model) {
-					    		// Si la classe n'implémente pas l'interface d'enregistrement Odoo
-						    	if(!$reflection->implementsInterface(RecordInterface::class)) {
-						    		throw new MappingException(sprintf('The Odoo model class "%s" (%s) must implements interface "%s"', $class, $model->name, RecordInterface::class));
-						    	}
-
-					    		// Enregistrement de la classe du modèle selon son nom annoté
-					    		$models[$model->name] = $class;
-					    	}
-					    }
-					}
+					// Recherche des modèles
+					$models = $this->findModelClasses($prefix, $directory);
 
 					// Assignation de la valeur sérialisé dans l'item du cache'
 					$cacheItem->set(serialize($models));
@@ -130,6 +94,59 @@ class CatalogFactory
 
 		// Retour du catalogue
 		return $catalog;
+	}
+
+	/**
+	 * Find model classes from prefix and directory path.
+	 * 
+	 * @param  string $prefix
+	 * @param  string $directory
+	 * 
+	 * @return array
+	 */
+	public function findModelClasses(string $prefix, string $directory)
+	{
+		// Initialisation des modèles
+		$models = [];
+
+		// Création d'un rechercheur de fichiers
+		$finder = new Finder;
+
+		// Recherche des fichiers PHP depuis le répertoire
+		$finder->files()->in($directory)->name('*.php');
+
+		// Pour chaque fichier
+		foreach ($finder as $file) {
+			// Définition du FQCN de la classe
+		    $class = str_replace(DIRECTORY_SEPARATOR, '\\', substr(sprintf('%s/%s', $prefix, $file->getRelativePathname()), 0, -4));
+
+		    // Si on a une classe
+		    if(class_exists($class)) {
+		    	// Réflection de la classe
+		    	$reflection = new ReflectionClass($class);
+
+		    	/**
+		    	 * Tentative de récupération de l'annotation du modèle
+		    	 * 
+		    	 * @var ORM\Model|null
+		    	 */
+		    	$model = $this->reader->getClassAnnotation($reflection, ORM\Model::class);
+
+		    	// Si on a une annotation de modèle
+		    	if(null !== $model) {
+		    		// Si la classe n'implémente pas l'interface d'enregistrement Odoo
+			    	if(!$reflection->implementsInterface(RecordInterface::class)) {
+			    		throw new MappingException(sprintf('The Odoo model class "%s" (%s) must implements interface "%s"', $class, $model->name, RecordInterface::class));
+			    	}
+
+		    		// Enregistrement de la classe du modèle selon son nom annoté
+		    		$models[$model->name] = $class;
+		    	}
+		    }
+		}
+
+		// Retour des modèles
+		return $models;
 	}
 
 	/**

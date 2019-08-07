@@ -129,7 +129,7 @@ class RecordAssociationHandler
         $recordManager = $this->getRecordManager(isset($params[1]) ? $params[1] : null);
 
         // Si la classe n'est pas mappée
-        if (!$recordManager->getModelRegistry()->hasClass($targetClass)) {
+        if (!$recordManager->getCatalog()->hasClass($targetClass)) {
             throw new InvalidArgumentException(sprintf('The target class "%s" of single association is not mapped.', $targetClass));
         }
 
@@ -256,7 +256,7 @@ class RecordAssociationHandler
         $recordManager = $this->getRecordManager(isset($params[1]) ? $params[1] : null);
 
         // Si la classe n'est pas mappée
-        if (!$recordManager->getModelRegistry()->hasClass($targetClass)) {
+        if (!$recordManager->getCatalog()->hasClass($targetClass)) {
             throw new InvalidArgumentException(sprintf('The target class "%s" of single association is not mapped.', $targetClass));
         }
 

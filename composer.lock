@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "b1ad4e5f29f84163c77e8d66a6cd0fe5",
+    "content-hash": "8c9dbd65b463e0db316bbf4ed340f1bd",
     "packages": [
         {
             "name": "ang3/php-odoo-api-client",

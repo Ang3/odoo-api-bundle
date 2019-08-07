@@ -3,7 +3,7 @@
 namespace Ang3\Bundle\OdooApiBundle\DependencyInjection;
 
 use Ang3\Component\OdooApiClient\ExternalApiClient;
-use Ang3\Bundle\OdooApiBundle\ORM\ModelRegistry;
+use Ang3\Bundle\OdooApiBundle\ORM\Catalog;
 use Ang3\Bundle\OdooApiBundle\ORM\RecordManager;
 use Ang3\Bundle\OdooApiBundle\ORM\RecordNormalizer;
 use Ang3\Bundle\OdooApiBundle\ORM\Registry;
@@ -92,7 +92,7 @@ class Ang3OdooApiExtension extends Extension implements PrependExtensionInterfac
             $container->setDefinition($clientName, $clientDefinition);
 
             // Création de la définition du registre des modèles
-            $modelRegistryDefinition = new Definition(ModelRegistry::class);
+            $catalogDefinition = new Definition(Catalog::class);
 
             // Initialisation du mapping
             $mapping = array_merge($config['mapping'], $params['mapping']);
@@ -104,13 +104,13 @@ class Ang3OdooApiExtension extends Extension implements PrependExtensionInterfac
             }
 
             // Ajout en argument des modèles du client
-            $modelRegistryDefinition->addArgument($mapping);
+            $catalogDefinition->addArgument($mapping);
 
             // Définition du nom du client
-            $modelRegistryName = sprintf('ang3_odoo_api.%s.model_registry', $name);
+            $catalogName = sprintf('ang3_odoo_api.%s.catalog', $name);
 
             // Enregistrement du client dans le container
-            $container->setDefinition($modelRegistryName, $modelRegistryDefinition);
+            $container->setDefinition($catalogName, $catalogDefinition);
 
             // Création de la définition du manager
             $managerDefinition = new Definition(RecordManager::class);
@@ -119,7 +119,7 @@ class Ang3OdooApiExtension extends Extension implements PrependExtensionInterfac
             $managerName = sprintf('ang3_odoo_api.%s.record_manager', $name);
 
             // Enregistrement des arguments de la définition
-            $managerDefinition->setArguments([new Reference($clientName), new Reference($modelRegistryName), new Reference(RecordNormalizer::class)]);
+            $managerDefinition->setArguments([new Reference($clientName), new Reference($catalogName), new Reference(RecordNormalizer::class)]);
 
             // Enregistrement du manager dans le container
             $container->setDefinition($managerName, $managerDefinition);
@@ -131,8 +131,8 @@ class Ang3OdooApiExtension extends Extension implements PrependExtensionInterfac
                 $container->setDefinition(ExternalApiClient::class, $clientDefinition);
 
                 // Enregistrement du registre de modèle par défaut dans le container
-                $container->setDefinition('ang3_odoo_api.model_registry', $modelRegistryDefinition);
-                $container->setDefinition(ModelRegistry::class, $modelRegistryDefinition);
+                $container->setDefinition('ang3_odoo_api.catalog', $catalogDefinition);
+                $container->setDefinition(Catalog::class, $catalogDefinition);
 
                 // Enregistrement du registre de modèle par défaut dans le container
                 $container->setDefinition('ang3_odoo_api.record_manager', $managerDefinition);

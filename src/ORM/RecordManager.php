@@ -20,9 +20,9 @@ class RecordManager
     private $client;
 
     /**
-     * @var ModelRegistry
+     * @var Catalog
      */
-    private $modelRegistry;
+    private $catalog;
 
     /**
      * @var RecordNormalizer
@@ -40,13 +40,13 @@ class RecordManager
      * Constructor of the manager.
      *
      * @param ExternalApiClient $client
-     * @param ModelRegistry     $modelRegistry
+     * @param Catalog     $catalog
      * @param RecordNormalizer  $normalizer
      */
-    public function __construct(ExternalApiClient $client, ModelRegistry $modelRegistry, RecordNormalizer $normalizer)
+    public function __construct(ExternalApiClient $client, Catalog $catalog, RecordNormalizer $normalizer)
     {
         $this->client = $client;
-        $this->modelRegistry = $modelRegistry;
+        $this->catalog = $catalog;
         $this->normalizer = $normalizer;
     }
 
@@ -60,7 +60,7 @@ class RecordManager
     public function persist(RecordInterface $record)
     {
         // Récupération du nom du modèle de l'enregistrement
-        $model = $this->modelRegistry->resolve($record);
+        $model = $this->catalog->resolve($record);
 
         // Récupération de l'ID de l'enregistrement
         $id = $record->getId();
@@ -111,7 +111,7 @@ class RecordManager
         }
 
         // Récupéraion du nom du modèle
-        $model = $this->modelRegistry->resolve($record);
+        $model = $this->catalog->resolve($record);
 
         // Retour de la suppression par l'ID
         return $this->deleteById($model, $record->getId());
@@ -128,7 +128,7 @@ class RecordManager
     public function deleteById(string $class, $ids)
     {
         // Récupéraion du nom du modèle
-        $model = $this->modelRegistry->resolve($class);
+        $model = $this->catalog->resolve($class);
 
         // Lancement de la requête de suppression
         $this->client->delete($model, $ids);
@@ -247,7 +247,7 @@ class RecordManager
     public function findBy(string $class, array $domains = [], array $options = [])
     {
         // Récupéraion du nom du modèle
-        $model = $this->modelRegistry->resolve($class);
+        $model = $this->catalog->resolve($class);
 
         // Normalisation des domaines
         $domains = $this->normalizer->normalizeDomains($class, $domains);
@@ -290,7 +290,7 @@ class RecordManager
     public function getChangeSet(RecordInterface $record)
     {
         // Récupéraion du nom du modèle
-        $model = $this->modelRegistry->resolve($record);
+        $model = $this->catalog->resolve($record);
 
         // Normalization de l'enregistrement reçu
         $normalized = $this->normalizer->normalize($record);
@@ -342,7 +342,7 @@ class RecordManager
         $this->setLoaded($record, true);
 
         // Récupéraion du nom du modèle
-        $model = $this->modelRegistry->resolve($record);
+        $model = $this->catalog->resolve($record);
 
         // Si le modèle n'est pas encore déclaré
         if (array_key_exists($model, self::$cache)) {
@@ -376,7 +376,7 @@ class RecordManager
         }
 
         // Récupéraion du nom du modèle
-        $model = $this->modelRegistry->resolve($record);
+        $model = $this->catalog->resolve($record);
 
         // Si on a des données pour ce mocèle identifié
         if (!empty(self::$cache[$model][$id])) {
@@ -461,11 +461,11 @@ class RecordManager
     }
 
     /**
-     * @return ModelRegistry
+     * @return Catalog
      */
-    public function getModelRegistry()
+    public function getCatalog()
     {
-        return $this->modelRegistry;
+        return $this->catalog;
     }
 
     /**

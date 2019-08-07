@@ -8,7 +8,7 @@ use Doctrine\Common\Util\ClassUtils;
 /**
  * @author Joanis ROUANET
  */
-class ModelRegistry
+class Catalog
 {
     /**
      * @var array
@@ -18,7 +18,7 @@ class ModelRegistry
     /**
      * @param array $mapping
      */
-    public function __construct(array $mapping)
+    public function __construct(array $mapping = [])
     {
         // Hydratation
         $this->mapping = $mapping;

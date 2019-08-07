@@ -5,7 +5,7 @@ namespace Ang3\Bundle\OdooApiBundle\ORM;
 use LogicException;
 use ReflectionProperty;
 use Ang3\Component\OdooApiClient\ExternalApiClient;
-use Ang3\Bundle\OdooApiBundle\Exception\RecordNotFoundException;
+use Ang3\Bundle\OdooApiBundle\ORM\Exception\RecordNotFoundException;
 use Ang3\Bundle\OdooApiBundle\ORM\Model\Record;
 use Ang3\Bundle\OdooApiBundle\ORM\Model\RecordInterface;
 

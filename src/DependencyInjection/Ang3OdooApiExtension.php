@@ -3,6 +3,8 @@
 namespace Ang3\Bundle\OdooApiBundle\DependencyInjection;
 
 use Ang3\Component\OdooApiClient\ExternalApiClient;
+use Ang3\Component\OdooApiClient\Factory\ApiClientFactory;
+use Ang3\Bundle\OdooApiBundle\ORM\Factory\CatalogFactory;
 use Ang3\Bundle\OdooApiBundle\ORM\Catalog;
 use Ang3\Bundle\OdooApiBundle\ORM\RecordManager;
 use Ang3\Bundle\OdooApiBundle\ORM\RecordNormalizer;
@@ -68,8 +70,8 @@ class Ang3OdooApiExtension extends Extension implements PrependExtensionInterfac
      */
     public function loadRegistry(ContainerBuilder $container, array $config)
     {
-        // Récupération mapping par défaut
-        $defaultMapping = $this->getDefaultMapping();
+        // Création de l'usine des catalogues et récupération de sa référence
+        $catalogFactory = new Reference(CatalogFactory::class);
 
         // Récupération du registre des connections
         $registryDefinition = new Definition(Registry::class);
@@ -83,7 +85,7 @@ class Ang3OdooApiExtension extends Extension implements PrependExtensionInterfac
             $clientDefinition = new Definition(ExternalApiClient::class);
 
             // Enregistrement des arguments de la définition
-            $clientDefinition->setArguments([$params['url'], $params['database'], $params['username'], $params['password']]);
+            $clientDefinition->setArguments([$params['url'], $params['database'], $params['user'], $params['password']]);
 
             // Définition du nom du client
             $clientName = sprintf('ang3_odoo_api.%s.client', $name);
@@ -94,17 +96,11 @@ class Ang3OdooApiExtension extends Extension implements PrependExtensionInterfac
             // Création de la définition du registre des modèles
             $catalogDefinition = new Definition(Catalog::class);
 
-            // Initialisation du mapping
-            $mapping = array_merge($config['mapping'], $params['mapping']);
-
-            // Si on souhaite charger le mapping par défaut
-            if (true === $params['defaults']) {
-                // On charge le mapping par défaut en mode non prioritaire
-                $mapping = array_merge($defaultMapping, $mapping);
-            }
-
             // Ajout en argument des modèles du client
-            $catalogDefinition->addArgument($mapping);
+            $catalogDefinition
+                ->setFactory([$catalogFactory, 'create'])
+                ->setArguments([$params['mapping'], true === $params['defaults']])
+            ;
 
             // Définition du nom du client
             $catalogName = sprintf('ang3_odoo_api.%s.catalog', $name);
@@ -148,22 +144,48 @@ class Ang3OdooApiExtension extends Extension implements PrependExtensionInterfac
     }
 
     /**
-     * Get default mapping.
-     *
-     * @return array
+     * Create client and returns its reference.
+     * 
+     * @param  ContainerBuilder $container
+     * @param  string           $name
+     * @param  array            $params
+     * @param  bool             $isDefaultClient
+     * 
+     * @return Reference
      */
-    public function getDefaultMapping()
+    public function createClient(ContainerBuilder $container, string $name, array $params, bool $isDefaultClient)
     {
-        return [
-            'res.user' => Models\Res\User::class,
-            'res.company' => Models\Res\Company::class,
-            'res.partner' => Models\Res\Partner::class,
-            'res.country' => Models\Res\Country::class,
-            'res.currency' => Models\Res\Currency::class,
-            'product.template' => Models\Product\Article::class,
-            'product.category' => Models\Product\Category::class,
-            'account.tax' => Models\Account\Tax::class,
-            'account.tax.group' => Models\Account\TaxGroup::class,
-        ];
+        // Création de la définition
+        $definition = new Definition(ExternalApiClient::class);
+
+        // Enregistrement des arguments de la définition
+        $definition
+            ->setFactory(new Reference(ApiClientFactory::class))
+            ->setArguments($params)
+        ;
+
+        // Définition du nom du client
+        $clientName = sprintf('ang3_odoo_api.%s.client', $name);
+
+        // Enregistrement du client dans le container
+        $container->setDefinition($clientName, $definition);
+
+        // S'il s'agit du client par défaut
+        if(true === $isDefaultClient) {
+            // Enregistrement du client par défaut
+            $container
+                ->setAlias('ang3_odoo_api.client', $clientName)
+                ->setPublic(true)
+            ;
+
+            // Enregistrement du client par défaut
+            $container
+                ->setAlias(ExternalApiClient::class, $clientName)
+                ->setPublic(true)
+            ;
+        }
+
+        // Retour de la référence du service client
+        return new Reference($clientName);
     }
 }

@@ -2,11 +2,14 @@
 
 namespace Ang3\Bundle\OdooApiBundle\ORM\Model\Account;
 
+use Ang3\Bundle\OdooApiBundle\ORM\Annotation as ORM;
 use Ang3\Bundle\OdooApiBundle\ORM\Model\Record;
 use Ang3\Bundle\OdooApiBundle\ORM\Model\NamedRecordTrait;
 use JMS\Serializer\Annotation as JMS;
 
 /**
+ * @ORM\Model("account.tax.group")
+ * 
  * @author Joanis ROUANET
  */
 class TaxGroup extends Record

@@ -2,12 +2,15 @@
 
 namespace Ang3\Bundle\OdooApiBundle\ORM\Model\Res;
 
+use Ang3\Bundle\OdooApiBundle\ORM\Annotation as ORM;
 use Ang3\Bundle\OdooApiBundle\ORM\Model\Record;
 use Ang3\Bundle\OdooApiBundle\ORM\Model\ActivatableRecordTrait;
 use Ang3\Bundle\OdooApiBundle\ORM\Model\NamedRecordTrait;
 use JMS\Serializer\Annotation as JMS;
 
 /**
+ * @ORM\Model("res.currency")
+ * 
  * @author Joanis ROUANET
  */
 class Currency extends Record

@@ -1,6 +1,6 @@
 <?php
 
-namespace Ang3\Bundle\OdooApiBundle\Exception;
+namespace Ang3\Bundle\OdooApiBundle\ORM\Exception;
 
 use RuntimeException;
 use Ang3\Component\OdooApiClient\ExternalApiClient;

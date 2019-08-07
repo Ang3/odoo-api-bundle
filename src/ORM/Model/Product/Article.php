@@ -2,6 +2,7 @@
 
 namespace Ang3\Bundle\OdooApiBundle\ORM\Model\Product;
 
+use Ang3\Bundle\OdooApiBundle\ORM\Annotation as ORM;
 use Ang3\Bundle\OdooApiBundle\ORM\Model\Record;
 use Ang3\Bundle\OdooApiBundle\ORM\Model\ActivatableRecordTrait;
 use Ang3\Bundle\OdooApiBundle\ORM\Model\NamedRecordTrait;
@@ -10,6 +11,8 @@ use Ang3\Bundle\OdooApiBundle\ORM\Model\Res\Company;
 use JMS\Serializer\Annotation as JMS;
 
 /**
+ * @ORM\Model("product.template")
+ * 
  * @author Joanis ROUANET
  */
 class Article extends Record

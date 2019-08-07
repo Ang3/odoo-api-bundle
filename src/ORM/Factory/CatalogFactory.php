@@ -1,6 +1,6 @@
 <?php
 
-namespace Ang3\Bundle\OdooApiBundle\Factory;
+namespace Ang3\Bundle\OdooApiBundle\ORM\Factory;
 
 use ReflectionClass;
 use Ang3\Bundle\OdooApiBundle\ORM\Annotation as ORM;
@@ -9,6 +9,7 @@ use Ang3\Bundle\OdooApiBundle\ORM\Exception\MappingException;
 use Ang3\Bundle\OdooApiBundle\ORM\Model\RecordInterface;
 use Doctrine\Common\Annotations\Reader;
 use Symfony\Contracts\Cache\CacheInterface;
+use Symfony\Contracts\Cache\ItemInterface;
 use Symfony\Component\Finder\Finder;
 
 /**
@@ -27,9 +28,8 @@ class CatalogFactory
     private $reader;
 
 	/**
-	 * @param Finder $finder
-	 * @param Reader $reader
-	 * @param string $projectDir
+	 * @param CacheInterface $systemCache
+	 * @param Reader         $reader
 	 */
 	public function __construct(CacheInterface $systemCache, Reader $reader)
 	{
@@ -49,51 +49,31 @@ class CatalogFactory
 	{
 		if(true === $loadDefaults) {
 			$mapping = array_merge([
-				'Ang3\Bundle\OdooApiBundle' => sprintf('%s/..', __DIR__)
+				'Ang3\Bundle\OdooApiBundle\ORM\Model' => sprintf('%s/../Model', __DIR__)
 			], $mapping);
 		}
-
-		dump($mapping);
 
 		// Création du catalogue
 		$catalog = new Catalog;
 
 		// Récupération du lecteur d'annotations
-		$reader = $this->reader;
+		$callback = [$this, 'findModelClasses'];
 
 		// Pour chaque entrée du mapping
-		foreach($mapping as $prefix => $directories) {
-			// Formatage des répertoire dans un tableau
-			$directories = (array) $directories;
+		foreach($mapping as $prefix => $directory) {
+			// Génération de la clé en cache
+			$cacheKey = $this->generateCacheKey($prefix, $directory);
 
-			// Pour chaque répertoire
-			foreach($directories as $directory) {
-				// Génération de la clé en cache
-				$cacheKey = $this->generateCacheKey($prefix, $directory);
+			// Récupération des modèles depuis le cache
+			$models = unserialize($this->systemCache->get($cacheKey, function(ItemInterface $item) use ($prefix, $directory, $callback) {
+				// Retour de la désérialisation des modèles
+				return serialize($callback($prefix, $directory));
+			}));
 
-				// Récupération de l'item depuis le cache
-				$cacheItem = $this->systemCache->getItem($cacheKey);
-
-				// Si pas d'entrée dans le cache
-				if(!$cacheItem->isHit()) {
-					// Recherche des modèles
-					$models = $this->findModelClasses($prefix, $directory);
-
-					// Assignation de la valeur sérialisé dans l'item du cache'
-					$cacheItem->set(serialize($models));
-
-					// Enregistrement de l'item
-					$this->systemCache->save($cacheItem);
-				}
-
-				// Récupération des modèles après désérialisation depuis le cache
-				$models = unserialize($cacheItem->get());
-
-				// Pour chaque modèle
-				foreach($models as $name => $class) {
-					// Enregistrement du modèle dans le catalogue
-					$catalog->register($name, $class);
-				}
+			// Pour chaque modèle
+			foreach($models as $name => $class) {
+				// Enregistrement du modèle dans le catalogue
+				$catalog->register($name, $class);
 			}
 		}
 

@@ -6,6 +6,8 @@ services:
 
   # Autowire
   Ang3\Component\OdooApiClient\Factory\ApiClientFactory: ~
+  Ang3\Bundle\OdooApiBundle\ORM\Factory\CatalogFactory: ~
+  Ang3\Bundle\OdooApiBundle\ORM\Factory\ManagerFactory: ~
   Ang3\Bundle\OdooApiBundle\ORM\RecordNormalizer: ~
   Ang3\Bundle\OdooApiBundle\ORM\Mapping\ClassMetadataFactory: ~
 

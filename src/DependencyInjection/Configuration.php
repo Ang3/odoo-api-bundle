@@ -47,7 +47,7 @@ class Configuration implements ConfigurationInterface
                                 ->cannotBeEmpty()
                                 ->defaultNull()
                             ->end()
-                            ->scalarNode('username')
+                            ->scalarNode('user')
                                 ->isRequired()
                                 ->cannotBeEmpty()
                                 ->defaultNull()

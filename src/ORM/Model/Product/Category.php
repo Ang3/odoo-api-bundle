@@ -2,11 +2,14 @@
 
 namespace Ang3\Bundle\OdooApiBundle\ORM\Model\Product;
 
+use Ang3\Bundle\OdooApiBundle\ORM\Annotation as ORM;
 use Ang3\Bundle\OdooApiBundle\ORM\Model\Record;
 use Ang3\Bundle\OdooApiBundle\ORM\Model\NamedRecordTrait;
 use JMS\Serializer\Annotation as JMS;
 
 /**
+ * @ORM\Model("product.category")
+ * 
  * @author Joanis ROUANET
  */
 class Category extends Record

@@ -2,10 +2,13 @@
 
 namespace Ang3\Bundle\OdooApiBundle\ORM\Model\Res;
 
+use Ang3\Bundle\OdooApiBundle\ORM\Annotation as ORM;
 use Ang3\Bundle\OdooApiBundle\ORM\Model\Record;
 use JMS\Serializer\Annotation as JMS;
 
 /**
+ * @ORM\Model("res.company")
+ * 
  * @author Joanis ROUANET
  */
 class Company extends Record

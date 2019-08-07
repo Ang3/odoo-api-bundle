@@ -2,6 +2,7 @@
 
 namespace Ang3\Bundle\OdooApiBundle\ORM\Model\Res;
 
+use Ang3\Bundle\OdooApiBundle\ORM\Annotation as ORM;
 use Ang3\Bundle\OdooApiBundle\ORM\Model\NamedRecordTrait;
 use JMS\Serializer\Annotation as JMS;
 

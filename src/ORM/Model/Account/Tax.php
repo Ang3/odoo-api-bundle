@@ -10,7 +10,7 @@ use Ang3\Bundle\OdooApiBundle\ORM\Model\Res\Company;
 use JMS\Serializer\Annotation as JMS;
 
 /**
- * @ORM\Model('account.tax')
+ * @ORM\Model("account.tax")
  * 
  * @author Joanis ROUANET
  */

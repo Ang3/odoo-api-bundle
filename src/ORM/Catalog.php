@@ -13,15 +13,15 @@ class Catalog
     /**
      * @var array
      */
-    private $mapping = [];
+    private $classMap = [];
 
     /**
-     * @param array $mapping
+     * @param array $classMap
      */
-    public function __construct(array $mapping = [])
+    public function __construct(array $classMap = [])
     {
         // Hydratation
-        $this->mapping = $mapping;
+        $this->classMap = $classMap;
     }
 
     /**
@@ -42,7 +42,7 @@ class Catalog
         }
 
         // Enregistrement
-        $this->mapping[$name] = $class;
+        $this->classMap[$name] = $class;
 
         // Retour du registre
         return $this;
@@ -63,7 +63,7 @@ class Catalog
         $class = is_object($objectOrClass) ? ClassUtils::getClass($objectOrClass) : (string) $objectOrClass;
 
         // Recherche du modèle par la classe
-        $name = array_search($class, $this->mapping);
+        $name = array_search($class, $this->classMap);
 
         // Si la classe n'est pas un modèle Odoo
         if (false === $name) {
@@ -91,7 +91,7 @@ class Catalog
         }
 
         // Retour de la classe du modèle
-        return $this->mapping[$name];
+        return $this->classMap[$name];
     }
 
     /**
@@ -103,7 +103,7 @@ class Catalog
      */
     public function hasModel(string $name)
     {
-        return array_key_exists($name, $this->mapping);
+        return array_key_exists($name, $this->classMap);
     }
 
     /**
@@ -115,6 +115,6 @@ class Catalog
      */
     public function hasClass(string $class)
     {
-        return in_array($class, $this->mapping);
+        return in_array($class, $this->classMap);
     }
 }

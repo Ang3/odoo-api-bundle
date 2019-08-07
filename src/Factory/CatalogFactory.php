@@ -47,11 +47,16 @@ class CatalogFactory
 	 */
 	public function create(array $mapping, bool $loadDefaults = true)
 	{
+		if(true === $loadDefaults) {
+			$mapping = array_merge([
+				'Ang3\Bundle\OdooApiBundle' => sprintf('%s/..', __DIR__)
+			], $mapping);
+		}
+
+		dump($mapping);
+
 		// Création du catalogue
 		$catalog = new Catalog;
-
-		// Initialisation des map de classes de modèles
-		$classMap = [];
 
 		// Récupération du lecteur d'annotations
 		$reader = $this->reader;
@@ -159,6 +164,6 @@ class CatalogFactory
 	 */
 	private function generateCacheKey(string $prefix, string $directory)
 	{
-		return sprintf('ang3_odoo_api.models.%s.%s', $prefix, str_replace(DIRECTORY_SEPARATOR, '_', $directory));
+		return sprintf('ang3_odoo_api.models.%s.%s', str_replace('\\', '_', $prefix), str_replace(DIRECTORY_SEPARATOR, '_', $directory));
 	}
 }

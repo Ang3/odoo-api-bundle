@@ -193,7 +193,7 @@ class UnitOfWork
             ->getClient()->searchAndRead($model, $domains, $options);
 
         // Pour chaque ligne de données
-        foreach ($result as $key => $data) {
+        foreach ($result as $key => $data) {dump($data);
             // Création de l'enregistrement
             $record = $this->recordNormalizer->denormalize($data, $class);
 

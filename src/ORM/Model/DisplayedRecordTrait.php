@@ -14,6 +14,7 @@ trait DisplayedRecordTrait
      *
      * @JMS\Type("string")
      * @JMS\SerializedName("display_name")
+     * @JMS\Exclude(if="context.getDirection() === constant('JMS\\Serializer\\GraphNavigatorInterface::DIRECTION_SERIALIZATION')")
      */
     protected $displayName;
 

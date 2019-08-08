@@ -16,6 +16,7 @@ class Record implements RecordInterface
      *
      * @JMS\Type("integer")
      * @JMS\SerializedName("id")
+     * @JMS\Exclude(if="context.getDirection() === constant('JMS\\Serializer\\GraphNavigatorInterface::DIRECTION_SERIALIZATION')")
      */
     protected $id;
 
@@ -24,6 +25,7 @@ class Record implements RecordInterface
      *
      * @JMS\Type("DateTime<'Y-m-d H:i:s'>")
      * @JMS\SerializedName("create_date")
+     * @JMS\Exclude(if="context.getDirection() === constant('JMS\\Serializer\\GraphNavigatorInterface::DIRECTION_SERIALIZATION')")
      */
     protected $createdAt;
 
@@ -32,6 +34,7 @@ class Record implements RecordInterface
      *
      * @JMS\Type("Ang3\Bundle\OdooApiBundle\ORM\Serializer\Type\SingleAssociation<'Ang3\Bundle\OdooApiBundle\ORM\Model\Res\User'>")
      * @JMS\SerializedName("create_uid")
+     * @JMS\Exclude(if="context.getDirection() === constant('JMS\\Serializer\\GraphNavigatorInterface::DIRECTION_SERIALIZATION')")
      */
     protected $createdBy;
 
@@ -40,6 +43,7 @@ class Record implements RecordInterface
      *
      * @JMS\Type("DateTime<'Y-m-d H:i:s'>")
      * @JMS\SerializedName("write_date")
+     * @JMS\Exclude(if="context.getDirection() === constant('JMS\\Serializer\\GraphNavigatorInterface::DIRECTION_SERIALIZATION')")
      */
     protected $updatedAt;
 
@@ -48,6 +52,7 @@ class Record implements RecordInterface
      *
      * @JMS\Type("Ang3\Bundle\OdooApiBundle\ORM\Serializer\Type\SingleAssociation<'Ang3\Bundle\OdooApiBundle\ORM\Model\Res\User'>")
      * @JMS\SerializedName("write_uid")
+     * @JMS\Exclude(if="context.getDirection() === constant('JMS\\Serializer\\GraphNavigatorInterface::DIRECTION_SERIALIZATION')")
      */
     protected $updatedBy;
 

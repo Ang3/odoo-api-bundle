@@ -4,7 +4,6 @@ namespace Ang3\Bundle\OdooApiBundle\ORM\Serializer\Handler;
 
 use InvalidArgumentException;
 use ReflectionClass;
-use Ang3\Bundle\OdooApiBundle\ORM\RecordManager;
 use Ang3\Bundle\OdooApiBundle\ORM\Registry;
 use Ang3\Bundle\OdooApiBundle\ORM\Model\RecordInterface;
 use Ang3\Bundle\OdooApiBundle\ORM\Serializer\Type\MultipleAssociation;
@@ -126,7 +125,7 @@ class RecordAssociationHandler
         $targetClass = $params[0];
 
         // Récupération du manager des enregistrement concerné
-        $recordManager = $this->getRecordManager(isset($params[1]) ? $params[1] : null);
+        $recordManager = $this->registry->get(isset($params[1]) ? $params[1] : null);
 
         // Si la classe n'est pas mappée
         if (!$recordManager->getCatalog()->hasClass($targetClass)) {
@@ -140,7 +139,11 @@ class RecordAssociationHandler
         $targetRecord = $targetReflection->newInstanceWithoutConstructor();
 
         // Assignation de l'ID de l'enregistrement
-        $recordManager->getNormalizer()->setRecordId($targetRecord, $association->getId());
+        $recordManager
+            ->getUnitOfWork()
+            ->getNormalizer()
+            ->setRecordId($targetRecord, $association->getId())
+        ;
 
         // Si on a un nom affiché
         if (null !== $association->getDisplayName() && $targetReflection->hasProperty('displayName')) {
@@ -253,11 +256,11 @@ class RecordAssociationHandler
         $targetClass = $params[0];
 
         // Récupération du manager des enregistrement concerné
-        $recordManager = $this->getRecordManager(isset($params[1]) ? $params[1] : null);
+        $recordManager = $this->registry->get(isset($params[1]) ? $params[1] : null);
 
         // Si la classe n'est pas mappée
-        if (!$recordManager->getCatalog()->hasClass($targetClass)) {
-            throw new InvalidArgumentException(sprintf('The target class "%s" of single association is not mapped.', $targetClass));
+        if (!$recordManager->isManagedClass($targetClass)) {
+            throw new InvalidArgumentException(sprintf('The target class "%s" is not managed.', $targetClass));
         }
 
         // Initialisation des enregistrements
@@ -272,7 +275,11 @@ class RecordAssociationHandler
             $targetRecord = $targetReflection->newInstanceWithoutConstructor();
 
             // Assignation de l'ID de l'enregistrement
-            $recordManager->getNormalizer()->setRecordId($targetRecord, $id);
+            $recordManager
+                ->getUnitOfWork()
+                ->getNormalizer()
+                ->setRecordId($targetRecord, $id)
+            ;
 
             // Enregistrement de l'enregistrement dans la collection
             $records[] = $targetRecord;
@@ -280,17 +287,5 @@ class RecordAssociationHandler
 
         // Retour des enregistrements
         return $records;
-    }
-
-    /**
-     * Get a record manager by name.
-     *
-     * @param string|null $name
-     *
-     * @return RecordManager
-     */
-    public function getRecordManager(string $name = null)
-    {
-        return $this->registry->get($name);
     }
 }

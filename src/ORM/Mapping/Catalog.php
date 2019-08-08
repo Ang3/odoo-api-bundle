@@ -33,7 +33,7 @@ class Catalog
     {
         // Si la classe n'existe pas
         if (!class_exists($class)) {
-            throw new MappingException(sprintf('The Odoo model class "%s" does not exist', $class));
+            throw new MappingException(sprintf('The class "%s" does not exist', $class));
         }
 
         // Réflection de la classe

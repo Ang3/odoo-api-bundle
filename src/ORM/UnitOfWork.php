@@ -3,12 +3,11 @@
 namespace Ang3\Bundle\OdooApiBundle\ORM;
 
 use LogicException;
-use Ang3\Bundle\OdooApiBundle\ORM\Factory\ClassMetadataFactory;
-use Ang3\Bundle\OdooApiBundle\ORM\Mapping\Catalog;
+use Ang3\Bundle\OdooApiBundle\ORM\Event\RecordEvent;
+use Ang3\Bundle\OdooApiBundle\ORM\Event\RecordUpdateEvent;
 use Ang3\Bundle\OdooApiBundle\ORM\Model\RecordInterface;
 use Ang3\Bundle\OdooApiBundle\ORM\Serializer\RecordNormalizer;
-use Ang3\Component\OdooApiClient\ExternalApiClient;
-use Doctrine\Common\Util\ClassUtils;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
  * @author Joanis ROUANET
@@ -16,24 +15,19 @@ use Doctrine\Common\Util\ClassUtils;
 class UnitOfWork
 {
     /**
-     * @var ExternalApiClient
+     * @var RecordManager
      */
-    private $client;
-
-    /**
-     * @var ClassMetadataFactory
-     */
-    private $classMetadataFactory;
-
-    /**
-     * @var Catalog
-     */
-    private $catalog;
+    private $recordManager;
 
     /**
      * @var RecordNormalizer
      */
-    private $normalizer;
+    private $recordNormalizer;
+
+    /**
+     * @var EventDispatcherInterface
+     */
+    private $eventDispatcher;
 
     /**
      * @var array
@@ -46,19 +40,15 @@ class UnitOfWork
     private $loadedRecordData = [];
 
     /**
-     * Constructor of the manager.
-     *
-     * @param ExternalApiClient    $client
-     * @param ClassMetadataFactory $classMetadataFactory
-     * @param Catalog              $catalog
-     * @param RecordNormalizer     $normalizer
+     * @param RecordManager            $recordManager
+     * @param RecordNormalizer         $recordNormalizer
+     * @param EventDispatcherInterface $eventDispatcher
      */
-    public function __construct(ExternalApiClient $client, ClassMetadataFactory $classMetadataFactory, Catalog $catalog, RecordNormalizer $normalizer)
+    public function __construct(RecordManager $recordManager, RecordNormalizer $recordNormalizer, EventDispatcherInterface $eventDispatcher)
     {
-        $this->client = $client;
-        $this->classMetadataFactory = $classMetadataFactory;
-        $this->catalog = $catalog;
-        $this->normalizer = $normalizer;
+        $this->recordManager = $recordManager;
+        $this->recordNormalizer = $recordNormalizer;
+        $this->eventDispatcher = $eventDispatcher;
     }
 
     /**
@@ -71,7 +61,10 @@ class UnitOfWork
     public function persist(RecordInterface $record)
     {
         // Récupération du nom du modèle de l'enregistrement
-        $model = $this->catalog->getModel($record);
+        $model = $this->recordManager
+            ->getCatalog()
+            ->getModel($record)
+        ;
 
         // Récupération de l'ID de l'enregistrement
         $id = $record->getId();
@@ -83,14 +76,23 @@ class UnitOfWork
                 throw new LogicException('Unable to create a user from API - To create new user please go to Odoo configuration panel!');
             }
 
+            // On dispatche l'évènement de pré-création
+            $this->eventDispatcher->dispatch(Events::prePersist, new RecordEvent($this->recordManager, $record));
+
             // Création de l'enregitrement et récupération de l'ID
-            $id = $this->client->create($model, $data = $this->normalizer->normalize($record));
+            $id = $this->recordManager
+                ->getClient()
+                ->create($model, $data = $this->recordNormalizer->normalize($record))
+            ;
 
             // Enregistrement de l'ID de l'enregistrement
             $record->setId($id);
 
             // Enregistrement des données originelles
             $this->setOriginalRecordData($record, $data);
+
+            // On dispatche l'évènement de post-création
+            $this->eventDispatcher->dispatch(Events::postPersist, new RecordEvent($this->recordManager, $record));
         } else {
             // Récupération des changements
             $changeSet = $this->getChangeSet($record);
@@ -101,8 +103,17 @@ class UnitOfWork
                 return $record;
             }
 
+            // On dispatche l'évènement de pré-mise-à-jour
+            $this->eventDispatcher->dispatch(Events::preUpdate, new RecordUpdateEvent($this->recordManager, $record, $changeSet));
+
             // Mise-à-jour de l'enregistrement
-            $this->client->update($model, $id, $changeSet);
+            $this->recordManager
+                ->getClient()
+                ->update($model, $id, $changeSet)
+            ;
+
+            // On dispatche l'évènement de post-mise-à-jour
+            $this->eventDispatcher->dispatch(Events::postUpdate, new RecordUpdateEvent($this->recordManager, $record, $changeSet));
         }
     }
 
@@ -160,13 +171,16 @@ class UnitOfWork
     public function findBy(string $class, array $domains = [], array $options = [])
     {
         // Récupéraion du nom du modèle
-        $model = $this->catalog->getModel($class);
+        $model = $this->recordManager
+            ->getCatalog()
+            ->getModel($class)
+        ;
 
         // Normalisation des domaines
-        $domains = $this->normalizer->normalizeDomains($class, $domains);
+        $domains = $this->recordNormalizer->normalizeDomains($class, $domains);
 
         // Récupération du noms des propriétés et leur nom sérialisés
-        $serializedNames = $this->normalizer->getSerializedNames($class);
+        $serializedNames = $this->recordNormalizer->getSerializedNames($class);
 
         // Si pas d'options de champs particuliers
         if (!isset($options['fields'])) {
@@ -175,15 +189,19 @@ class UnitOfWork
         }
 
         // Récupération des entrées
-        $result = $this->client->searchAndRead($model, $domains, $options);
+        $result = $this->recordManager
+            ->getClient()->searchAndRead($model, $domains, $options);
 
         // Pour chaque ligne de données
         foreach ($result as $key => $data) {
             // Création de l'enregistrement
-            $record = $this->normalizer->denormalize($data, $class);
+            $record = $this->recordNormalizer->denormalize($data, $class);
 
             // Mise-à-jour des données originelles
             $this->setOriginalRecordData($record);
+
+            // On dispatche l'évènement de post-chargement
+            $this->eventDispatcher->dispatch(Events::postLoad, new RecordEvent($this->recordManager, $record));
 
             // Dénormalization des données
             $result[$key] = $record;
@@ -203,10 +221,13 @@ class UnitOfWork
     public function getChangeSet(RecordInterface $record)
     {
         // Récupéraion du nom du modèle
-        $model = $this->catalog->getModel($record);
+        $model = $this->recordManager
+            ->getCatalog()
+            ->getModel($record)
+        ;
 
         // Normalization de l'enregistrement reçu
-        $normalized = $this->normalizer->normalize($record);
+        $normalized = $this->recordNormalizer->normalize($record);
 
         // Récupération de l'ID de l'enregistrement
         $id = $record->getId();
@@ -249,10 +270,17 @@ class UnitOfWork
         }
 
         // Récupéraion du nom du modèle
-        $model = $this->catalog->getModel($record);
+        $model = $this->recordManager
+            ->getCatalog()
+            ->getModel($record)
+        ;
+
+        // On dispatche l'évènement de pré-suppression
+        $this->eventDispatcher->dispatch(Events::preDelete, new RecordEvent($this->recordManager, $record));
 
         // Lancement de la requête de suppression
-        $this->client->delete($model, $id);
+        $this->recordManager
+            ->getClient()->delete($model, $id);
 
         // Relevé de l'ID de l'objet
         $objectId = spl_object_id($record);
@@ -265,6 +293,9 @@ class UnitOfWork
 
         // Suppression de l'identifiant
         $record->setId(null);
+
+        // On dispatche l'évènement de post-suppression
+        $this->eventDispatcher->dispatch(Events::postDelete, new RecordEvent($this->recordManager, $record));
 
         // Retour de l'unité de travail
         return $this;
@@ -287,10 +318,10 @@ class UnitOfWork
         }
 
         // Création des métadonnées de la classe
-        $classMetadata = $this->classMetadataFactory->load(ClassUtils::getClass($record));
+        $classMetadata = $this->recordManager->getClassMetadata($record);
 
         // Récupération de l'enregistrement
-        $refreshed = $this->find($classMetadata->getName(), $id);
+        $refreshed = $this->find($classMetadata->getClass(), $id);
 
         // Si pas d'enregistrement
         if (null === $refreshed) {
@@ -299,9 +330,9 @@ class UnitOfWork
         }
 
         // Pour chaque proprité de la classe
-        foreach ($classMetadata->getProperties() as $property) {
+        foreach ($classMetadata->iterateFields() as $name => $field) {
             // On insère la valeur de l'enregistrement rafraichit dans la propriété de l'enregistrement mis-à-jour
-            $property->setValue($record, $property->getValue($refreshed));
+            $field->setValue($record, $field->getValue($refreshed));
         }
     }
 
@@ -326,14 +357,14 @@ class UnitOfWork
             return $this;
         }
 
-        // On renseigne l'enregistrement comme étant chargé
-        $this->setLoaded($record, true);
-
         // Récupéraion du nom du modèle
-        $model = $this->catalog->getModel($record);
+        $model = $this->recordManager
+            ->getCatalog()
+            ->getModel($record)
+        ;
 
         // Enregistrement des données identifiées
-        $this->originalRecordData[spl_object_id($record)] = $data ?: $this->normalizer->normalize($record);
+        $this->originalRecordData[spl_object_id($record)] = $data ?: $this->recordNormalizer->normalize($record);
 
         // Retour du cache
         return $this;
@@ -360,7 +391,10 @@ class UnitOfWork
         }
 
         // Récupéraion du nom du modèle
-        $model = $this->catalog->getModel($record);
+        $model = $this->recordManager
+            ->getCatalog()
+            ->getModel($record)
+        ;
 
         // Relevé de l'ID de l'objet
         $objectId = spl_object_id($record);
@@ -373,19 +407,6 @@ class UnitOfWork
 
         // Pas de données
         return [];
-    }
-
-    /**
-     * Define record instance as loaded.
-     *
-     * @internal
-     *
-     * @param RecordInterface $record
-     * @param bool|bool       $isLoaded
-     */
-    private function setLoaded(RecordInterface $record, bool $isLoaded = true)
-    {
-        // ...
     }
 
     /**
@@ -433,27 +454,11 @@ class UnitOfWork
     }
 
     /**
-     * @return ExternalApiClient
+     * @return RecordManager
      */
-    public function getClient()
+    public function getManager()
     {
-        return $this->client;
-    }
-
-    /**
-     * @return ClassMetadataFactory
-     */
-    public function getClassMetadataFactory()
-    {
-        return $this->classMetadataFactory;
-    }
-
-    /**
-     * @return Catalog
-     */
-    public function getCatalog()
-    {
-        return $this->catalog;
+        return $this->recordManager;
     }
 
     /**
@@ -461,6 +466,6 @@ class UnitOfWork
      */
     public function getNormalizer()
     {
-        return $this->normalizer;
+        return $this->recordNormalizer;
     }
 }

@@ -83,13 +83,16 @@ class ClassMetadataFactory
         // Retour de la construction de l'instance des mtadonnées
         $classMetadata = new ClassMetadata($class);
 
+        // Récupération de la réflection de la classe
+        $reflection = $classMetadata->getReflectionClass();
+
         // Si la classe n'implémente pas l'interface d'un enregistrement
-        if (!$classMetadata->implementsInterface(RecordInterface::class)) {
+        if (!$reflection->implementsInterface(RecordInterface::class)) {
             throw new MappingException(sprintf('The class "%s" does not implement record interface "%s"', $class, RecordInterface::class));
         }
 
         // Recherche du de l'annotation du modèle
-        $model = $this->findModelAssociation($classMetadata);
+        $model = $this->findModelAssociation($reflection);
 
         // Si pas de modèle
         if (null === $model) {
@@ -100,7 +103,7 @@ class ClassMetadataFactory
         $classMetadata->setModel($model->name);
 
         // Pour chaque propriété de la classe
-        foreach ($classMetadata->getProperties() as $property) {
+        foreach ($reflection->getProperties() as $property) {
             /**
              * Récupération d'une annotation d'exclusion éventuelle.
              *
@@ -149,7 +152,7 @@ class ClassMetadataFactory
             }
 
             // Enregistrement de l'association
-            $field = new FieldMetadata($classMetadata->getName(), $property->getName());
+            $field = new FieldMetadata($reflection->getName(), $property->getName());
 
             // Enregistrement du nom sérialisé de la propriété
             $field->setSerializedName($serializedName);

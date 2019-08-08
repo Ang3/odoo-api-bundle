@@ -5,6 +5,7 @@ namespace Ang3\Bundle\OdooApiBundle\ORM\Factory;
 use Ang3\Component\OdooApiClient\ExternalApiClient;
 use Ang3\Bundle\OdooApiBundle\ORM\RecordManager;
 use Ang3\Bundle\OdooApiBundle\ORM\Serializer\RecordNormalizer;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
  * @author Joanis ROUANET
@@ -27,17 +28,24 @@ class ManagerFactory
     private $recordNormalizer;
 
     /**
+     * @var EventDispatcherInterface
+     */
+    private $eventDispatcher;
+
+    /**
      * Constructor of the factory.
      *
-     * @param CatalogFactory       $catalogFactory
-     * @param ClassMetadataFactory $classMetadataFactory
-     * @param RecordNormalizer     $recordNormalizer
+     * @param CatalogFactory           $catalogFactory
+     * @param ClassMetadataFactory     $classMetadataFactory
+     * @param RecordNormalizer         $recordNormalizer
+     * @param EventDispatcherInterface $eventDispatcher
      */
-    public function __construct(CatalogFactory $catalogFactory, ClassMetadataFactory $classMetadataFactory, RecordNormalizer $recordNormalizer)
+    public function __construct(CatalogFactory $catalogFactory, ClassMetadataFactory $classMetadataFactory, RecordNormalizer $recordNormalizer, EventDispatcherInterface $eventDispatcher)
     {
         $this->catalogFactory = $catalogFactory;
         $this->classMetadataFactory = $classMetadataFactory;
         $this->recordNormalizer = $recordNormalizer;
+        $this->eventDispatcher = $eventDispatcher;
     }
 
     /**
@@ -55,6 +63,6 @@ class ManagerFactory
         $catalog = $this->catalogFactory->create($mapping, $loadDefaults);
 
         // Retour de la construction du manager
-        return new RecordManager($client, $this->classMetadataFactory, $catalog, $this->recordNormalizer);
+        return new RecordManager($client, $this->classMetadataFactory, $catalog, $this->recordNormalizer, $this->eventDispatcher);
     }
 }

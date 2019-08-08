@@ -52,13 +52,6 @@ class Record implements RecordInterface
     protected $updatedBy;
 
     /**
-     * @var bool
-     *
-     * @JMS\Exclude
-     */
-    protected $__loaded = false;
-
-    /**
      * {@inherited}.
      */
     public function setId(int $id = null)
@@ -162,13 +155,5 @@ class Record implements RecordInterface
     public function getDisplayName()
     {
         return null;
-    }
-
-    /**
-     * @return bool
-     */
-    public function isLoaded()
-    {
-        return $this->__loaded;
     }
 }

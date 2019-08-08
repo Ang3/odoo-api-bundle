@@ -9,8 +9,13 @@ use Ang3\Bundle\OdooApiBundle\ORM\Exception\MappingException;
 /**
  * @author Joanis ROUANET
  */
-class ClassMetadata extends ReflectionClass
+class ClassMetadata
 {
+    /**
+     * @var ReflectionClass
+     */
+    private $reflection;
+
     /**
      * @var string
      */
@@ -20,6 +25,14 @@ class ClassMetadata extends ReflectionClass
      * @var array
      */
     private $fields = [];
+
+    /**
+     * @param string $class
+     */
+    public function __construct(string $class)
+    {
+        $this->reflection = new ReflectionClass($class);
+    }
 
     /**
      * @param string $model
@@ -83,11 +96,37 @@ class ClassMetadata extends ReflectionClass
     {
         // Si pas cette propriété
         if (!$this->hasField($name)) {
-            throw new MappingException(sprintf('The field "%s" does not exists in metadata of class "%s"', $name, $this->getName()));
+            throw new MappingException(sprintf('The field "%s" does not exists in metadata of class "%s"', $name, $this->reflection->getName()));
         }
 
         // Retour de la propriété
         return $this->fields[$name];
+    }
+
+    /**
+     * @param string $name
+     *
+     * @throws MappingException when the association was not found
+     *
+     * @return AssociationMetadata
+     */
+    public function getAssociation($name)
+    {
+        // Si pas cette propriété
+        if (!$this->hasField($name)) {
+            throw new MappingException(sprintf('The field "%s" does not exists in metadata of class "%s"', $name, $this->reflection->getName()));
+        }
+
+        // Récupération du champ
+        $field = $this->fields[$name];
+
+        // Si pas cette propriété
+        if (!$field->isAssociation()) {
+            throw new MappingException(sprintf('The field "%s" is not an association in class "%s"', $name, $this->reflection->getName()));
+        }
+
+        // Retour de la propriété
+        return $field;
     }
 
     /**
@@ -188,5 +227,25 @@ class ClassMetadata extends ReflectionClass
                 yield $name => $field;
             }
         }
+    }
+
+    /**
+     * Get reflection class.
+     *
+     * @return ReflectionClass
+     */
+    public function getReflectionClass()
+    {
+        return $this->reflection;
+    }
+
+    /**
+     * Get the FQCN of mapped class.
+     *
+     * @return string
+     */
+    public function getClass()
+    {
+        return $this->reflection->getName();
     }
 }

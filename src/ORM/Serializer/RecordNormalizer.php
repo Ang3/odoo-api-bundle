@@ -5,7 +5,6 @@ namespace Ang3\Bundle\OdooApiBundle\ORM\Serializer;
 use Exception;
 use InvalidArgumentException;
 use ReflectionClass;
-use Ang3\Bundle\OdooApiBundle\ORM\Mapping\AssociationMetadata;
 use Ang3\Bundle\OdooApiBundle\ORM\Mapping\ClassMetadata;
 use Ang3\Bundle\OdooApiBundle\ORM\Factory\ClassMetadataFactory;
 use Ang3\Bundle\OdooApiBundle\ORM\Model\RecordInterface;
@@ -138,21 +137,15 @@ class RecordNormalizer
             $field = array_key_exists($field, $serializedNames) ? $serializedNames[$field] : $field;
 
             // Si la classe possède la propriété
-            if ($classMetadata->hasProperty($propertyName)) {
-                // Récupération de la réflection de la propriété
-                $property = $classMetadata->getProperty($propertyName);
-
-                // Si la propriété n'est pas une association
-                if (!($property instanceof AssociationMetadata)) {
-                    // Champ suivant
-                    continue;
-                }
+            if ($classMetadata->hasAssociation($propertyName)) {
+                // Récupération de l'association
+                $association = $classMetadata->getAssociation($propertyName);
 
                 // Changement de classe courante
-                $classMetadata = $this->classMetadataFactory->load($property->getTargetClass());
+                $classMetadata = $this->classMetadataFactory->load($association->getTargetClass());
 
                 // Mise-à-jour des nom de champs sérialisés selon la nouvelle classe
-                $serializedNames = $this->getSerializedNames($property->getTargetClass());
+                $serializedNames = $this->getSerializedNames($association->getTargetClass());
             }
         }
 

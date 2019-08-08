@@ -13,6 +13,7 @@ use Ang3\Bundle\OdooApiBundle\ORM\Model\Record;
 use Ang3\Bundle\OdooApiBundle\ORM\Model\RecordInterface;
 use Ang3\Bundle\OdooApiBundle\ORM\Serializer\RecordNormalizer;
 use Doctrine\Common\Util\ClassUtils;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
  * @author Joanis ROUANET
@@ -30,6 +31,11 @@ class RecordManager
     private $classMetadataFactory;
 
     /**
+     * @var Catalog
+     */
+    private $catalog;
+
+    /**
      * @var UnitOfWork
      */
     private $unitOfWork;
@@ -44,16 +50,18 @@ class RecordManager
     /**
      * Constructor of the manager.
      *
-     * @param ExternalApiClient    $client
-     * @param ClassMetadataFactory $classMetadataFactory
-     * @param Catalog              $catalog
-     * @param RecordNormalizer     $normalizer
+     * @param ExternalApiClient        $client
+     * @param ClassMetadataFactory     $classMetadataFactory
+     * @param Catalog                  $catalog
+     * @param RecordNormalizer         $normalizer
+     * @param EventDispatcherInterface $eventDispatcher
      */
-    public function __construct(ExternalApiClient $client, ClassMetadataFactory $classMetadataFactory, Catalog $catalog, RecordNormalizer $normalizer)
+    public function __construct(ExternalApiClient $client, ClassMetadataFactory $classMetadataFactory, Catalog $catalog, RecordNormalizer $normalizer, EventDispatcherInterface $eventDispatcher)
     {
         $this->client = $client;
         $this->classMetadataFactory = $classMetadataFactory;
-        $this->unitOfWork = new UnitOfWork($client, $classMetadataFactory, $catalog, $normalizer);
+        $this->catalog = $catalog;
+        $this->unitOfWork = new UnitOfWork($this, $normalizer, $eventDispatcher);
     }
 
     /**
@@ -67,8 +75,10 @@ class RecordManager
      */
     public function persist(RecordInterface $record)
     {
+        // On persiste
         $this->unitOfWork->persist($record);
 
+        // Retour du manager
         return $this;
     }
 
@@ -81,8 +91,10 @@ class RecordManager
      */
     public function delete(Record $record)
     {
+        // On supprime l'enregistrement
         $this->unitOfWork->delete($record);
 
+        // Retour du manager
         return $this;
     }
 
@@ -91,13 +103,14 @@ class RecordManager
      *
      * @param RecordInterface $record
      *
-     * @return RecordInterface|null
+     * @return self
      */
     public function reload(RecordInterface $record)
     {
         $this->unitOfWork->reload($record);
 
-        return $record;
+        // Retour du manager
+        return $this;
     }
 
     /**
@@ -213,11 +226,7 @@ class RecordManager
      */
     public function isManagedClass(string $class)
     {
-        return $this
-            ->getUnitOfWOrk()
-            ->getCatalog()
-            ->hasClass($class)
-        ;
+        return $this->catalog->hasClass($class);
     }
 
     /**
@@ -229,11 +238,7 @@ class RecordManager
      */
     public function isManagedModel(string $model)
     {
-        return $this
-            ->getUnitOfWOrk()
-            ->getCatalog()
-            ->hasModel($model)
-        ;
+        return $this->catalog->hasModel($model);
     }
 
     /**
@@ -253,9 +258,17 @@ class RecordManager
     }
 
     /**
+     * @return Catalog
+     */
+    public function getCatalog()
+    {
+        return $this->catalog;
+    }
+
+    /**
      * @return UnitOfWork
      */
-    public function getUnitOfWOrk()
+    public function getUnitOfWork()
     {
         return $this->unitOfWork;
     }

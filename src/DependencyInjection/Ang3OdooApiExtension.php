@@ -5,10 +5,8 @@ namespace Ang3\Bundle\OdooApiBundle\DependencyInjection;
 use Ang3\Component\OdooApiClient\ExternalApiClient;
 use Ang3\Component\OdooApiClient\Factory\ApiClientFactory;
 use Ang3\Bundle\OdooApiBundle\Doctrine\DBAL\Types\RecordType;
-use Ang3\Bundle\OdooApiBundle\ORM\Factory\CatalogFactory;
-use Ang3\Bundle\OdooApiBundle\ORM\Mapping\Catalog;
+use Ang3\Bundle\OdooApiBundle\ORM\Factory\ManagerFactory;
 use Ang3\Bundle\OdooApiBundle\ORM\RecordManager;
-use Ang3\Bundle\OdooApiBundle\ORM\Serializer\RecordNormalizer;
 use Ang3\Bundle\OdooApiBundle\ORM\Registry;
 use Ang3\Bundle\OdooApiBundle\ORM\Model as Models;
 use Symfony\Component\Config\FileLocator;
@@ -70,9 +68,6 @@ class Ang3OdooApiExtension extends Extension implements PrependExtensionInterfac
      */
     public function loadRegistry(ContainerBuilder $container, array $config)
     {
-        // Création de l'usine des catalogues et récupération de sa référence
-        $catalogFactory = new Reference(CatalogFactory::class);
-
         // Récupération du registre des connections
         $registryDefinition = new Definition(Registry::class);
 
@@ -93,21 +88,6 @@ class Ang3OdooApiExtension extends Extension implements PrependExtensionInterfac
             // Enregistrement du client dans le container
             $container->setDefinition($clientName, $clientDefinition);
 
-            // Création de la définition du registre des modèles
-            $catalogDefinition = new Definition(Catalog::class);
-
-            // Ajout en argument des modèles du client
-            $catalogDefinition
-                ->setFactory([$catalogFactory, 'create'])
-                ->setArguments([$params['mapping'], true === $params['load_default_mapping']])
-            ;
-
-            // Définition du nom du client
-            $catalogName = sprintf('ang3_odoo_api.%s.catalog', $name);
-
-            // Enregistrement du client dans le container
-            $container->setDefinition($catalogName, $catalogDefinition);
-
             // Création de la définition du manager
             $managerDefinition = new Definition(RecordManager::class);
 
@@ -115,21 +95,16 @@ class Ang3OdooApiExtension extends Extension implements PrependExtensionInterfac
             $managerName = sprintf('ang3_odoo_api.%s.record_manager', $name);
 
             // Enregistrement des arguments de la définition
-            $managerDefinition->setArguments([new Reference($clientName), new Reference($catalogName), new Reference(RecordNormalizer::class)]);
+            $managerDefinition
+                ->setFactory([new Reference(ManagerFactory::class), 'create'])
+                ->setArguments([new Reference($clientName), $params['mapping'], $params['load_default_mapping']])
+            ;
 
             // Enregistrement du manager dans le container
             $container->setDefinition($managerName, $managerDefinition);
 
             // S'il s'agit du client par défaut
             if ($name === $config['default_connection']) {
-                // Enregistrement du client par défaut dans le container
-                $container->setDefinition('ang3_odoo_api.client', $clientDefinition);
-                $container->setDefinition(ExternalApiClient::class, $clientDefinition);
-
-                // Enregistrement du registre de modèle par défaut dans le container
-                $container->setDefinition('ang3_odoo_api.catalog', $catalogDefinition);
-                $container->setDefinition(Catalog::class, $catalogDefinition);
-
                 // Enregistrement du registre de modèle par défaut dans le container
                 $container->setDefinition('ang3_odoo_api.record_manager', $managerDefinition);
                 $container->setDefinition(RecordManager::class, $managerDefinition);
@@ -160,7 +135,7 @@ class Ang3OdooApiExtension extends Extension implements PrependExtensionInterfac
 
         // Enregistrement des arguments de la définition
         $definition
-            ->setFactory(new Reference(ApiClientFactory::class))
+            ->setFactory([new Reference(ApiClientFactory::class), 'create'])
             ->setArguments($params)
         ;
 

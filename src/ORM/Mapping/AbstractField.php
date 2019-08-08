@@ -9,7 +9,7 @@ use ReflectionProperty;
  *
  * @author Joanis ROUANET
  */
-abstract class AbstractProperty extends ReflectionProperty implements PropertyInterface
+abstract class AbstractField extends ReflectionProperty implements FieldInterface
 {
     /**
      * @var string
@@ -22,9 +22,6 @@ abstract class AbstractProperty extends ReflectionProperty implements PropertyIn
      */
     public function __construct(string $class, string $name)
     {
-        // Hydratation
-        $this->name = $name;
-
         // Construction de la réflection
         parent::__construct($class, $name);
 
@@ -50,24 +47,6 @@ abstract class AbstractProperty extends ReflectionProperty implements PropertyIn
     public function getSerializedName()
     {
         return $this->serializedName;
-    }
-
-    /**
-     * {@inheritdoc}.
-     */
-    public function setValue($object, $value = null)
-    {
-        parent::setValue($object, $value);
-
-        return $this;
-    }
-
-    /**
-     * {@inheritdoc}.
-     */
-    public function getValue($object = null)
-    {
-        return $object ? parent::getValue($object) : null;
     }
 
     /**

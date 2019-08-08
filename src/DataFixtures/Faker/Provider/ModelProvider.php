@@ -3,7 +3,6 @@
 namespace Ang3\Bundle\OdooApiBundle\DataFixtures\Faker\Provider;
 
 use ReflectionClass;
-use Ang3\Bundle\OdooApiBundle\ORM\Mapping\Catalog;
 use Ang3\Bundle\OdooApiBundle\ORM\Model\RecordInterface;
 use Faker\Provider\Base as BaseProvider;
 
@@ -13,26 +12,11 @@ use Faker\Provider\Base as BaseProvider;
 final class ModelProvider extends BaseProvider
 {
     /**
-     * @var Catalog
-     */
-    private $catalog;
-
-    /**
      * @static
      *
      * @var int
      */
     private static $count = 0;
-
-    /**
-     * @required
-     *
-     * @param Catalog $catalog
-     */
-    public function setCatalog(Catalog $catalog)
-    {
-        $this->catalog = $catalog;
-    }
 
     /**
      * @param string   $class

@@ -8,6 +8,12 @@ services:
   Ang3\Component\OdooApiClient\Factory\ApiClientFactory: ~
 
   #
+  # ORM cache
+  #
+  
+  Ang3\Bundle\OdooApiBundle\ORM\Cache\ClassMetadataCache: ~
+
+  #
   # ORM factories
   #
   

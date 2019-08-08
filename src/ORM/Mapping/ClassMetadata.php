@@ -19,7 +19,7 @@ class ClassMetadata extends ReflectionClass
     /**
      * @var array
      */
-    private $properties = [];
+    private $fields = [];
 
     /**
      * @param string $model
@@ -42,14 +42,14 @@ class ClassMetadata extends ReflectionClass
     }
 
     /**
-     * @param PropertyInterface $property
+     * @param FieldInterface $field
      *
      * @return self
      */
-    public function addProperty(PropertyInterface $property)
+    public function addField(FieldInterface $field)
     {
         // Enregistrement du champ
-        $this->properties[$property->getName()] = $property;
+        $this->fields[$field->getName()] = $field;
 
         // Retour des métadonnées
         return $this;
@@ -60,12 +60,12 @@ class ClassMetadata extends ReflectionClass
      *
      * @return self
      */
-    public function removeProperty(string $name)
+    public function removeField(string $name)
     {
         // Si le champ est déjà enregistré
-        if ($this->hasProperty($name)) {
+        if ($this->hasField($name)) {
             // Suppression du champ
-            unset($this->properties[$name]);
+            unset($this->fields[$name]);
         }
 
         // Retour des métadonnées
@@ -75,29 +75,27 @@ class ClassMetadata extends ReflectionClass
     /**
      * @param string $name
      *
-     * @throws MappingException when the property was not found
+     * @throws MappingException when the field was not found
      *
-     * @return PropertyInterface
+     * @return FieldInterface
      */
-    public function getProperty($name)
+    public function getField($name)
     {
         // Si pas cette propriété
-        if (!$this->hasProperty($name)) {
-            throw new MappingException(sprintf('The property "%s" does not exists in metadata of class "%s"', $name, $this->getName()));
+        if (!$this->hasField($name)) {
+            throw new MappingException(sprintf('The field "%s" does not exists in metadata of class "%s"', $name, $this->getName()));
         }
 
         // Retour de la propriété
-        return $this->properties[$name];
+        return $this->fields[$name];
     }
 
     /**
-     * @param null $filter
-     *
      * @return array
      */
-    public function getProperties($filter = null)
+    public function getFields()
     {
-        return $this->properties;
+        return $this->fields;
     }
 
     /**
@@ -105,9 +103,9 @@ class ClassMetadata extends ReflectionClass
      *
      * @return bool
      */
-    public function hasProperty($name)
+    public function hasField($name)
     {
-        return array_key_exists($name, $this->properties);
+        return array_key_exists($name, $this->fields);
     }
 
     /**
@@ -115,9 +113,9 @@ class ClassMetadata extends ReflectionClass
      *
      * @return bool
      */
-    public function hasField(string $name)
+    public function hasSimpleField(string $name)
     {
-        return $this->hasProperty($name) && $this->properties[$name]->isField();
+        return $this->hasField($name) && $this->fields[$name]->isField();
     }
 
     /**
@@ -127,11 +125,11 @@ class ClassMetadata extends ReflectionClass
      */
     public function hasAssociation(string $name)
     {
-        return $this->hasProperty($name) && $this->properties[$name]->isAssociation();
+        return $this->hasField($name) && $this->fields[$name]->isAssociation();
     }
 
     /**
-     * Get all serialized properties names.
+     * Get all serialized fields names.
      *
      * @return array
      */
@@ -141,9 +139,9 @@ class ClassMetadata extends ReflectionClass
         $serializedNames = [];
 
         // Pour chaque propriété
-        foreach ($this->properties as $name => $property) {
+        foreach ($this->iterateFields() as $name => $field) {
             // Enregistrement du nom sérialisé
-            $serializedNames[$property->getName()] = $property->getSerializedName();
+            $serializedNames[$field->getName()] = $field->getSerializedName();
         }
 
         // Retour des noms sérialisés
@@ -153,26 +151,26 @@ class ClassMetadata extends ReflectionClass
     /**
      * @return Generator
      */
-    public function iterateProperties()
+    public function iterateFields()
     {
         // Pour chaque propriété
-        foreach ($this->properties as $name => $property) {
+        foreach ($this->fields as $name => $field) {
             // On rend le champ avec son nom en clé
-            yield $name => $property;
+            yield $name => $field;
         }
     }
 
     /**
      * @return Generator
      */
-    public function iterateFields()
+    public function iterateSimpleFields()
     {
         // Pour chaque propriété
-        foreach ($this->properties as $name => $property) {
+        foreach ($this->fields as $name => $field) {
             // Si c'est un champ simple
-            if ($property->isField()) {
+            if ($field->isField()) {
                 // On rend le champ avec son nom en clé
-                yield $name => $property;
+                yield $name => $field;
             }
         }
     }
@@ -183,11 +181,11 @@ class ClassMetadata extends ReflectionClass
     public function iterateAssociations()
     {
         // Pour chaque propriété
-        foreach ($this->properties as $name => $property) {
+        foreach ($this->fields as $name => $field) {
             // Si c'est une association
-            if ($property->isAssociation()) {
+            if ($field->isAssociation()) {
                 // On rend le champ avec son nom en clé
-                yield $name => $property;
+                yield $name => $field;
             }
         }
     }

@@ -5,6 +5,7 @@ namespace Ang3\Bundle\OdooApiBundle\ORM\Factory;
 use ReflectionClass;
 use ReflectionProperty;
 use Ang3\Bundle\OdooApiBundle\ORM\Annotation as ORM;
+use Ang3\Bundle\OdooApiBundle\ORM\Cache\ClassMetadataCache;
 use Ang3\Bundle\OdooApiBundle\ORM\Mapping\ClassMetadata;
 use Ang3\Bundle\OdooApiBundle\ORM\Mapping\FieldMetadata;
 use Ang3\Bundle\OdooApiBundle\ORM\Mapping\SingleAssociationMetadata;
@@ -15,8 +16,6 @@ use Ang3\Bundle\OdooApiBundle\ORM\Serializer\Type\SingleAssociation;
 use Ang3\Bundle\OdooApiBundle\ORM\Serializer\Type\MultipleAssociation;
 use Doctrine\Common\Annotations\Reader;
 use JMS\Serializer\Annotation as JMS;
-use Symfony\Contracts\Cache\CacheInterface;
-use Symfony\Contracts\Cache\ItemInterface;
 
 /**
  * @author Joanis ROUANET
@@ -29,18 +28,18 @@ class ClassMetadataFactory
     private $reader;
 
     /**
-     * @var CacheInterface
+     * @var ClassMetadataCache
      */
-    private $systemCache;
+    private $classMetadataCache;
 
     /**
-     * @param Reader         $reader
-     * @param CacheInterface $systemCache
+     * @param Reader             $reader
+     * @param ClassMetadataCache $classMetadataCache
      */
-    public function __construct(Reader $reader, CacheInterface $systemCache)
+    public function __construct(Reader $reader, ClassMetadataCache $classMetadataCache)
     {
         $this->reader = $reader;
-        $this->systemCache = $systemCache;
+        $this->classMetadataCache = $classMetadataCache;
     }
 
     /**
@@ -52,14 +51,20 @@ class ClassMetadataFactory
      */
     public function load(string $class)
     {
-        // Récupération du lecteur d'annotations
-        $callback = [$this, 'doLoad'];
+        // Récupération des métadonnées depuis le cache mémoire
+        $classMetadata = $this->classMetadataCache->get($class);
 
-        // Retour des métadonnées stockées en cache
-        return unserialize($this->systemCache->get($this->generateCacheKey($class), function (ItemInterface $item) use ($class, $callback) {
-            // Retour de la désérialisation des modèles
-            return serialize($callback($class));
-        }));
+        // Si pas de métadonnées
+        if (null === $classMetadata) {
+            // Chargement effectif des métadonnées
+            $classMetadata = $this->doLoad($class);
+        }
+
+        // Enregistrement des métadonnées dans le cache mémoire
+        $this->classMetadataCache->set($class, $classMetadata);
+
+        // Retour des métadonnées
+        return $classMetadata;
     }
 
     /**
@@ -125,7 +130,7 @@ class ClassMetadataFactory
                 $association->setSerializedName($serializedName);
 
                 // Enregistrement de la propriété
-                $classMetadata->addProperty($association);
+                $classMetadata->addField($association);
 
                 // Propriété suivante
                 continue;
@@ -137,20 +142,20 @@ class ClassMetadataFactory
                 $association->setSerializedName($serializedName);
 
                 // Enregistrement de la propriété
-                $classMetadata->addProperty($association);
+                $classMetadata->addField($association);
 
                 // Propriété suivante
                 continue;
             }
 
             // Enregistrement de l'association
-            $property = new FieldMetadata($classMetadata->getName(), $property->getName());
+            $field = new FieldMetadata($classMetadata->getName(), $property->getName());
 
             // Enregistrement du nom sérialisé de la propriété
-            $property->setSerializedName($serializedName);
+            $field->setSerializedName($serializedName);
 
             // Enregistrement de la propriété
-            $classMetadata->addProperty($property);
+            $classMetadata->addField($field);
         }
 
         // Retour des métadonnées
@@ -232,7 +237,7 @@ class ClassMetadataFactory
         }
 
         // Définition de la classe cible
-        $targetClass = substr($annotation->name, strlen($annotation->name));
+        $targetClass = substr($annotation->name, strlen($class));
         $targetClass = str_replace('<', null, $targetClass);
         $targetClass = str_replace('>', null, $targetClass);
         $targetClass = str_replace('\'', null, $targetClass);
@@ -248,7 +253,7 @@ class ClassMetadataFactory
 
         // Si la classe n'implémente pas l'interface d'un enregistrement
         if (!$reflection->implementsInterface(RecordInterface::class)) {
-            throw new MappingException(sprintf('The target class "%s" of association on property "%s::%s" does not implement record interface "%s"', $targetClass, $property->getDeclaringClass(), $property->getName(), RecordInterface::class));
+            throw new MappingException(sprintf('The target class "%s" of association from property "%s::%s" does not implement record interface "%s"', $targetClass, $property->getDeclaringClass(), $property->getName(), RecordInterface::class));
         }
 
         // Retour de la classe cible
@@ -269,19 +274,5 @@ class ClassMetadataFactory
 
         // Retour de l'association éventuelle
         return $annotation;
-    }
-
-    /**
-     * Generate a key for cache item.
-     *
-     * @internal
-     *
-     * @param string $class
-     *
-     * @return string
-     */
-    private function generateCacheKey(string $class)
-    {
-        return sprintf('ang3_odoo_api.metadata.%s', str_replace('\\', '_', $class));
     }
 }

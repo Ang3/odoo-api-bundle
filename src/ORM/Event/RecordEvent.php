@@ -2,7 +2,7 @@
 
 namespace Ang3\Bundle\OdooApiBundle\ORM\Event;
 
-use Ang3\Bundle\OdooApiBundle\ORM\RecordManager;
+use Ang3\Bundle\OdooApiBundle\ORM\Manager;
 use Ang3\Bundle\OdooApiBundle\ORM\Model\RecordInterface;
 use Symfony\Component\EventDispatcher\Event;
 
@@ -12,9 +12,9 @@ use Symfony\Component\EventDispatcher\Event;
 class RecordEvent extends Event
 {
     /**
-     * @var RecordManager
+     * @var Manager
      */
-    private $recordManager;
+    private $manager;
 
     /**
      * @var RecordInterface
@@ -22,21 +22,21 @@ class RecordEvent extends Event
     private $record;
 
     /**
-     * @param RecordManager   $recordManager
+     * @param Manager         $manager
      * @param RecordInterface $record
      */
-    public function __construct(RecordManager $recordManager, RecordInterface $record)
+    public function __construct(Manager $manager, RecordInterface $record)
     {
-        $this->recordManager = $recordManager;
+        $this->manager = $manager;
         $this->record = $record;
     }
 
     /**
-     * @return RecordManager
+     * @return Manager
      */
-    public function getRecordManager()
+    public function getManager()
     {
-        return $this->recordManager;
+        return $this->manager;
     }
 
     /**

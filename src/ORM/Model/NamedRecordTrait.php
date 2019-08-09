@@ -2,8 +2,6 @@
 
 namespace Ang3\Bundle\OdooApiBundle\ORM\Model;
 
-use JMS\Serializer\Annotation as JMS;
-
 /**
  * @author Joanis ROUANET
  */

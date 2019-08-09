@@ -17,7 +17,7 @@ class Category extends Record
 
     /**
      * @var string|null
-     * 
+     *
      * @ORM\Field(name="parent_path", type="string")
      */
     protected $parentPath;

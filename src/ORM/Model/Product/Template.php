@@ -49,14 +49,14 @@ class Template extends Record
 
     /**
      * @var string|null
-     * 
+     *
      * @ORM\Field(name="default_code", type="string")
      */
     protected $defaultCode;
 
     /**
      * @var string|null
-     * 
+     *
      * @ORM\Field(name="barcode", type="string")
      */
     protected $barCode;

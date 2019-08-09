@@ -22,7 +22,7 @@ class Field
     public $name;
 
     /**
-     * @var string|null
+     * @var string
      */
     public $type;
 

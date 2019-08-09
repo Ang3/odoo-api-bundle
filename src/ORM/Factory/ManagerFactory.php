@@ -3,8 +3,9 @@
 namespace Ang3\Bundle\OdooApiBundle\ORM\Factory;
 
 use Ang3\Component\OdooApiClient\ExternalApiClient;
-use Ang3\Bundle\OdooApiBundle\ORM\RecordManager;
-use Ang3\Bundle\OdooApiBundle\ORM\Serializer\RecordNormalizer;
+use Ang3\Bundle\OdooApiBundle\ORM\Configuration;
+use Ang3\Bundle\OdooApiBundle\ORM\Manager;
+use Ang3\Bundle\OdooApiBundle\ORM\Normalizer;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
@@ -23,9 +24,9 @@ class ManagerFactory
     private $classMetadataFactory;
 
     /**
-     * @var RecordNormalizer
+     * @var Normalizer
      */
-    private $recordNormalizer;
+    private $normalizer;
 
     /**
      * @var EventDispatcherInterface
@@ -37,14 +38,14 @@ class ManagerFactory
      *
      * @param CatalogFactory           $catalogFactory
      * @param ClassMetadataFactory     $classMetadataFactory
-     * @param RecordNormalizer         $recordNormalizer
+     * @param Normalizer               $normalizer
      * @param EventDispatcherInterface $eventDispatcher
      */
-    public function __construct(CatalogFactory $catalogFactory, ClassMetadataFactory $classMetadataFactory, RecordNormalizer $recordNormalizer, EventDispatcherInterface $eventDispatcher)
+    public function __construct(CatalogFactory $catalogFactory, ClassMetadataFactory $classMetadataFactory, Normalizer $normalizer, EventDispatcherInterface $eventDispatcher)
     {
         $this->catalogFactory = $catalogFactory;
         $this->classMetadataFactory = $classMetadataFactory;
-        $this->recordNormalizer = $recordNormalizer;
+        $this->normalizer = $normalizer;
         $this->eventDispatcher = $eventDispatcher;
     }
 
@@ -55,14 +56,17 @@ class ManagerFactory
      * @param array             $mapping
      * @param bool              $loadDefaults
      *
-     * @return RecordManager
+     * @return Manager
      */
     public function create(ExternalApiClient $client, array $mapping = [], bool $loadDefaults = true)
     {
         // Création du catalogue de modèles
         $catalog = $this->catalogFactory->create($mapping, $loadDefaults);
 
+        // Création de la configuration
+        $configuration = new Configuration($catalog, $this->normalizer, $this->classMetadataFactory);
+
         // Retour de la construction du manager
-        return new RecordManager($client, $this->classMetadataFactory, $catalog, $this->recordNormalizer, $this->eventDispatcher);
+        return new Manager($client, $configuration, $this->eventDispatcher);
     }
 }

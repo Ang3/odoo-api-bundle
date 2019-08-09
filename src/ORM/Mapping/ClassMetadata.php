@@ -4,6 +4,7 @@ namespace Ang3\Bundle\OdooApiBundle\ORM\Mapping;
 
 use Generator;
 use ReflectionClass;
+use ReflectionProperty;
 use Ang3\Bundle\OdooApiBundle\ORM\Exception\MappingException;
 
 /**
@@ -94,12 +95,12 @@ class ClassMetadata
     public function addProperty(PropertyInterface $property)
     {
         // Si la propriété est déjà mappée
-        if($this->hasProperty($property->getLocalName())) {
+        if ($this->hasProperty($property->getLocalName())) {
             throw new MappingException(sprintf('The property "%s::$%s" is already mapped.', $this->class, $property->getLocalName()));
         }
 
         // Si la propriété est déjà mappée
-        if($this->isMapped($property->getRemoteName())) {
+        if ($this->isMapped($property->getRemoteName())) {
             throw new MappingException(sprintf('The remote name "%s" for the class "%s" is already mapped to another property.', $property->getRemoteName(), $this->class));
         }
 
@@ -209,15 +210,15 @@ class ClassMetadata
 
     /**
      * Resolve property from mapped name.
-     * 
-     * @param  string $name
-     * 
+     *
+     * @param string $name
+     *
      * @return PropertyInterface|null
      */
     public function resolveMapped($name)
     {
         // Si la propriété n'est pas mappée
-        if(!$this->isMapped($name)) {
+        if (!$this->isMapped($name)) {
             // Retour null
             return null;
         }
@@ -228,9 +229,9 @@ class ClassMetadata
 
     /**
      * Check if a name is mapped.
-     * 
-     * @param  string $name
-     * 
+     *
+     * @param string $name
+     *
      * @return PropertyInterface|null
      */
     public function isMapped($name)
@@ -311,6 +312,47 @@ class ClassMetadata
     }
 
     /**
+     * Get the property value of an instance.
+     *
+     * @param object            $object
+     * @param PropertyInterface $property
+     *
+     * @return mixed
+     */
+    public function getValue(object $object, PropertyInterface $property)
+    {
+        // Rélfection de la propriété
+        $property = new ReflectionProperty($this->class, $property->getLocalName());
+
+        // On rend accessible la propriété
+        $property->setAccessible(true);
+
+        // Retour de la valeur de la propriété
+        return $property->getValue($object);
+    }
+
+    /**
+     * Get the property value of an instance.
+     *
+     * @param object            $object
+     * @param PropertyInterface $property
+     * @param mixed|null        $value
+     *
+     * @return mixed
+     */
+    public function setValue(object $object, PropertyInterface $property, $value = null)
+    {
+        // Rélfection de la propriété
+        $property = new ReflectionProperty($this->class, $property->getLocalName());
+
+        // On rend accessible la propriété
+        $property->setAccessible(true);
+
+        // Retour de la valeur de la propriété
+        return $property->setValue($object, $value);
+    }
+
+    /**
      * Get reflection class.
      *
      * @return ReflectionClass
@@ -318,5 +360,25 @@ class ClassMetadata
     public function getReflectionClass()
     {
         return $this->reflectionClass = $this->reflectionClass ?: new ReflectionClass($this->class);
+    }
+
+    /**
+     * Get all local names.
+     *
+     * @return array
+     */
+    public function getAllLocalNames()
+    {
+        return array_keys($this->properties);
+    }
+
+    /**
+     * Get all remote names.
+     *
+     * @return array
+     */
+    public function getAllRemoteNames()
+    {
+        return array_keys($this->maps);
     }
 }

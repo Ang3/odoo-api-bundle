@@ -20,20 +20,13 @@ abstract class AbstractProperty implements PropertyInterface
     private $remoteName;
 
     /**
-     * @var bool
-     */
-    private $nullable;
-
-    /**
      * @param string $localName
      * @param string $remoteName
-     * @param bool   $nullable
      */
-    public function __construct(string $localName, string $remoteName, bool $nullable = true)
+    public function __construct(string $localName, string $remoteName)
     {
         $this->localName = $localName;
         $this->remoteName = $remoteName;
-        $this->nullable = $nullable;
     }
 
     /**
@@ -74,26 +67,6 @@ abstract class AbstractProperty implements PropertyInterface
     public function getRemoteName()
     {
         return $this->remoteName;
-    }
-
-    /**
-     * @param bool $nullable
-     *
-     * @return self
-     */
-    public function setNullable(bool $nullable)
-    {
-        $this->nullable = $nullable;
-
-        return $this;
-    }
-
-    /**
-     * {@inheritdoc}.
-     */
-    public function isNullable()
-    {
-        return $this->nullable;
     }
 
     /**

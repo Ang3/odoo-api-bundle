@@ -6,19 +6,16 @@ use InvalidArgumentException;
 use LogicException;
 use Ang3\Component\OdooApiClient\ExternalApiClient;
 use Ang3\Bundle\OdooApiBundle\ORM\Exception\RecordNotFoundException;
-use Ang3\Bundle\OdooApiBundle\ORM\Factory\ClassMetadataFactory;
-use Ang3\Bundle\OdooApiBundle\ORM\Mapping\Catalog;
 use Ang3\Bundle\OdooApiBundle\ORM\Mapping\ClassMetadata;
 use Ang3\Bundle\OdooApiBundle\ORM\Model\Record;
 use Ang3\Bundle\OdooApiBundle\ORM\Model\RecordInterface;
-use Ang3\Bundle\OdooApiBundle\ORM\Serializer\RecordNormalizer;
 use Doctrine\Common\Util\ClassUtils;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
  * @author Joanis ROUANET
  */
-class RecordManager
+class Manager
 {
     /**
      * @var ExternalApiClient
@@ -26,14 +23,9 @@ class RecordManager
     private $client;
 
     /**
-     * @var ClassMetadataFactory
+     * @var Configuration
      */
-    private $classMetadataFactory;
-
-    /**
-     * @var Catalog
-     */
-    private $catalog;
+    private $configuration;
 
     /**
      * @var UnitOfWork
@@ -51,17 +43,60 @@ class RecordManager
      * Constructor of the manager.
      *
      * @param ExternalApiClient        $client
-     * @param ClassMetadataFactory     $classMetadataFactory
-     * @param Catalog                  $catalog
-     * @param RecordNormalizer         $normalizer
+     * @param Configuration            $configuration
      * @param EventDispatcherInterface $eventDispatcher
      */
-    public function __construct(ExternalApiClient $client, ClassMetadataFactory $classMetadataFactory, Catalog $catalog, RecordNormalizer $normalizer, EventDispatcherInterface $eventDispatcher)
+    public function __construct(ExternalApiClient $client, Configuration $configuration, EventDispatcherInterface $eventDispatcher)
     {
         $this->client = $client;
-        $this->classMetadataFactory = $classMetadataFactory;
-        $this->catalog = $catalog;
-        $this->unitOfWork = new UnitOfWork($this, $normalizer, $eventDispatcher);
+        $this->configuration = $configuration;
+        $this->unitOfWork = new UnitOfWork($this, $eventDispatcher);
+    }
+
+    /**
+     * Normalize a record.
+     *
+     * @param RecordInterface           $record
+     * @param NormalizationContext|null $context
+     *
+     * @return array
+     */
+    public function normalize(RecordInterface $record, NormalizationContext $context = null)
+    {
+        return $this
+            ->getConfiguration()
+            ->getNormalizer()
+            ->toArray($record, $context)
+        ;
+    }
+
+    /**
+     * Denormalize a record.
+     *
+     * @param array                     $data
+     * @param string                    $class
+     * @param NormalizationContext|null $context
+     *
+     * @return RecordInterface
+     */
+    public function denormalize(array $data = [], string $class, NormalizationContext $context = null)
+    {
+        // Si la classe n'est pas managée
+        if (!$this->isManagedClass($class)) {
+            throw new InvalidArgumentException(sprintf('The class "%s" is not managed', $class));
+        }
+
+        /**
+         * @var RecordInterface
+         */
+        $record = $this
+            ->getConfiguration()
+            ->getNormalizer()
+            ->fromArray($data, $class, $context)
+        ;
+
+        // Retour de l'enregistrement
+        return $record;
     }
 
     /**
@@ -214,7 +249,11 @@ class RecordManager
         }
 
         // Retour de la création des métadonnées de la classe
-        return $this->classMetadataFactory->load($class);
+        return $this
+            ->getConfiguration()
+            ->getClassMetadataFactory()
+            ->load($class)
+        ;
     }
 
     /**
@@ -226,7 +265,11 @@ class RecordManager
      */
     public function isManagedClass(string $class)
     {
-        return $this->catalog->hasClass($class);
+        return $this
+            ->getConfiguration()
+            ->getCatalog()
+            ->hasClass($class)
+        ;
     }
 
     /**
@@ -238,7 +281,11 @@ class RecordManager
      */
     public function isManagedModel(string $model)
     {
-        return $this->catalog->hasModel($model);
+        return $this
+            ->getConfiguration()
+            ->getCatalog()
+            ->hasModel($model)
+        ;
     }
 
     /**
@@ -250,19 +297,11 @@ class RecordManager
     }
 
     /**
-     * @return ClassMetadataFactory
+     * @return Configuration
      */
-    public function getClassMetadataFactory()
+    public function getConfiguration()
     {
-        return $this->classMetadataFactory;
-    }
-
-    /**
-     * @return Catalog
-     */
-    public function getCatalog()
-    {
-        return $this->catalog;
+        return $this->configuration;
     }
 
     /**

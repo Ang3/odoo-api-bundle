@@ -17,12 +17,14 @@ namespace Ang3\Bundle\OdooApiBundle\ORM\Annotation;
 class ManyToOne
 {
     /**
-     * @var string|null
+     * @var string
      */
     public $name;
 
     /**
-     * @var string|null
+     * @Required
+     *
+     * @var string
      */
     public $class;
 

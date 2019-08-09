@@ -3,7 +3,6 @@
 namespace Ang3\Bundle\OdooApiBundle\Doctrine\DBAL\Types;
 
 use Ang3\Bundle\OdooApiBundle\ORM\Model\RecordInterface;
-use Ang3\Bundle\OdooApiBundle\ORM\Serializer\Type\SingleAssociation;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\DBAL\Types\ConversionException;
 use Doctrine\DBAL\Types\Type;
@@ -45,19 +44,13 @@ class RecordType extends Type
             return $value;
         }
 
-        // Si la valeur est une association simple
-        if ($value instanceof SingleAssociation) {
-            // Retour de l'identifiant
-            return $value->getId();
-        }
-
         // Si la valeur est une interface d'enregistrement
         if ($value instanceof RecordInterface) {
             // Retour de l'identifiant
             return $value->getId();
         }
 
-        throw ConversionException::conversionFailedInvalidType($value, 'integer', [SingleAssociation::class, RecordInterface::class]);
+        throw ConversionException::conversionFailedInvalidType($value, 'integer', [RecordInterface::class]);
     }
 
     /**

@@ -8,24 +8,13 @@ services:
   Ang3\Component\OdooApiClient\Factory\ApiClientFactory: ~
 
   #
-  # ORM cache
+  # ORM services
   #
-  
   Ang3\Bundle\OdooApiBundle\ORM\Cache\ClassMetadataCache: ~
-
-  #
-  # ORM factories
-  #
-  
   Ang3\Bundle\OdooApiBundle\ORM\Factory\CatalogFactory: ~
   Ang3\Bundle\OdooApiBundle\ORM\Factory\ClassMetadataFactory: ~
   Ang3\Bundle\OdooApiBundle\ORM\Factory\ManagerFactory: ~
-
-  #
-  # ORM services
-  #
-  
-  Ang3\Bundle\OdooApiBundle\ORM\Serializer\RecordNormalizer: ~
+  Ang3\Bundle\OdooApiBundle\ORM\Normalizer: ~
 
   # 
   # DOCTRINE

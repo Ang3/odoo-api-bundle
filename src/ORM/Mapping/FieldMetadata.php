@@ -2,37 +2,45 @@
 
 namespace Ang3\Bundle\OdooApiBundle\ORM\Mapping;
 
+use Ang3\Bundle\OdooApiBundle\ORM\Mapping\Types\TypeInterface;
+
 /**
  * @author Joanis ROUANET
  */
 class FieldMetadata extends AbstractProperty
 {
     /**
-     * @var string
+     * @var TypeInterface
      */
     private $type;
 
     /**
-     * @param string $localName
-     * @param string $remoteName
-     * @param string $type
-     * @param bool   $nullable
+     * @var bool
      */
-    public function __construct(string $localName, string $remoteName, string $type, bool $nullable = true)
+    private $nullable;
+
+    /**
+     * @param string        $localName
+     * @param string        $remoteName
+     * @param TypeInterface $type
+     * @param bool          $nullable
+     */
+    public function __construct(string $localName, string $remoteName, TypeInterface $type, bool $nullable = true)
     {
         // Construction de la propriété de base
-        parent::__construct($localName, $remoteName, $nullable);
+        parent::__construct($localName, $remoteName);
 
         // Hydratation
         $this->type = $type;
+        $this->nullable = $nullable;
     }
 
     /**
-     * @param string $type
+     * @param TypeInterface $type
      *
      * @return self
      */
-    public function setType(string $type)
+    public function setType(TypeInterface $type)
     {
         $this->type = $type;
 
@@ -40,10 +48,30 @@ class FieldMetadata extends AbstractProperty
     }
 
     /**
-     * @return string
+     * @return TypeInterface
      */
     public function getType()
     {
         return $this->type;
+    }
+
+    /**
+     * @param bool $nullable
+     *
+     * @return self
+     */
+    public function setNullable(bool $nullable)
+    {
+        $this->nullable = $nullable;
+
+        return $this;
+    }
+
+    /**
+     * {@inheritdoc}.
+     */
+    public function isNullable()
+    {
+        return $this->nullable;
     }
 }

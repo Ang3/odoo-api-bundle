@@ -17,19 +17,16 @@ namespace Ang3\Bundle\OdooApiBundle\ORM\Annotation;
 class ManyToMany
 {
     /**
-     * @var string|null
+     * @var string
      */
     public $name;
 
     /**
-     * @var string|null
+     * @Required
+     *
+     * @var string
      */
     public $class;
-
-    /**
-     * @var bool
-     */
-    public $nullable = true;
 
     /**
      * @var array

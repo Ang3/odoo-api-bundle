@@ -2,7 +2,7 @@
 
 namespace Ang3\Bundle\OdooApiBundle\ORM\Event;
 
-use Ang3\Bundle\OdooApiBundle\ORM\RecordManager;
+use Ang3\Bundle\OdooApiBundle\ORM\Manager;
 use Ang3\Bundle\OdooApiBundle\ORM\Model\RecordInterface;
 
 /**
@@ -16,17 +16,17 @@ class RecordUpdateEvent extends RecordEvent
     private $changeSet;
 
     /**
-     * @param RecordManager   $recordManager
+     * @param Manager         $manager
      * @param RecordInterface $record
      * @param array           $changeSet
      */
-    public function __construct(RecordManager $recordManager, RecordInterface $record, array $changeSet)
+    public function __construct(Manager $manager, RecordInterface $record, array $changeSet)
     {
         // Hydratation
         $this->changeSet = $changeSet;
 
         // Construction de l'évènement parent
-        parent::__construct($recordManager, $record);
+        parent::__construct($manager, $record);
     }
 
     /**

@@ -3,8 +3,9 @@
 namespace Ang3\Bundle\OdooApiBundle\Doctrine\ORM\EventListener;
 
 use ReflectionClass;
-use Ang3\Bundle\OdooApiBundle\ORM\Serializer\RecordNormalizer;
+use Ang3\Bundle\OdooApiBundle\ORM\Normalizer;
 use Ang3\Bundle\OdooApiBundle\ORM\Factory\ClassMetadataFactory;
+use Ang3\Bundle\OdooApiBundle\ORM\Mapping\ManyToOneMetadata;
 use Doctrine\Common\Util\ClassUtils;
 use Doctrine\ORM\Event\LifecycleEventArgs;
 
@@ -19,18 +20,18 @@ class DoctrineListener
     private $classMetadataFactory;
 
     /**
-     * @var RecordNormalizer
+     * @var Normalizer
      */
-    private $recordNormalizer;
+    private $normalizer;
 
     /**
      * @param ClassMetadataFactory $classMetadataFactory
-     * @param RecordNormalizer     $recordNormalizer
+     * @param Normalizer           $normalizer
      */
-    public function __construct(ClassMetadataFactory $classMetadataFactory, RecordNormalizer $recordNormalizer)
+    public function __construct(ClassMetadataFactory $classMetadataFactory, Normalizer $normalizer)
     {
         $this->classMetadataFactory = $classMetadataFactory;
-        $this->recordNormalizer = $recordNormalizer;
+        $this->normalizer = $normalizer;
     }
 
     /**
@@ -57,14 +58,11 @@ class DoctrineListener
         $classMetadata = $this->classMetadataFactory->load($entityClass);
 
         // Pour chaque propriété de l'objet
-        foreach ($properties as $property) {
-            // Si on a une annotation de relation simple
-            if ($association = $this->classMetadataFactory->findSingleAssociation($classMetadata, $property)) {
-                // On rend accessible la propriété
-                $property->setAccessible(true);
-
-                // Récupération de la valeur  de la propriété
-                $value = $property->getValue($entity);
+        foreach ($classMetadata->iterateAssociations() as $property) {
+            // Si c'est une association simple
+            if ($property instanceof ManyToOneMetadata) {
+                // Récupération de la valeur de la propriété
+                $value = $classMetadata->getValue($entity, $property);
 
                 // Si pas de valeur
                 if (null === $value) {
@@ -79,16 +77,16 @@ class DoctrineListener
                 }
 
                 // Création d'une réflection de la classe associée
-                $reflection = new ReflectionClass($association->getTargetClass());
+                $reflection = new ReflectionClass($property->getTargetClass());
 
                 // Création de l'enregistrement
                 $record = $reflection->newInstanceWithoutConstructor();
 
                 // Assignation de l'ID de l'enregistrement
-                $this->recordNormalizer->setRecordId($record, $value);
-
-                // On remplace la valeur de la propriété
-                $property->setValue($entity, $record);
+                $classMetadata
+                    ->setValue($record, $this->classMetadataFactory->load($property->getTargetClass())->getProperty('id'), $value)
+                    ->setValue($entity, $property, $record)
+                ;
 
                 // Propriété suivante
                 continue;

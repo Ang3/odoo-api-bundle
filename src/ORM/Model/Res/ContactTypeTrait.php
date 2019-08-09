@@ -14,7 +14,7 @@ trait ContactTypeTrait
 
     /**
      * @var string|null
-     * 
+     *
      * @ORM\Field(name="street", type="string")
      */
     protected $street;

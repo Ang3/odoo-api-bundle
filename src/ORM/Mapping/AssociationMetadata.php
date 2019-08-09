@@ -23,12 +23,11 @@ class AssociationMetadata extends AbstractProperty
      * @param string $localName
      * @param string $remoteName
      * @param string $targetClass
-     * @param bool   $nullable
      */
-    public function __construct(string $localName, string $remoteName, string $targetClass, bool $nullable = true)
+    public function __construct(string $localName, string $remoteName, string $targetClass)
     {
         // Construction de la propriété de base
-        parent::__construct($localName, $remoteName, $nullable);
+        parent::__construct($localName, $remoteName);
 
         // Hydratation
         $this->targetClass = $targetClass;
@@ -56,7 +55,7 @@ class AssociationMetadata extends AbstractProperty
 
     /**
      * Construct new instance without constructor.
-     * 
+     *
      * @return object
      */
     public function newInstance()
@@ -69,7 +68,7 @@ class AssociationMetadata extends AbstractProperty
 
     /**
      * Get the reflection of target class.
-     * 
+     *
      * @return ReflectionClass
      */
     public function getReflectionClass()

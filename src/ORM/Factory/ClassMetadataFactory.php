@@ -3,18 +3,18 @@
 namespace Ang3\Bundle\OdooApiBundle\ORM\Factory;
 
 use ReflectionClass;
-use ReflectionProperty;
 use Ang3\Bundle\OdooApiBundle\ORM\Annotation as ORM;
 use Ang3\Bundle\OdooApiBundle\ORM\Cache\ClassMetadataCache;
 use Ang3\Bundle\OdooApiBundle\ORM\Mapping\ClassMetadata;
 use Ang3\Bundle\OdooApiBundle\ORM\Mapping\FieldMetadata;
-use Ang3\Bundle\OdooApiBundle\ORM\Mapping\SingleAssociationMetadata;
-use Ang3\Bundle\OdooApiBundle\ORM\Mapping\MultipleAssociationMetadata;
+use Ang3\Bundle\OdooApiBundle\ORM\Mapping\ManyToManyMetadata;
+use Ang3\Bundle\OdooApiBundle\ORM\Mapping\ManyToOneMetadata;
+use Ang3\Bundle\OdooApiBundle\ORM\Mapping\OneToManyMetadata;
+use Ang3\Bundle\OdooApiBundle\ORM\Mapping\Types\TypeInterface;
 use Ang3\Bundle\OdooApiBundle\ORM\Exception\MappingException;
 use Ang3\Bundle\OdooApiBundle\ORM\Model\RecordInterface;
-use Ang3\Bundle\OdooApiBundle\ORM\Serializer\Type\SingleAssociation;
-use Ang3\Bundle\OdooApiBundle\ORM\Serializer\Type\MultipleAssociation;
 use Doctrine\Common\Annotations\Reader;
+use Doctrine\Common\Util\ClassUtils;
 
 /**
  * @author Joanis ROUANET
@@ -27,23 +27,31 @@ class ClassMetadataFactory
     private $reader;
 
     /**
+     * @var ClassMetadataCache
+     */
+    private $classMetadataCache;
+
+    /**
      * @param Reader $reader
      */
     public function __construct(Reader $reader)
     {
         $this->reader = $reader;
-        $this->classMetadataCache = new ClassMetadataCache;
+        $this->classMetadataCache = new ClassMetadataCache();
     }
 
     /**
      * Load metadata of a class.
      *
-     * @param string $class
+     * @param object|string $objectOrClass
      *
      * @return ClassMetadata
      */
-    public function load(string $class)
+    public function load($objectOrClass)
     {
+        // Définition de la classe cible
+        $class = is_object($objectOrClass) ? ClassUtils::getClass($objectOrClass) : $objectOrClass;
+
         // Récupération des métadonnées depuis le cache mémoire
         $classMetadata = $this->classMetadataCache->get($class);
 
@@ -83,7 +91,7 @@ class ClassMetadataFactory
         }
 
         /** @var ORM\Model|null */
-        $model = $this->reader->getClassAnnotation($class, ORM\Model::class);
+        $model = $this->reader->getClassAnnotation($reflection, ORM\Model::class);
 
         // Si pas de modèle
         if (null === $model) {
@@ -96,15 +104,15 @@ class ClassMetadataFactory
         // Pour chaque propriété de la classe
         foreach ($reflection->getProperties() as $property) {
             // Si on est sur une autre classe que celle dont on veut charger les métadonnées
-            if($class !== $classMetadata->getClass()) {
+            if ($class !== $classMetadata->getClass()) {
                 // Si la propriété est privée
-                if($property->isPrivate()) {
+                if ($property->isPrivate()) {
                     // Propriété suivante
                     continue;
                 }
 
                 // Si la propriété est déjà mappée
-                if($classMetadata->hasProperty($property->getName())) {
+                if ($classMetadata->hasProperty($property->getName())) {
                     // Propriété suivante
                     continue;
                 }
@@ -114,12 +122,12 @@ class ClassMetadataFactory
             $field = $this->reader->getPropertyAnnotation($property, ORM\Field::class);
 
             // Si on a un champ à mapper
-            if(null !== $field) {
+            if (null !== $field) {
                 // Définition du nom du champ distant
                 $remoteName = $field->name ?: $property->getName();
 
                 // Enregistrement du champ
-                $classMetadata->addProperty(new FieldMetadata($property->getName(), $remoteName, $field->type, $field->nullable));
+                $classMetadata->addProperty(new FieldMetadata($property->getName(), $remoteName, $this->resolveType($field->type), $field->nullable));
             }
 
             /** @var ORM\ManyToOne|null */
@@ -143,7 +151,7 @@ class ClassMetadataFactory
                 $remoteName = $manyToMany->name ?: $property->getName();
 
                 // Enregistrement de l'association
-                $classMetadata->addProperty(new ManyToManyMetadata($property->getName(), $remoteName, $manyToMany->class, $manyToMany->nullable));
+                $classMetadata->addProperty(new ManyToManyMetadata($property->getName(), $remoteName, $manyToMany->class));
             }
 
             /** @var ORM\OneToMany|null */
@@ -155,7 +163,7 @@ class ClassMetadataFactory
                 $remoteName = $oneToMany->name ?: $property->getName();
 
                 // Enregistrement de l'association
-                $classMetadata->addProperty(new OneToManyMetadata($property->getName(), $remoteName, $oneToMany->class, $oneToMany->nullable));
+                $classMetadata->addProperty(new OneToManyMetadata($property->getName(), $remoteName, $oneToMany->class));
             }
         }
 
@@ -163,12 +171,24 @@ class ClassMetadataFactory
         $parentClass = $reflection->getParentClass();
 
         // Si on a une classe parente
-        if(null !== $parentClass) {
+        if (null !== $parentClass) {
             // Retour du chargement récursif de la/les classe(s) parente(s)
             return $this->doLoad($parentClass->getClass(), $classMetadata);
         }
 
         // Retour des métadonnées
         return $classMetadata;
+    }
+
+    /**
+     * Resolve type instance from name.
+     *
+     * @param string|null $typeName
+     *
+     * @return TypeInterface
+     */
+    public function resolveType(string $typeName = null)
+    {
+        // ...
     }
 }

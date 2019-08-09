@@ -15,7 +15,7 @@ class Registry
     private $defaultConnection;
 
     /**
-     * @var RecordManager[]
+     * @var Manager[]
      */
     private $managers = [];
 
@@ -30,12 +30,12 @@ class Registry
     /**
      * Register a manager by name.
      *
-     * @param string        $name
-     * @param RecordManager $manager
+     * @param string  $name
+     * @param Manager $manager
      *
      * @return self
      */
-    public function register(string $name, RecordManager $manager)
+    public function register(string $name, Manager $manager)
     {
         $this->managers[$name] = $manager;
 
@@ -49,7 +49,7 @@ class Registry
      *
      * @throws Exception when the manager was not found
      *
-     * @return RecordManager
+     * @return Manager
      */
     public function get(string $name = null)
     {

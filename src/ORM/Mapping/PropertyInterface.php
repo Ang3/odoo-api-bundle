@@ -20,11 +20,6 @@ interface PropertyInterface
     /**
      * @return bool
      */
-    public function isNullable();
-
-    /**
-     * @return bool
-     */
     public function isField();
 
     /**

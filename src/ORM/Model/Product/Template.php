@@ -15,7 +15,7 @@ use JMS\Serializer\Annotation as JMS;
  *
  * @author Joanis ROUANET
  */
-class Article extends Record
+class Template extends Record
 {
     use ActivatableRecordTrait;
     use NamedRecordTrait;

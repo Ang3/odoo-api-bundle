@@ -43,16 +43,23 @@ class DoctrineListener
         // Récupération de l'entité
         $entity = $eventArgs->getEntity();
 
-        // Récupération des métadonnées de la classe
-        $classMetadata = $eventArgs
+        // Relevé de la classe de l'entité
+        $entityClass = ClassUtils::getClass($entity);
+
+        // Récupération des propriétés mappés de la classe
+        $properties = $eventArgs
             ->getEntityManager()
-            ->getClassMetadata(ClassUtils::getClass($entity))
+            ->getClassMetadata($entityClass)
+            ->getReflectionProperties()
         ;
 
+        // Récupération des métadonnées de la classe
+        $classMetadata = $this->classMetadataFactory->load($entityClass);
+
         // Pour chaque propriété de l'objet
-        foreach ($classMetadata->getReflectionProperties() as $property) {
+        foreach ($properties as $property) {
             // Si on a une annotation de relation simple
-            if ($association = $this->classMetadataFactory->findSingleAssociation($property)) {
+            if ($association = $this->classMetadataFactory->findSingleAssociation($classMetadata, $property)) {
                 // On rend accessible la propriété
                 $property->setAccessible(true);
 
@@ -72,7 +79,7 @@ class DoctrineListener
                 }
 
                 // Création d'une réflection de la classe associée
-                $reflection = new ReflectionClass($association->class);
+                $reflection = new ReflectionClass($association->getTargetClass());
 
                 // Création de l'enregistrement
                 $record = $reflection->newInstanceWithoutConstructor();

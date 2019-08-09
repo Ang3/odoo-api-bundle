@@ -5,7 +5,7 @@ namespace Ang3\Bundle\OdooApiBundle\ORM\Mapping;
 /**
  * @author Joanis ROUANET
  */
-interface FieldInterface
+interface PropertyInterface
 {
     /**
      * @return string

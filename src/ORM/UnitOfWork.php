@@ -193,7 +193,7 @@ class UnitOfWork
             ->getClient()->searchAndRead($model, $domains, $options);
 
         // Pour chaque ligne de données
-        foreach ($result as $key => $data) {dump($data);
+        foreach ($result as $key => $data) {
             // Création de l'enregistrement
             $record = $this->recordNormalizer->denormalize($data, $class);
 
@@ -330,7 +330,7 @@ class UnitOfWork
         }
 
         // Pour chaque proprité de la classe
-        foreach ($classMetadata->iterateFields() as $name => $field) {
+        foreach ($classMetadata->iterateProperties() as $name => $field) {
             // On insère la valeur de l'enregistrement rafraichit dans la propriété de l'enregistrement mis-à-jour
             $field->setValue($record, $field->getValue($refreshed));
         }

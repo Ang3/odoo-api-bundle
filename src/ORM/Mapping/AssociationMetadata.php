@@ -5,7 +5,7 @@ namespace Ang3\Bundle\OdooApiBundle\ORM\Mapping;
 /**
  * @author Joanis ROUANET
  */
-class AssociationMetadata extends AbstractField
+class AssociationMetadata extends AbstractProperty
 {
     /**
      * @var string
@@ -13,14 +13,15 @@ class AssociationMetadata extends AbstractField
     private $targetClass;
 
     /**
-     * @param string $class
-     * @param string $name
-     * @param string $targetClass
+     * @param ClassMetadata $classMetadata
+     * @param string        $name
+     * @param string        $serializedName
+     * @param string        $targetClass
      */
-    public function __construct(string $class, string $name, string $targetClass)
+    public function __construct(ClassMetadata $classMetadata, string $name, string $serializedName, string $targetClass)
     {
-        // Construction de la réflection
-        parent::__construct($class, $name);
+        // Construction de la ropriété
+        parent::__construct($classMetadata, $name, $serializedName);
 
         // Hydratation
         $this->targetClass = $targetClass;

@@ -7,7 +7,7 @@ use ReflectionProperty;
 use Ang3\Bundle\OdooApiBundle\ORM\Annotation as ORM;
 use Ang3\Bundle\OdooApiBundle\ORM\Cache\ClassMetadataCache;
 use Ang3\Bundle\OdooApiBundle\ORM\Mapping\ClassMetadata;
-use Ang3\Bundle\OdooApiBundle\ORM\Mapping\FieldMetadata;
+use Ang3\Bundle\OdooApiBundle\ORM\Mapping\PropertyMetadata;
 use Ang3\Bundle\OdooApiBundle\ORM\Mapping\SingleAssociationMetadata;
 use Ang3\Bundle\OdooApiBundle\ORM\Mapping\MultipleAssociationMetadata;
 use Ang3\Bundle\OdooApiBundle\ORM\Exception\MappingException;
@@ -80,11 +80,8 @@ class ClassMetadataFactory
      */
     private function doLoad(string $class)
     {
-        // Retour de la construction de l'instance des mtadonnées
-        $classMetadata = new ClassMetadata($class);
-
         // Récupération de la réflection de la classe
-        $reflection = $classMetadata->getReflectionClass();
+        $reflection = new ReflectionClass($class);
 
         // Si la classe n'implémente pas l'interface d'un enregistrement
         if (!$reflection->implementsInterface(RecordInterface::class)) {
@@ -99,8 +96,8 @@ class ClassMetadataFactory
             throw new MappingException(sprintf('Missing annotation "%s" on class "%s"', ORM\Model::class, $class));
         }
 
-        // Hydratation du modèle de la classe
-        $classMetadata->setModel($model->name);
+        // Retour de la construction de l'instance des mtadonnées
+        $classMetadata = new ClassMetadata($class, $model->name);
 
         // Pour chaque propriété de la classe
         foreach ($reflection->getProperties() as $property) {
@@ -111,16 +108,6 @@ class ClassMetadataFactory
              */
             $excluded = $this->reader->getPropertyAnnotation($property, JMS\Exclude::class);
 
-            /**
-             * Récupération du nom sérialisé éventuel.
-             *
-             * @var JMS\SerializedName|null
-             */
-            $serializedName = $this->reader->getPropertyAnnotation($property, JMS\SerializedName::class);
-
-            // Définition du nom sérialisé selon la présence d'annotation ou non
-            $serializedName = null !== $serializedName ? $serializedName->name : $property->getName();
-
             // Si on a une annotation d'exclusion
             if (null !== $excluded) {
                 // Propriété suivante
@@ -128,37 +115,28 @@ class ClassMetadataFactory
             }
 
             // Si on a une association simple
-            if ($association = $this->findSingleAssociation($property)) {
-                // Enregistrement du nom sérialisé de la propriété
-                $association->setSerializedName($serializedName);
-
+            if ($association = $this->findSingleAssociation($classMetadata, $property)) {
                 // Enregistrement de la propriété
-                $classMetadata->addField($association);
+                $classMetadata->addProperty($association);
 
                 // Propriété suivante
                 continue;
             }
 
             // Si on a une association mutiple
-            if ($association = $this->findMultipleAssociation($property)) {
-                // Enregistrement du nom sérialisé de la propriété
-                $association->setSerializedName($serializedName);
-
+            if ($association = $this->findMultipleAssociation($classMetadata, $property)) {
                 // Enregistrement de la propriété
-                $classMetadata->addField($association);
+                $classMetadata->addProperty($association);
 
                 // Propriété suivante
                 continue;
             }
 
             // Enregistrement de l'association
-            $field = new FieldMetadata($reflection->getName(), $property->getName());
-
-            // Enregistrement du nom sérialisé de la propriété
-            $field->setSerializedName($serializedName);
+            $property = new PropertyMetadata($classMetadata, $property->getName(), $this->getSerializedName($property));
 
             // Enregistrement de la propriété
-            $classMetadata->addField($field);
+            $classMetadata->addProperty($property);
         }
 
         // Retour des métadonnées
@@ -168,11 +146,12 @@ class ClassMetadataFactory
     /**
      * Find single association on property.
      *
+     * @param ClassMetadata      $classMetadata
      * @param ReflectionProperty $property
      *
      * @return SingleAssociationMetadata|null
      */
-    public function findSingleAssociation(ReflectionProperty $property)
+    public function findSingleAssociation(ClassMetadata $classMetadata, ReflectionProperty $property)
     {
         // Recherche d'une classe cible pour une association simple
         $targetClass = $this->findAssociation($property, SingleAssociation::class);
@@ -184,17 +163,18 @@ class ClassMetadataFactory
         }
 
         // Retour de l'association simple
-        return new SingleAssociationMetadata($property->getDeclaringClass()->getName(), $property->getName(), $targetClass);
+        return new SingleAssociationMetadata($classMetadata, $property->getName(), $this->getSerializedName($property), $targetClass);
     }
 
     /**
      * Find multiple association on property.
      *
+     * @param ClassMetadata      $classMetadata
      * @param ReflectionProperty $property
      *
      * @return MultipleAssociationMetadata|null
      */
-    public function findMultipleAssociation(ReflectionProperty $property)
+    public function findMultipleAssociation(ClassMetadata $classMetadata, ReflectionProperty $property)
     {
         // Recherche d'une classe cible pour une association simple
         $targetClass = $this->findAssociation($property, MultipleAssociation::class);
@@ -206,7 +186,7 @@ class ClassMetadataFactory
         }
 
         // Retour de l'association simple
-        return new MultipleAssociationMetadata($property->getDeclaringClass()->getName(), $property->getName(), $targetClass);
+        return new MultipleAssociationMetadata($classMetadata, $property->getName(), $this->getSerializedName($property), $targetClass);
     }
 
     /**
@@ -277,5 +257,25 @@ class ClassMetadataFactory
 
         // Retour de l'association éventuelle
         return $annotation;
+    }
+
+    /**
+     * Get serialized name of a property.
+     *
+     * @param ReflectionProperty $property
+     *
+     * @return string
+     */
+    public function getSerializedName(ReflectionProperty $property)
+    {
+        /**
+         * Récupération du nom sérialisé éventuel.
+         *
+         * @var JMS\SerializedName|null
+         */
+        $serializedName = $this->reader->getPropertyAnnotation($property, JMS\SerializedName::class);
+
+        // Retour du nom sérialisé selon la présence d'annotation ou non
+        return null !== $serializedName ? $serializedName->name : $property->getName();
     }
 }

@@ -8,7 +8,9 @@ namespace Ang3\Bundle\OdooApiBundle\ORM\Annotation;
  * @Annotation
  * @Target({"PROPERTY"})
  * @Attributes({
- *   @Attribute("type", type = "string")
+ *   @Attribute("name", type = "name"),
+ *   @Attribute("type", type = "string"),
+ *   @Attribute("options", type = "array")
  * })
  */
 class Field
@@ -16,5 +18,15 @@ class Field
     /**
      * @var string|null
      */
+    public $name;
+
+    /**
+     * @var string|null
+     */
     public $type;
+
+    /**
+     * @var array
+     */
+    public $options = [];
 }

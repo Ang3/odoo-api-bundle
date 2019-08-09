@@ -6,7 +6,6 @@ use Ang3\Bundle\OdooApiBundle\ORM\Annotation as ORM;
 use Ang3\Bundle\OdooApiBundle\ORM\Model\Record;
 use Ang3\Bundle\OdooApiBundle\ORM\Model\ActivatableRecordTrait;
 use Ang3\Bundle\OdooApiBundle\ORM\Model\NamedRecordTrait;
-use JMS\Serializer\Annotation as JMS;
 
 /**
  * @ORM\Model("res.currency")
@@ -21,26 +20,23 @@ class Currency extends Record
     /**
      * @var string
      *
-     * @JMS\Type("string")
-     * @JMS\SerializedName("symbol")
+     * @ORM\Field(name="symbol", type="string, nullable=false)
      */
     private $symbol;
 
     /**
      * @var float
      *
-     * @JMS\Type("float")
-     * @JMS\SerializedName("rounding")
-     */
-    private $rounding;
-
-    /**
-     * @var float
-     *
-     * @JMS\Type("float")
-     * @JMS\SerializedName("rate")
+     * @ORM\Field(name="rate", type="float", nullable=false)
      */
     private $rate;
+
+    /**
+     * @var float|null
+     *
+     * @ORM\Field(name="rounding", type="float")
+     */
+    private $rounding;
 
     /**
      * @param string $symbol
@@ -63,26 +59,6 @@ class Currency extends Record
     }
 
     /**
-     * @param float $rounding
-     *
-     * @return self
-     */
-    public function setRounding(float $rounding)
-    {
-        $this->rounding = $rounding;
-
-        return $this;
-    }
-
-    /**
-     * @return float
-     */
-    public function getRounding()
-    {
-        return $this->rounding;
-    }
-
-    /**
      * @param float $rate
      *
      * @return self
@@ -100,5 +76,25 @@ class Currency extends Record
     public function getRate()
     {
         return $this->rate;
+    }
+
+    /**
+     * @param float|null $rounding
+     *
+     * @return self
+     */
+    public function setRounding(float $rounding = null)
+    {
+        $this->rounding = $rounding;
+
+        return $this;
+    }
+
+    /**
+     * @return float|null
+     */
+    public function getRounding()
+    {
+        return $this->rounding;
     }
 }

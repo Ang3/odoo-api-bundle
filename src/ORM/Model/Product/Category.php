@@ -5,7 +5,6 @@ namespace Ang3\Bundle\OdooApiBundle\ORM\Model\Product;
 use Ang3\Bundle\OdooApiBundle\ORM\Annotation as ORM;
 use Ang3\Bundle\OdooApiBundle\ORM\Model\Record;
 use Ang3\Bundle\OdooApiBundle\ORM\Model\NamedRecordTrait;
-use JMS\Serializer\Annotation as JMS;
 
 /**
  * @ORM\Model("product.category")
@@ -18,25 +17,23 @@ class Category extends Record
 
     /**
      * @var string|null
-     *
-     * @JMS\Type("string")
-     * @JMS\SerializedName("parent_path")
+     * 
+     * @ORM\Field(name="parent_path", type="string")
      */
     protected $parentPath;
 
     /**
      * @var int|null
      *
-     * @JMS\Type("integer")
-     * @JMS\SerializedName("product_count")
+     * @ORM\ReadOnly
+     * @ORM\Field(name="product_count", type="integer")
      */
     protected $nbProducts;
 
     /**
      * @var Category|null
      *
-     * @JMS\Type("Ang3\Bundle\OdooApiBundle\ORM\Serializer\Type\SingleAssociation<'Ang3\Bundle\OdooApiBundle\ORM\Model\Product\Category'>")
-     * @JMS\SerializedName("parent_id")
+     * @ORM\ManyToOne(name="parent_id", class="Ang3\Bundle\OdooApiBundle\ORM\Model\Product\Category")
      */
     protected $parent;
 

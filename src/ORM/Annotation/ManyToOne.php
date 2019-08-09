@@ -8,15 +8,31 @@ namespace Ang3\Bundle\OdooApiBundle\ORM\Annotation;
  * @Annotation
  * @Target({"PROPERTY"})
  * @Attributes({
- *   @Attribute("class", type = "string")
+ *   @Attribute("name", type = "name"),
+ *   @Attribute("class", type = "string"),
+ *   @Attribute("nullable", type = "boolean"),
+ *   @Attribute("options", type = "array")
  * })
  */
 class ManyToOne
 {
     /**
-     * @Required
-     *
-     * @var string
+     * @var string|null
+     */
+    public $name;
+
+    /**
+     * @var string|null
      */
     public $class;
+
+    /**
+     * @var bool
+     */
+    public $nullable = true;
+
+    /**
+     * @var array
+     */
+    public $options = [];
 }

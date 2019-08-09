@@ -2,6 +2,8 @@
 
 namespace Ang3\Bundle\OdooApiBundle\ORM\Mapping;
 
+use ReflectionClass;
+
 /**
  * @author Joanis ROUANET
  */
@@ -13,15 +15,20 @@ class AssociationMetadata extends AbstractProperty
     private $targetClass;
 
     /**
-     * @param ClassMetadata $classMetadata
-     * @param string        $name
-     * @param string        $serializedName
-     * @param string        $targetClass
+     * @var ReflectionClass|null
      */
-    public function __construct(ClassMetadata $classMetadata, string $name, string $serializedName, string $targetClass)
+    private $reflectionClass;
+
+    /**
+     * @param string $localName
+     * @param string $remoteName
+     * @param string $targetClass
+     * @param bool   $nullable
+     */
+    public function __construct(string $localName, string $remoteName, string $targetClass, bool $nullable = true)
     {
-        // Construction de la ropriété
-        parent::__construct($classMetadata, $name, $serializedName);
+        // Construction de la propriété de base
+        parent::__construct($localName, $remoteName, $nullable);
 
         // Hydratation
         $this->targetClass = $targetClass;
@@ -45,6 +52,29 @@ class AssociationMetadata extends AbstractProperty
     public function getTargetClass()
     {
         return $this->targetClass;
+    }
+
+    /**
+     * Construct new instance without constructor.
+     * 
+     * @return object
+     */
+    public function newInstance()
+    {
+        return $this
+            ->getReflectionClass()
+            ->newInstanceWithoutConstructor()
+        ;
+    }
+
+    /**
+     * Get the reflection of target class.
+     * 
+     * @return ReflectionClass
+     */
+    public function getReflectionClass()
+    {
+        return $this->reflectionClass = $this->reflectionClass ?: new ReflectionClass($this->targetClass);
     }
 
     /**

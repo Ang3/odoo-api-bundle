@@ -5,7 +5,6 @@ namespace Ang3\Bundle\OdooApiBundle\ORM\Model\Res;
 use Ang3\Bundle\OdooApiBundle\ORM\Annotation as ORM;
 use Ang3\Bundle\OdooApiBundle\ORM\Model\Record;
 use Ang3\Bundle\OdooApiBundle\ORM\Model\NamedRecordTrait;
-use JMS\Serializer\Annotation as JMS;
 
 /**
  * @ORM\Model("res.country")
@@ -19,24 +18,21 @@ class Country extends Record
     /**
      * @var string|null
      *
-     * @JMS\Type("string")
-     * @JMS\SerializedName("code")
+     * @ORM\Field(name="code", type="string")
      */
     protected $code;
 
     /**
      * @var int|null
      *
-     * @JMS\Type("integer")
-     * @JMS\SerializedName("phone_code")
+     * @ORM\Field(name="phone_code", type="integer")
      */
     protected $phoneCode;
 
     /**
-     * @var Currency
+     * @var Currency|null
      *
-     * @JMS\Type("Ang3\Bundle\OdooApiBundle\ORM\Serializer\Type\SingleAssociation<'Ang3\Bundle\OdooApiBundle\ORM\Model\Res\Currency'>")
-     * @JMS\SerializedName("currency_id")
+     * @ORM\ManyToOne(name="currency_id", class="Ang3\Bundle\OdooApiBundle\ORM\Model\Res\Currency")
      */
     protected $currency;
 
@@ -81,11 +77,11 @@ class Country extends Record
     }
 
     /**
-     * @param Currency $currency
+     * @param Currency|null $currency
      *
      * @return self
      */
-    public function setCurrency(Currency $currency)
+    public function setCurrency(Currency $currency = null)
     {
         $this->currency = $currency;
 
@@ -93,7 +89,7 @@ class Country extends Record
     }
 
     /**
-     * @return Currency
+     * @return Currency|null
      */
     public function getCurrency()
     {

@@ -1,6 +1,6 @@
 <?php
 
-namespace Ang3\Bundle\OdooApiBundle\ORM\Types;
+namespace Ang3\Bundle\OdooApiBundle\ORM\Mapping\Types;
 
 /**
  * @author Joanis ROUANET

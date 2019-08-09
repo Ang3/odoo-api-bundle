@@ -8,7 +8,6 @@ use Ang3\Bundle\OdooApiBundle\ORM\Model\ActivatableRecordTrait;
 use Ang3\Bundle\OdooApiBundle\ORM\Model\NamedRecordTrait;
 use Ang3\Bundle\OdooApiBundle\ORM\Model\Account\Tax;
 use Ang3\Bundle\OdooApiBundle\ORM\Model\Res\Company;
-use JMS\Serializer\Annotation as JMS;
 
 /**
  * @ORM\Model("product.template")
@@ -23,80 +22,70 @@ class Template extends Record
     /**
      * @var string
      *
-     * @JMS\Type("string")
-     * @JMS\SerializedName("type")
+     * @ORM\Field(name="type", type="string", nullable=false)
      */
     protected $type;
 
     /**
      * @var string|null
      *
-     * @JMS\Type("string")
-     * @JMS\SerializedName("description")
+     * @ORM\Field(name="description", type="string")
      */
     protected $description;
 
     /**
      * @var float|null
      *
-     * @JMS\Type("float")
-     * @JMS\SerializedName("list_price")
+     * @ORM\Field(name="list_price", type="float")
      */
     protected $sellingPrice;
 
     /**
      * @var float|null
      *
-     * @JMS\Type("float")
-     * @JMS\SerializedName("standard_price")
+     * @ORM\Field(name="standard_price", type="float")
      */
     protected $cost;
 
     /**
      * @var string|null
-     *
-     * @JMS\Type("string")
-     * @JMS\SerializedName("default_code")
+     * 
+     * @ORM\Field(name="default_code", type="string")
      */
     protected $defaultCode;
 
     /**
      * @var string|null
-     *
-     * @JMS\Type("string")
-     * @JMS\SerializedName("barcode")
+     * 
+     * @ORM\Field(name="barcode", type="string")
      */
     protected $barCode;
 
     /**
      * @var Tax[]
      *
-     * @JMS\Type("Ang3\Bundle\OdooApiBundle\ORM\Serializer\Type\MultipleAssociation<'Ang3\Bundle\OdooApiBundle\ORM\Model\Account\Tax'>")
-     * @JMS\SerializedName("taxes_id")
+     * @ORM\ManyToMany(name="taxes_id", class="Ang3\Bundle\OdooApiBundle\ORM\Model\Account\Tax")
      */
     protected $taxes = [];
 
     /**
      * @var Tax[]
      *
-     * @JMS\Type("Ang3\Bundle\OdooApiBundle\ORM\Serializer\Type\MultipleAssociation<'Ang3\Bundle\OdooApiBundle\ORM\Model\Account\Tax'>")
-     * @JMS\SerializedName("supplier_taxes_id")
+     * @ORM\ManyToMany(name="supplier_taxes_id", class="Ang3\Bundle\OdooApiBundle\ORM\Model\Account\Tax")
      */
     protected $supplierTaxes = [];
 
     /**
      * @var Category
      *
-     * @JMS\Type("Ang3\Bundle\OdooApiBundle\ORM\Serializer\Type\SingleAssociation<'Ang3\Bundle\OdooApiBundle\ORM\Model\Product\Category'>")
-     * @JMS\SerializedName("categ_id")
+     * @ORM\ManyToOne(name="categ_id", class="Ang3\Bundle\OdooApiBundle\ORM\Model\Product\Category", nullable=false)
      */
     protected $category;
 
     /**
-     * @var Company
+     * @var Company|null
      *
-     * @JMS\Type("Ang3\Bundle\OdooApiBundle\ORM\Serializer\Type\SingleAssociation<'Ang3\Bundle\OdooApiBundle\ORM\Model\Res\Company'>")
-     * @JMS\SerializedName("company_id")
+     * @ORM\ManyToOne(name="company_id", class="Ang3\Bundle\OdooApiBundle\ORM\Model\Res\Company", nullable=true)
      */
     protected $company;
 
@@ -305,11 +294,11 @@ class Template extends Record
     }
 
     /**
-     * @param Company $company
+     * @param Company|null $company
      *
      * @return self
      */
-    public function setCompany(Company $company)
+    public function setCompany(Company $company = null)
     {
         $this->company = $company;
 
@@ -317,7 +306,7 @@ class Template extends Record
     }
 
     /**
-     * @return Company
+     * @return Company|null
      */
     public function getCompany()
     {

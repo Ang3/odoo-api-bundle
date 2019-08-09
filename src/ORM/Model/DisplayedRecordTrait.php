@@ -12,9 +12,7 @@ trait DisplayedRecordTrait
     /**
      * @var string
      *
-     * @JMS\Type("string")
-     * @JMS\SerializedName("display_name")
-     * @JMS\Exclude(if="context.getDirection() === constant('JMS\\Serializer\\GraphNavigatorInterface::DIRECTION_SERIALIZATION')")
+     * @ORM\Field(name="display_name", type="string")
      */
     protected $displayName;
 

@@ -3,7 +3,6 @@
 namespace Ang3\Bundle\OdooApiBundle\ORM\Model\Product;
 
 use Ang3\Bundle\OdooApiBundle\ORM\Annotation as ORM;
-use JMS\Serializer\Annotation as JMS;
 
 /**
  * @ORM\Model("product.product")
@@ -15,8 +14,7 @@ class Product extends Template
     /**
      * @var Template
      *
-     * @JMS\Type("Ang3\Bundle\OdooApiBundle\ORM\Serializer\Type\SingleAssociation<'Ang3\Bundle\OdooApiBundle\ORM\Model\Product\Template'>")
-     * @JMS\SerializedName("product_tmpl_id")
+     * @ORM\ManyToOne(name="product_tmpl_id", class="Ang3\Bundle\OdooApiBundle\ORM\Model\Product\Template", nullable=false)
      */
     protected $template;
 

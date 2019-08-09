@@ -10,13 +10,14 @@ namespace Ang3\Bundle\OdooApiBundle\ORM\Annotation;
  * @Attributes({
  *   @Attribute("name", type = "name"),
  *   @Attribute("type", type = "string"),
+ *   @Attribute("nullable", type = "boolean"),
  *   @Attribute("options", type = "array")
  * })
  */
 class Field
 {
     /**
-     * @var string|null
+     * @var string
      */
     public $name;
 
@@ -24,6 +25,11 @@ class Field
      * @var string|null
      */
     public $type;
+
+    /**
+     * @var bool
+     */
+    public $nullable = true;
 
     /**
      * @var array

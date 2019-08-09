@@ -10,12 +10,17 @@ interface PropertyInterface
     /**
      * @return string
      */
-    public function getName();
+    public function getLocalName();
 
     /**
      * @return string
      */
-    public function getSerializedName();
+    public function getRemoteName();
+
+    /**
+     * @return bool
+     */
+    public function isNullable();
 
     /**
      * @return bool

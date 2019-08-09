@@ -4,7 +4,6 @@ namespace Ang3\Bundle\OdooApiBundle\ORM\Model\Res;
 
 use Ang3\Bundle\OdooApiBundle\ORM\Annotation as ORM;
 use Ang3\Bundle\OdooApiBundle\ORM\Model\Record;
-use JMS\Serializer\Annotation as JMS;
 
 /**
  * @ORM\Model("res.company")
@@ -18,8 +17,7 @@ class Company extends Record
     /**
      * @var Partner
      *
-     * @JMS\Type("Ang3\Bundle\OdooApiBundle\ORM\Serializer\Type\SingleAssociation<'Ang3\Bundle\OdooApiBundle\ORM\Model\Res\Partner'>")
-     * @JMS\SerializedName("partner_id")
+     * @ORM\ManyToOne(name="partner_id", class="Ang3\Bundle\OdooApiBundle\ORM\Model\Res\Partner", nullable=false)
      */
     protected $partner;
 

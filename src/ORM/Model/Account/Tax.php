@@ -7,7 +7,6 @@ use Ang3\Bundle\OdooApiBundle\ORM\Model\Record;
 use Ang3\Bundle\OdooApiBundle\ORM\Model\ActivatableRecordTrait;
 use Ang3\Bundle\OdooApiBundle\ORM\Model\NamedRecordTrait;
 use Ang3\Bundle\OdooApiBundle\ORM\Model\Res\Company;
-use JMS\Serializer\Annotation as JMS;
 
 /**
  * @ORM\Model("account.tax")
@@ -22,64 +21,56 @@ class Tax extends Record
     /**
      * @var string|null
      *
-     * @JMS\Type("string")
-     * @JMS\SerializedName("description")
+     * @ORM\Field(name="description", type="string")
      */
     protected $description;
 
     /**
      * @var float
      *
-     * @JMS\Type("float")
-     * @JMS\SerializedName("amount")
+     * @ORM\Field(name="amount", type="float", nullable=false)
      */
     protected $amount;
 
     /**
      * @var string
      *
-     * @JMS\Type("string")
-     * @JMS\SerializedName("amount_type")
+     * @ORM\Field(name="amount_type", type="string", nullable=false)
      */
     protected $amountType;
 
     /**
      * @var string
      *
-     * @JMS\Type("string")
-     * @JMS\SerializedName("type_taxe_use")
+     * @ORM\Field(name="type_taxe_use", type="string", nullable=false)
      */
     protected $scope;
 
     /**
      * @var bool
      *
-     * @JMS\Type("bool")
-     * @JMS\SerializedName("price_include")
+     * @ORM\Field(name="price_include", type="boolean")
      */
     protected $includedInPrice = false;
 
     /**
      * @var bool
      *
-     * @JMS\Type("bool")
-     * @JMS\SerializedName("inlude_base_amount")
+     * @ORM\Field(name="inlude_base_amount", type="boolean")
      */
     protected $baseAmountIncluded = false;
 
     /**
      * @var TaxGroup
      *
-     * @JMS\Type("Ang3\Bundle\OdooApiBundle\ORM\Serializer\Type\SingleAssociation<'Ang3\Bundle\OdooApiBundle\ORM\Model\Account\TaxGroup'>")
-     * @JMS\SerializedName("company_id")
+     * @ORM\ManyToOne(name="tax_group_id", class="Ang3\Bundle\OdooApiBundle\ORM\Model\Account\TaxGroup", nullable=false)
      */
     protected $group;
 
     /**
      * @var Company
      *
-     * @JMS\Type("Ang3\Bundle\OdooApiBundle\ORM\Serializer\Type\SingleAssociation<'Ang3\Bundle\OdooApiBundle\ORM\Model\Res\Company'>")
-     * @JMS\SerializedName("company_id")
+     * @ORM\ManyToOne(name="company_id", class="Ang3\Bundle\OdooApiBundle\ORM\Model\Res\Company", nullable=false)
      */
     protected $company;
 

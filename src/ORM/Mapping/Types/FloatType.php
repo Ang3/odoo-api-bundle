@@ -1,6 +1,6 @@
 <?php
 
-namespace Ang3\Bundle\OdooApiBundle\ORM\Types;
+namespace Ang3\Bundle\OdooApiBundle\ORM\Mapping\Types;
 
 /**
  * @author Joanis ROUANET
@@ -60,6 +60,6 @@ class FloatType extends AbstractType
 		$factor = 10 * $decimals;
 
 		// On définie les décimales via e facteur
-		return (float) ((int) $value * $factor) / ($factor)
+		return (float) ((int) $value * $factor) / ($factor);
 	}
 }

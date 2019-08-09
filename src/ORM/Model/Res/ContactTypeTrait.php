@@ -2,8 +2,8 @@
 
 namespace Ang3\Bundle\OdooApiBundle\ORM\Model\Res;
 
+use Ang3\Bundle\OdooApiBundle\ORM\Annotation as ORM;
 use Ang3\Bundle\OdooApiBundle\ORM\Model\NamedRecordTrait;
-use JMS\Serializer\Annotation as JMS;
 
 /**
  * @author Joanis ROUANET
@@ -14,99 +14,87 @@ trait ContactTypeTrait
 
     /**
      * @var string|null
-     *
-     * @JMS\Type("string")
-     * @JMS\SerializedName("street")
+     * 
+     * @ORM\Field(name="street", type="string")
      */
     protected $street;
 
     /**
      * @var string|null
      *
-     * @JMS\Type("string")
-     * @JMS\SerializedName("city")
+     * @ORM\Field(name="city", type="string")
      */
     protected $city;
 
     /**
      * @var string|null
      *
-     * @JMS\Type("string")
-     * @JMS\SerializedName("zip")
+     * @ORM\Field(name="zip", type="string")
      */
     protected $zip;
 
     /**
-     * @var Country
-     *
-     * @JMS\Type("Ang3\Bundle\OdooApiBundle\ORM\Serializer\Type\SingleAssociation<'Ang3\Bundle\OdooApiBundle\ORM\Model\Res\Country'>")
-     * @JMS\SerializedName("country_id")
-     */
-    protected $country;
-
-    /**
      * @var string|null
      *
-     * @JMS\Type("string")
-     * @JMS\SerializedName("phone")
+     * @ORM\Field(name="phone", type="string")
      */
     protected $phone;
 
     /**
      * @var string|null
      *
-     * @JMS\Type("string")
-     * @JMS\SerializedName("mobile")
+     * @ORM\Field(name="mobile", type="string")
      */
     protected $mobile;
 
     /**
      * @var string|null
      *
-     * @JMS\Type("string")
-     * @JMS\SerializedName("email")
+     * @ORM\Field(name="email", type="string")
      */
     protected $email;
 
     /**
      * @var string|null
      *
-     * @JMS\Type("string")
-     * @JMS\SerializedName("website")
+     * @ORM\Field(name="website", type="string")
      */
     protected $website;
 
     /**
      * @var bool
      *
-     * @JMS\Type("boolean")
-     * @JMS\SerializedName("is_company")
+     * @ORM\Field(name="is_company", type="boolean")
      */
     protected $company = false;
 
     /**
      * @var bool
      *
-     * @JMS\Type("boolean")
-     * @JMS\SerializedName("customer")
+     * @ORM\Field(name="customer", type="boolean")
      */
     protected $customer = false;
 
     /**
      * @var bool
      *
-     * @JMS\Type("boolean")
-     * @JMS\SerializedName("supplier")
+     * @ORM\Field(name="supplier", type="boolean")
      */
     protected $supplier = false;
 
     /**
      * @var bool
      *
-     * @JMS\Type("boolean")
-     * @JMS\SerializedName("employee")
+     * @ORM\Field(name="employee", type="boolean")
      */
     protected $employee = false;
+
+    /**
+     * @var Country|null
+     *
+     * @ORM\ManyToOne(name="country_id", class="Ang3\Bundle\OdooApiBundle\ORM\Model\Res\Country")
+     */
+    protected $country;
 
     /**
      * @param string|null $street
@@ -166,26 +154,6 @@ trait ContactTypeTrait
     public function getZip()
     {
         return $this->zip;
-    }
-
-    /**
-     * @param Country $country
-     *
-     * @return self
-     */
-    public function setCountry(Country $country)
-    {
-        $this->country = $country;
-
-        return $this;
-    }
-
-    /**
-     * @return Country
-     */
-    public function getCountry()
-    {
-        return $this->country;
     }
 
     /**
@@ -346,5 +314,25 @@ trait ContactTypeTrait
     public function isEmployee()
     {
         return $this->employee;
+    }
+
+    /**
+     * @param Country|null $country
+     *
+     * @return self
+     */
+    public function setCountry(Country $country = null)
+    {
+        $this->country = $country;
+
+        return $this;
+    }
+
+    /**
+     * @return Country|null
+     */
+    public function getCountry()
+    {
+        return $this->country;
     }
 }

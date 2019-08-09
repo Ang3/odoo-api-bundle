@@ -14,8 +14,7 @@ trait NamedRecordTrait
     /**
      * @var string
      *
-     * @JMS\Type("string")
-     * @JMS\SerializedName("name")
+     * @ORM\Field(name="name", type="string")
      */
     protected $name;
 

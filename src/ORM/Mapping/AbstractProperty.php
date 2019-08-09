@@ -2,8 +2,6 @@
 
 namespace Ang3\Bundle\OdooApiBundle\ORM\Mapping;
 
-use ReflectionProperty;
-
 /**
  * @abstract
  *
@@ -12,40 +10,40 @@ use ReflectionProperty;
 abstract class AbstractProperty implements PropertyInterface
 {
     /**
-     * @var ClassMetadata
+     * @var string
      */
-    private $classMetadata;
+    private $localName;
 
     /**
      * @var string
      */
-    private $name;
+    private $remoteName;
 
     /**
-     * @var string
+     * @var bool
      */
-    private $serializedName;
+    private $nullable;
 
     /**
-     * @param ClassMetadata $classMetadata
-     * @param string        $name
-     * @param string        $serializedName
+     * @param string $localName
+     * @param string $remoteName
+     * @param bool   $nullable
      */
-    public function __construct(ClassMetadata $classMetadata, string $name, string $serializedName)
+    public function __construct(string $localName, string $remoteName, bool $nullable = true)
     {
-        $this->classMetadata = $classMetadata;
-        $this->name = $name;
-        $this->serializedName = $serializedName;
+        $this->localName = $localName;
+        $this->remoteName = $remoteName;
+        $this->nullable = $nullable;
     }
 
     /**
-     * @param ClassMetadata $classMetadata
+     * @param string $localName
      *
      * @return self
      */
-    public function setClassMetadata(ClassMetadata $classMetadata)
+    public function setLocalName(string $localName)
     {
-        $this->classMetadata = $classMetadata;
+        $this->localName = $localName;
 
         return $this;
     }
@@ -53,19 +51,19 @@ abstract class AbstractProperty implements PropertyInterface
     /**
      * {@inheritdoc}.
      */
-    public function getClassMetadata()
+    public function getLocalName()
     {
-        return $this->classMetadata;
+        return $this->localName;
     }
 
     /**
-     * @param string $name
+     * @param string $remoteName
      *
      * @return self
      */
-    public function setName(string $name)
+    public function setRemoteName(string $remoteName)
     {
-        $this->name = $name;
+        $this->remoteName = $remoteName;
 
         return $this;
     }
@@ -73,19 +71,19 @@ abstract class AbstractProperty implements PropertyInterface
     /**
      * {@inheritdoc}.
      */
-    public function getName()
+    public function getRemoteName()
     {
-        return $this->name;
+        return $this->remoteName;
     }
 
     /**
-     * @param string $serializedName
+     * @param bool $nullable
      *
      * @return self
      */
-    public function setSerializedName(string $serializedName)
+    public function setNullable(bool $nullable)
     {
-        $this->serializedName = $serializedName;
+        $this->nullable = $nullable;
 
         return $this;
     }
@@ -93,19 +91,9 @@ abstract class AbstractProperty implements PropertyInterface
     /**
      * {@inheritdoc}.
      */
-    public function getSerializedName()
+    public function isNullable()
     {
-        return $this->serializedName;
-    }
-
-    /**
-     * Get the reflection of the property.
-     *
-     * @return ReflectionProperty
-     */
-    public function getReflectionProperty()
-    {
-        return new ReflectionProperty($this->classMetadata->getClass(), $this->name);
+        return $this->nullable;
     }
 
     /**

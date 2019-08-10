@@ -15,24 +15,18 @@ class FieldMetadata extends AbstractProperty
     private $type;
 
     /**
-     * @var bool
-     */
-    private $nullable;
-
-    /**
      * @param string        $localName
      * @param string        $remoteName
      * @param TypeInterface $type
-     * @param bool          $nullable
+     * @param array         $options
      */
-    public function __construct(string $localName, string $remoteName, TypeInterface $type, bool $nullable = true)
+    public function __construct(string $localName, string $remoteName, TypeInterface $type, array $options = [])
     {
         // Construction de la propriété de base
-        parent::__construct($localName, $remoteName);
+        parent::__construct($localName, $remoteName, $options);
 
         // Hydratation
         $this->type = $type;
-        $this->nullable = $nullable;
     }
 
     /**
@@ -53,25 +47,5 @@ class FieldMetadata extends AbstractProperty
     public function getType()
     {
         return $this->type;
-    }
-
-    /**
-     * @param bool $nullable
-     *
-     * @return self
-     */
-    public function setNullable(bool $nullable)
-    {
-        $this->nullable = $nullable;
-
-        return $this;
-    }
-
-    /**
-     * {@inheritdoc}.
-     */
-    public function isNullable()
-    {
-        return $this->nullable;
     }
 }

@@ -18,6 +18,25 @@ interface PropertyInterface
     public function getRemoteName();
 
     /**
+     * @return array
+     */
+    public function getOptions();
+
+    /**
+     * Check if the property is in read only mode.
+     *
+     * @return bool
+     */
+    public function isReadOnly();
+
+    /**
+     * Check if the property is nullable.
+     *
+     * @return bool
+     */
+    public function isNullable();
+
+    /**
      * @return bool
      */
     public function isField();

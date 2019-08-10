@@ -23,11 +23,12 @@ class AssociationMetadata extends AbstractProperty
      * @param string $localName
      * @param string $remoteName
      * @param string $targetClass
+     * @param array  $options
      */
-    public function __construct(string $localName, string $remoteName, string $targetClass)
+    public function __construct(string $localName, string $remoteName, string $targetClass, array $options = [])
     {
         // Construction de la propriété de base
-        parent::__construct($localName, $remoteName);
+        parent::__construct($localName, $remoteName, $options);
 
         // Hydratation
         $this->targetClass = $targetClass;

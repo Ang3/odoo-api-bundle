@@ -6,6 +6,7 @@ use Ang3\Component\OdooApiClient\ExternalApiClient;
 use Ang3\Bundle\OdooApiBundle\ORM\Configuration;
 use Ang3\Bundle\OdooApiBundle\ORM\Manager;
 use Ang3\Bundle\OdooApiBundle\ORM\Normalizer;
+use Ang3\Bundle\OdooApiBundle\ORM\Mapping\TypeCollection;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
@@ -13,6 +14,11 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
  */
 class ManagerFactory
 {
+    /**
+     * @var TypeCollection
+     */
+    private $typeCollection;
+
     /**
      * @var CatalogFactory
      */
@@ -36,13 +42,15 @@ class ManagerFactory
     /**
      * Constructor of the factory.
      *
+     * @param TypeCollection           $typeCollection
      * @param CatalogFactory           $catalogFactory
      * @param ClassMetadataFactory     $classMetadataFactory
      * @param Normalizer               $normalizer
      * @param EventDispatcherInterface $eventDispatcher
      */
-    public function __construct(CatalogFactory $catalogFactory, ClassMetadataFactory $classMetadataFactory, Normalizer $normalizer, EventDispatcherInterface $eventDispatcher)
+    public function __construct(TypeCollection $typeCollection, CatalogFactory $catalogFactory, ClassMetadataFactory $classMetadataFactory, Normalizer $normalizer, EventDispatcherInterface $eventDispatcher)
     {
+        $this->typeCollection = $typeCollection;
         $this->catalogFactory = $catalogFactory;
         $this->classMetadataFactory = $classMetadataFactory;
         $this->normalizer = $normalizer;
@@ -64,7 +72,7 @@ class ManagerFactory
         $catalog = $this->catalogFactory->create($mapping, $loadDefaults);
 
         // Création de la configuration
-        $configuration = new Configuration($catalog, $this->normalizer, $this->classMetadataFactory);
+        $configuration = new Configuration($this->typeCollection, $catalog, $this->classMetadataFactory, $this->normalizer);
 
         // Retour de la construction du manager
         return new Manager($client, $configuration, $this->eventDispatcher);

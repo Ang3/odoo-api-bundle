@@ -20,13 +20,20 @@ abstract class AbstractProperty implements PropertyInterface
     private $remoteName;
 
     /**
+     * @var array
+     */
+    private $options;
+
+    /**
      * @param string $localName
      * @param string $remoteName
+     * @param array  $options
      */
-    public function __construct(string $localName, string $remoteName)
+    public function __construct(string $localName, string $remoteName, array $options = [])
     {
         $this->localName = $localName;
         $this->remoteName = $remoteName;
+        $this->options = $options;
     }
 
     /**
@@ -67,6 +74,42 @@ abstract class AbstractProperty implements PropertyInterface
     public function getRemoteName()
     {
         return $this->remoteName;
+    }
+
+    /**
+     * @param array $options
+     *
+     * @return self
+     */
+    public function setOptions(array $options = [])
+    {
+        $this->options = $options;
+
+        return $this;
+    }
+
+    /**
+     * {@inheritdoc}.
+     */
+    public function getOptions()
+    {
+        return $this->options;
+    }
+
+    /**
+     * {@inheritdoc}.
+     */
+    public function isReadOnly()
+    {
+        return array_key_exists('read_only', $this->options) && true === $this->options['read_only'];
+    }
+
+    /**
+     * {@inheritdoc}.
+     */
+    public function isNullable()
+    {
+        return array_key_exists('nullable', $this->options) && true === $this->options['nullable'];
     }
 
     /**

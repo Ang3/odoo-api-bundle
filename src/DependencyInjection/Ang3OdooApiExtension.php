@@ -5,10 +5,11 @@ namespace Ang3\Bundle\OdooApiBundle\DependencyInjection;
 use Ang3\Component\OdooApiClient\ExternalApiClient;
 use Ang3\Component\OdooApiClient\Factory\ApiClientFactory;
 use Ang3\Bundle\OdooApiBundle\Doctrine\DBAL\Types\RecordType;
-use Ang3\Bundle\OdooApiBundle\ORM\Factory\ManagerFactory;
 use Ang3\Bundle\OdooApiBundle\ORM\Manager;
 use Ang3\Bundle\OdooApiBundle\ORM\Registry;
 use Ang3\Bundle\OdooApiBundle\ORM\Model as Models;
+use Ang3\Bundle\OdooApiBundle\ORM\Factory\ManagerFactory;
+use Ang3\Bundle\OdooApiBundle\ORM\Mapping\TypeCollection;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\Alias;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -95,15 +96,58 @@ class Ang3OdooApiExtension extends Extension implements PrependExtensionInterfac
     }
 
     /**
-     * Load registry.
+     * Create client and returns its reference.
      *
      * @param ContainerBuilder $container
-     * @param array            $connections
+     * @param string           $name
+     * @param array            $params
+     * @param bool             $isDefaultClient
+     *
+     * @return Reference
+     */
+    public function createClient(ContainerBuilder $container, string $name, array $params, bool $isDefaultClient)
+    {
+        // Création de la définition
+        $definition = new Definition(ExternalApiClient::class);
+
+        // Enregistrement des arguments de la définition
+        $definition
+            ->setFactory([new Reference(ApiClientFactory::class), 'create'])
+            ->setArguments([$params])
+        ;
+
+        // Définition du nom du client
+        $clientName = sprintf('ang3_odoo_api.%s.client', $name);
+
+        // Enregistrement du client dans le container
+        $container->setDefinition($clientName, $definition);
+
+        // S'il s'agit du client par défaut
+        if (true === $isDefaultClient) {
+            // Enregistrement du client par défaut
+            $container->setAlias('ang3_odoo_api.client', new Alias($clientName, true));
+
+            // Enregistrement du client par défaut
+            $container->setAlias(ExternalApiClient::class, new Alias($clientName, false));
+        }
+
+        // Retour de la référence du service client
+        return new Reference($clientName);
+    }
+
+    /**
+     * Load ORM.
+     *
+     * @param ContainerBuilder $container
+     * @param Reference[]      $connections
      * @param array            $orm
      * @param string           $defaultConnection
      */
     public function loadOrm(ContainerBuilder $container, array $connections, array $orm, string $defaultConnection)
     {
+        // Chargement et récupération de la référence de la collection de types
+        $typeCollection = $this->loadTypeCollection($container, $orm['types']);
+
         // Récupération du registre des connections
         $registryDefinition = new Definition(Registry::class);
 
@@ -151,42 +195,25 @@ class Ang3OdooApiExtension extends Extension implements PrependExtensionInterfac
     }
 
     /**
-     * Create client and returns its reference.
+     * Load ORM types.
      *
      * @param ContainerBuilder $container
-     * @param string           $name
-     * @param array            $params
-     * @param bool             $isDefaultClient
+     * @param Reference[]      $types
      *
      * @return Reference
      */
-    public function createClient(ContainerBuilder $container, string $name, array $params, bool $isDefaultClient)
+    public function loadTypeCollection(ContainerBuilder $container, array $types)
     {
-        // Création de la définition
-        $definition = new Definition(ExternalApiClient::class);
+        // Récupération du registre des connections
+        $definition = new Definition(TypeCollection::class);
 
-        // Enregistrement des arguments de la définition
-        $definition
-            ->setFactory([new Reference(ApiClientFactory::class), 'create'])
-            ->setArguments($params)
-        ;
+        // Définition du nom du service
+        $serviceName = 'ang3_odoo_api.orm.type_collection';
 
-        // Définition du nom du client
-        $clientName = sprintf('ang3_odoo_api.%s.client', $name);
+        // Enregistrement du registre de la collection dans le container
+        $container->setDefinition(TypeCollection::class, $definition);
 
-        // Enregistrement du client dans le container
-        $container->setDefinition($clientName, $definition);
-
-        // S'il s'agit du client par défaut
-        if (true === $isDefaultClient) {
-            // Enregistrement du client par défaut
-            $container->setAlias('ang3_odoo_api.client', new Alias($clientName, true));
-
-            // Enregistrement du client par défaut
-            $container->setAlias(ExternalApiClient::class, new Alias($clientName, false));
-        }
-
-        // Retour de la référence du service client
-        return new Reference($clientName);
+        // Retour de la référence du service
+        return new Reference(TypeCollection::class);
     }
 }

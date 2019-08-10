@@ -35,13 +35,13 @@ class DateTimeType extends AbstractType
         // Récupération des options de fuseaux horaires
         list($format, $timezone) = [
             !empty($options['format']) ? $options['format'] : 'Y-m-d H:i:s',
-            !empty($options['timezone']) ? $options['timezone'] : 'UTC',
+            new DateTimeZone(!empty($options['timezone']) ? $options['timezone'] : 'UTC'),
         ];
 
         // Si la valeur est déjà une date
         if ($value instanceof DateTime) {
             // Mise-à-jour du fuseau horaire
-            $value->setTimezone(new DateTimeZone($timezone));
+            $value->setTimezone($timezone);
 
             // Retour de la valeur
             return $value;
@@ -83,12 +83,12 @@ class DateTimeType extends AbstractType
         // Récupération des options de fuseaux horaires
         list($format, $timezone) = [
             !empty($options['format']) ? $options['format'] : 'Y-m-d H:i:s',
-            !empty($options['timezone']) ? $options['timezone'] : 'UTC',
+            new DateTimeZone(!empty($options['timezone']) ? $options['timezone'] : 'UTC'),
         ];
 
         // Mise-à-jour du fuseau horaire et retour de la date
         return $value
-            ->setTimezone(new DateTimeZone($timezone))
+            ->setTimezone($timezone)
             ->format($format)
         ;
     }

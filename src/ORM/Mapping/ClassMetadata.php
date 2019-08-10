@@ -338,18 +338,44 @@ class ClassMetadata
      * @param PropertyInterface $property
      * @param mixed|null        $value
      *
-     * @return mixed
+     * @return self
      */
     public function setValue(object $object, PropertyInterface $property, $value = null)
     {
         // Rélfection de la propriété
-        $property = new ReflectionProperty($this->class, $property->getLocalName());
+        $reflection = $this->getReflectionProperty($property);
 
         // On rend accessible la propriété
-        $property->setAccessible(true);
+        $reflection->setAccessible(true);
 
-        // Retour de la valeur de la propriété
-        return $property->setValue($object, $value);
+        // Enregistrement de la valeur de la propriété
+        $reflection->setValue($object, $value);
+
+        // Retour des métadonnées
+        return $this;
+    }
+
+    /**
+     * Get a new instance of class.
+     *
+     * @return object
+     */
+    public function newInstance()
+    {
+        return $this
+            ->getReflectionClass()
+            ->newInstanceWithoutConstructor()
+        ;
+    }
+
+    /**
+     * Get reflection property.
+     *
+     * @return ReflectionProperty
+     */
+    public function getReflectionProperty(PropertyInterface $property)
+    {
+        return new ReflectionProperty($this->class, $property->getLocalName());
     }
 
     /**
@@ -359,7 +385,7 @@ class ClassMetadata
      */
     public function getReflectionClass()
     {
-        return $this->reflectionClass = $this->reflectionClass ?: new ReflectionClass($this->class);
+        return new ReflectionClass($this->class);
     }
 
     /**

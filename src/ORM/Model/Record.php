@@ -39,7 +39,7 @@ class Record implements RecordInterface
      * @var DateTime
      *
      * @ORM\ReadOnly
-     * @ORM\ManyToOne(name="write_date", class="Ang3\Bundle\OdooApiBundle\ORM\Model\Res\User")
+     * @ORM\Field(name="write_date", type="datetime")
      */
     protected $updatedAt;
 

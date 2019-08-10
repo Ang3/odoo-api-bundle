@@ -2,8 +2,12 @@
 
 namespace Ang3\Bundle\OdooApiBundle\ORM;
 
+use InvalidArgumentException;
 use LogicException;
 use Ang3\Bundle\OdooApiBundle\ORM\Event\RecordEvent;
+use Ang3\Bundle\OdooApiBundle\ORM\Event\RecordNormalizationEvent;
+use Ang3\Bundle\OdooApiBundle\ORM\Event\RecordPreDenormalizationEvent;
+use Ang3\Bundle\OdooApiBundle\ORM\Event\RecordPostDenormalizationEvent;
 use Ang3\Bundle\OdooApiBundle\ORM\Event\RecordUpdateEvent;
 use Ang3\Bundle\OdooApiBundle\ORM\Mapping\Catalog;
 use Ang3\Bundle\OdooApiBundle\ORM\Model\RecordInterface;
@@ -75,7 +79,7 @@ class UnitOfWork
             // Création de l'enregitrement et récupération de l'ID
             $id = $this->manager
                 ->getClient()
-                ->create($model, $data = $this->manager->normalize($record))
+                ->create($model, $data = $this->normalize($record))
             ;
 
             // Enregistrement de l'ID de l'enregistrement
@@ -175,7 +179,7 @@ class UnitOfWork
         // Si pas d'options de champs particuliers
         if (!isset($options['fields'])) {
             // On filtre selon les champs de la classe
-            $options['fields'] = array_values($classMetadata->getAllLocalNames());
+            $options['fields'] = array_values($classMetadata->getAllRemoteNames());
         }
 
         // Récupération des entrées
@@ -185,7 +189,7 @@ class UnitOfWork
         // Pour chaque ligne de données
         foreach ($result as $key => $data) {
             // Création de l'enregistrement
-            $record = $this->manager->denormalize($data, $class);
+            $record = $this->denormalize($data, $class);
 
             // Mise-à-jour des données originelles
             $this->setOriginalRecordData($record);
@@ -217,7 +221,7 @@ class UnitOfWork
         ;
 
         // Normalization de l'enregistrement reçu
-        $normalized = $this->manager->normalize($record);
+        $normalized = $this->normalize($record);
 
         // Récupération de l'ID de l'enregistrement
         $id = $record->getId();
@@ -327,6 +331,91 @@ class UnitOfWork
     }
 
     /**
+     * Normalize a record.
+     *
+     * @param RecordInterface           $record
+     * @param NormalizationContext|null $context
+     *
+     * @return array
+     */
+    public function normalize(RecordInterface $record, NormalizationContext $context = null)
+    {
+        // Définition du contexte
+        $context = $context ?: new NormalizationContext();
+
+        /**
+         * On dispatche l'évènement de pré-normalisation.
+         *
+         * @var RecordNormalizationEvent
+         */
+        $event = $this->eventDispatcher->dispatch(Events::preNormalize, new RecordNormalizationEvent($this->manager, $record, $context));
+
+        // Création de l'évènement et récupération de l'enregistrement éventuellement modifié
+        $record = $event->getRecord();
+
+        // Normalisation des données
+        $data = $this
+            ->getNormalizer()
+            ->toArray($record, $context)
+        ;
+
+        /**
+         * On dispatche l'évènement de post-normalisation.
+         *
+         * @var RecordNormalizationEvent
+         */
+        $event = $this->eventDispatcher->dispatch(Events::postNormalize, new RecordNormalizationEvent($this->manager, $record, $context, $data));
+
+        // Retour des données de l'évènement
+        return $event->getData();
+    }
+
+    /**
+     * Denormalize a record.
+     *
+     * @param array                     $data
+     * @param string                    $class
+     * @param NormalizationContext|null $context
+     *
+     * @return RecordInterface
+     */
+    public function denormalize(array $data = [], string $class, NormalizationContext $context = null)
+    {
+        // Définition du contexte
+        $context = $context ?: new NormalizationContext();
+
+        // Si la classe n'est pas managée
+        if (!$this->manager->isManagedClass($class)) {
+            throw new InvalidArgumentException(sprintf('The class "%s" is not managed', $class));
+        }
+
+        /**
+         * On dispatche l'évènement de pré-dénormalisation.
+         *
+         * @var RecordPreDenormalizationEvent
+         */
+        $event = $this->eventDispatcher->dispatch(Events::preDenormalize, new RecordPreDenormalizationEvent($this->manager, $data, $class, $context));
+
+        /**
+         * @var RecordInterface
+         */
+        $record = $this
+            ->getNormalizer()
+            ->fromArray($event->getData(), $event->getClass(), $event->getContext())
+        ;
+
+        /**
+         * On dispatche l'évènement de post-dénormalisation.
+         *
+         * @var RecordPostDenormalizationEvent
+         */
+        $event = $this->eventDispatcher->dispatch(Events::postDenormalize, new RecordPostDenormalizationEvent($this->manager, $record, $event->getData(), $event->getClass(), $event->getContext()));
+
+        // Retour de l'enregistrement
+        return $event->getRecord();
+    }
+
+    /**
      * Set data for a model.
      *
      * @internal
@@ -354,7 +443,7 @@ class UnitOfWork
         ;
 
         // Enregistrement des données identifiées
-        $this->originalRecordData[spl_object_id($record)] = $data ?: $this->manager->normalize($record);
+        $this->originalRecordData[spl_object_id($record)] = $data ?: $this->normalize($record);
 
         // Retour du cache
         return $this;

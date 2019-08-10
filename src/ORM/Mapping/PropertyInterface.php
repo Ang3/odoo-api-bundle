@@ -2,6 +2,8 @@
 
 namespace Ang3\Bundle\OdooApiBundle\ORM\Mapping;
 
+use Ang3\Bundle\OdooApiBundle\ORM\Mapping\Types\TypeInterface;
+
 /**
  * @author Joanis ROUANET
  */
@@ -16,6 +18,11 @@ interface PropertyInterface
      * @return string
      */
     public function getRemoteName();
+
+    /**
+     * @return TypeInterface
+     */
+    public function getType();
 
     /**
      * @return array

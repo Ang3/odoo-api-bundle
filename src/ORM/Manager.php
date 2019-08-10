@@ -54,52 +54,6 @@ class Manager
     }
 
     /**
-     * Normalize a record.
-     *
-     * @param RecordInterface           $record
-     * @param NormalizationContext|null $context
-     *
-     * @return array
-     */
-    public function normalize(RecordInterface $record, NormalizationContext $context = null)
-    {
-        return $this
-            ->getConfiguration()
-            ->getNormalizer()
-            ->toArray($record, $context)
-        ;
-    }
-
-    /**
-     * Denormalize a record.
-     *
-     * @param array                     $data
-     * @param string                    $class
-     * @param NormalizationContext|null $context
-     *
-     * @return RecordInterface
-     */
-    public function denormalize(array $data = [], string $class, NormalizationContext $context = null)
-    {
-        // Si la classe n'est pas managée
-        if (!$this->isManagedClass($class)) {
-            throw new InvalidArgumentException(sprintf('The class "%s" is not managed', $class));
-        }
-
-        /**
-         * @var RecordInterface
-         */
-        $record = $this
-            ->getConfiguration()
-            ->getNormalizer()
-            ->fromArray($data, $class, $context)
-        ;
-
-        // Retour de l'enregistrement
-        return $record;
-    }
-
-    /**
      * Persist a record.
      *
      * @param Record $record

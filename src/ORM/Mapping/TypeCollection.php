@@ -26,6 +26,7 @@ class TypeCollection
         $this->types[Types\IntegerType::getName()] = new Types\IntegerType();
         $this->types[Types\FloatType::getName()] = new Types\FloatType();
         $this->types[Types\StringType::getName()] = new Types\StringType();
+        $this->types[Types\ArrayType::getName()] = new Types\ArrayType();
         $this->types[Types\DateTimeType::getName()] = new Types\DateTimeType();
         $this->types[Types\ManyToOneType::getName()] = new Types\ManyToOneType();
     }

@@ -5,6 +5,7 @@ namespace Ang3\Bundle\OdooApiBundle\ORM;
 use Ang3\Bundle\OdooApiBundle\ORM\Factory\ClassMetadataFactory;
 use Ang3\Bundle\OdooApiBundle\ORM\Mapping\AssociationMetadata;
 use Ang3\Bundle\OdooApiBundle\ORM\Mapping\ClassMetadata;
+use Ang3\Bundle\OdooApiBundle\ORM\Mapping\ManyToOneMetadata;
 
 /**
  * @author Joanis ROUANET
@@ -42,21 +43,29 @@ class Normalizer
 
         // Pour chaque propriété de l'enregistrement
         foreach ($classMetadata->iterateProperties() as $property) {
-            // Si la propriété représente un champ simple
-            if ($property->isField()) {
-                // ...
-
+            // Si la propriété est en lecture seule
+            if ($property->isReadOnly()) {
                 // Propriété suivante
                 continue;
             }
 
-            // Si la propriété représente une association
-            if ($property->isAssociation()) {
-                // ...
+            // Récupération de la valeur de la propriété
+            $value = $classMetadata->getValue($object, $property);
 
-                // Propriété suivante
+            // Convertion de la valeur pour Odoo
+            $value = $property
+                ->getType()
+                ->convertToOdooValue($value, $property->getOptions())
+            ;
+
+            // Si la valeur de la propriété ne peut pas être nulle et que c'est le cas
+            if (!$property->isNullable() && null === $value) {
+                // On ingore la propriété
                 continue;
             }
+
+            // Enregistrement de la valeur de la propriété Odoo dans les données
+            $data[$property->getRemoteName()] = $value;
         }
 
         // Retour des données normalisées
@@ -77,7 +86,67 @@ class Normalizer
         // Récupération des métadonnées de la classe
         $classMetadata = $this->classMetadataFactory->load($class);
 
-        // ...
+        // Création d'une instance de la classe de l'objet à dénormaliser
+        $object = $classMetadata->newInstance();
+
+        // Pour chaque valeur des données soumises
+        foreach ($data as $remoteName => $value) {
+            // Résolution éventuelle de la propriété de la classe
+            $property = $classMetadata->resolveMapped($remoteName);
+
+            // Si la propriété est nulle
+            if (null === $property) {
+                // Valeur suivante
+                continue;
+            }
+
+            // Récupération de la valeur après typage
+            $value = $property
+                ->getType()
+                ->convertToPhpValue($value, $property->getOptions())
+            ;
+
+            // Si la propriété est une association
+            if ($property instanceof AssociationMetadata) {
+                // Récupération de la classe cible
+                $targetClass = $property->getTargetClass();
+
+                // Si c'est une association simple
+                if ($property instanceof ManyToOneMetadata) {
+                    // Dénormalisation
+                    $value = $this->fromArray([
+                        'id' => $value[0],
+                        'display_name' => $value[1],
+                    ], $targetClass, $context);
+                } else {
+                    // Initialisation de la collection
+                    $collection = [];
+
+                    // Pour ligne de la valeur
+                    foreach ($value as $id) {
+                        // Si on a déjà transformer cet ID
+                        if (isset($collection[$id])) {
+                            // Ligne suivante
+                            continue;
+                        }
+
+                        // Dénormalisation
+                        $collection[$id] = $this->fromArray([
+                            'id' => $id,
+                        ], $targetClass, $context);
+                    }
+
+                    // Récupération des valeurs uniquement
+                    $value = array_values($collection);
+                }
+            }
+
+            // Enregistrement de la valeur au sein de l'objet
+            $classMetadata->setValue($object, $property, $value);
+        }
+
+        // Retour de l'objet
+        return $object;
     }
 
     /**

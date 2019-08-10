@@ -13,7 +13,7 @@ class RecordUpdateEvent extends RecordEvent
     /**
      * @var array
      */
-    private $changeSet;
+    protected $changeSet;
 
     /**
      * @param Manager         $manager

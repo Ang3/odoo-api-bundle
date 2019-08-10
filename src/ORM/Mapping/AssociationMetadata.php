@@ -3,6 +3,7 @@
 namespace Ang3\Bundle\OdooApiBundle\ORM\Mapping;
 
 use ReflectionClass;
+use Ang3\Bundle\OdooApiBundle\ORM\Mapping\Types\TypeInterface;
 
 /**
  * @author Joanis ROUANET
@@ -20,15 +21,16 @@ class AssociationMetadata extends AbstractProperty
     private $reflectionClass;
 
     /**
-     * @param string $localName
-     * @param string $remoteName
-     * @param string $targetClass
-     * @param array  $options
+     * @param string        $localName
+     * @param string        $remoteName
+     * @param TypeInterface $type
+     * @param string        $targetClass
+     * @param array         $options
      */
-    public function __construct(string $localName, string $remoteName, string $targetClass, array $options = [])
+    public function __construct(string $localName, string $remoteName, TypeInterface $type, string $targetClass, array $options = [])
     {
         // Construction de la propriété de base
-        parent::__construct($localName, $remoteName, $options);
+        parent::__construct($localName, $remoteName, $type, $options);
 
         // Hydratation
         $this->targetClass = $targetClass;

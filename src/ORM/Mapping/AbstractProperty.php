@@ -2,6 +2,8 @@
 
 namespace Ang3\Bundle\OdooApiBundle\ORM\Mapping;
 
+use Ang3\Bundle\OdooApiBundle\ORM\Mapping\Types\TypeInterface;
+
 /**
  * @abstract
  *
@@ -20,19 +22,26 @@ abstract class AbstractProperty implements PropertyInterface
     private $remoteName;
 
     /**
+     * @var TypeInterface
+     */
+    private $type;
+
+    /**
      * @var array
      */
     private $options;
 
     /**
-     * @param string $localName
-     * @param string $remoteName
-     * @param array  $options
+     * @param string        $localName
+     * @param string        $remoteName
+     * @param TypeInterface $type
+     * @param array         $options
      */
-    public function __construct(string $localName, string $remoteName, array $options = [])
+    public function __construct(string $localName, string $remoteName, TypeInterface $type, array $options = [])
     {
         $this->localName = $localName;
         $this->remoteName = $remoteName;
+        $this->type = $type;
         $this->options = $options;
     }
 
@@ -74,6 +83,26 @@ abstract class AbstractProperty implements PropertyInterface
     public function getRemoteName()
     {
         return $this->remoteName;
+    }
+
+    /**
+     * @param TypeInterface $type
+     *
+     * @return self
+     */
+    public function setType(TypeInterface $type)
+    {
+        $this->type = $type;
+
+        return $this;
+    }
+
+    /**
+     * {@inheritdoc}.
+     */
+    public function getType()
+    {
+        return $this->type;
     }
 
     /**

@@ -19,7 +19,7 @@ class RecordEvent extends Event
     /**
      * @var RecordInterface
      */
-    private $record;
+    protected $record;
 
     /**
      * @param Manager         $manager
@@ -37,6 +37,18 @@ class RecordEvent extends Event
     public function getManager()
     {
         return $this->manager;
+    }
+
+    /**
+     * @param RecordInterface $record
+     *
+     * @return self
+     */
+    public function setRecord(RecordInterface $record)
+    {
+        $this->record = $record;
+
+        return $this;
     }
 
     /**

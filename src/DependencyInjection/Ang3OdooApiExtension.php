@@ -14,6 +14,7 @@ use Symfony\Component\DependencyInjection\Alias;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Reference;
+use Symfony\Component\DependencyInjection\Exception\InvalidArgumentException;
 use Symfony\Component\DependencyInjection\Extension\PrependExtensionInterface;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
@@ -44,7 +45,7 @@ class Ang3OdooApiExtension extends Extension implements PrependExtensionInterfac
         $connections = $this->loadClients($container, $config['connections'], $config['default_connection']);
 
         // Si l'ORM est activé
-        if(true === $config['orm']['enabled']) {
+        if (true === $config['orm']['enabled']) {
             // Chargement de l'ORM
             $this->loadOrm($container, $connections, $config['orm'], $config['default_connection']);
         }
@@ -69,22 +70,22 @@ class Ang3OdooApiExtension extends Extension implements PrependExtensionInterfac
 
     /**
      * Load clients instances from connections params.
-     * 
-     * @param  ContainerBuilder $container
-     * @param  array            $connection
-     * @param  string           $defaultConnection
-     * 
+     *
+     * @param ContainerBuilder $container
+     * @param array            $connections
+     * @param string           $defaultConnection
+     *
      * @return Reference[]
      */
     public function loadClients(ContainerBuilder $container, array $connections, string $defaultConnection)
     {
         // Si la connexion par défat n'existe pas
-        if(!array_key_exists($defaultConnection, $connections)) {
+        if (!array_key_exists($defaultConnection, $connections)) {
             throw new InvalidArgumentException(sprintf('The default Odoo connection "%s" is not configured', $defaultConnection));
         }
 
         // Pour chaque conenctions
-        foreach($connections as $name => &$connection) {
+        foreach ($connections as $name => &$connection) {
             // Mise-à-jour de la connexion par la référence du client associé
             $connection = $this->createClient($container, $name, $connection, $name === $defaultConnection);
         }
@@ -97,9 +98,9 @@ class Ang3OdooApiExtension extends Extension implements PrependExtensionInterfac
      * Load registry.
      *
      * @param ContainerBuilder $container
-     * @param Reference[]      $connections
+     * @param array            $connections
      * @param array            $orm
-     * @param array            $defaultConnection
+     * @param string           $defaultConnection
      */
     public function loadOrm(ContainerBuilder $container, array $connections, array $orm, string $defaultConnection)
     {
@@ -121,7 +122,7 @@ class Ang3OdooApiExtension extends Extension implements PrependExtensionInterfac
             $connectionName = $params['connection'] ?: $defaultConnection;
 
             // Si la connection du manager n'existe pas
-            if(!array_key_exists($connectionName, $connections)) {
+            if (!array_key_exists($connectionName, $connections)) {
                 throw new InvalidArgumentException(sprintf('The connection "%s" of Odoo ORM manager "%s" is not configured', $params['connection'], $managerName));
             }
 
@@ -166,7 +167,7 @@ class Ang3OdooApiExtension extends Extension implements PrependExtensionInterfac
 
         // Enregistrement des arguments de la définition
         $definition
-            ->setFactory([new Reference(ApiClientFactory::class), 'createExternalApiClient'])
+            ->setFactory([new Reference(ApiClientFactory::class), 'create'])
             ->setArguments($params)
         ;
 

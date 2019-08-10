@@ -4,7 +4,6 @@ namespace Ang3\Bundle\OdooApiBundle\DependencyInjection;
 
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
-use Symfony\Component\Config\Definition\Manager;
 
 /**
  * Configuration du bundle.

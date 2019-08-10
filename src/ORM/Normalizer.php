@@ -5,7 +5,6 @@ namespace Ang3\Bundle\OdooApiBundle\ORM;
 use Ang3\Bundle\OdooApiBundle\ORM\Factory\ClassMetadataFactory;
 use Ang3\Bundle\OdooApiBundle\ORM\Mapping\AssociationMetadata;
 use Ang3\Bundle\OdooApiBundle\ORM\Mapping\ClassMetadata;
-use Doctrine\Common\Util\ClassUtils;
 
 /**
  * @author Joanis ROUANET

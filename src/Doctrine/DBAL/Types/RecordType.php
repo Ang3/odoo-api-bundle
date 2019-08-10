@@ -50,7 +50,7 @@ class RecordType extends Type
             return $value->getId();
         }
 
-        throw ConversionException::conversionFailedInvalidType($value, 'integer', [RecordInterface::class]);
+        throw ConversionException::conversionFailedInvalidType($value, 'integer', ['integer', RecordInterface::class]);
     }
 
     /**

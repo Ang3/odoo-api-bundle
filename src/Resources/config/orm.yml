@@ -1,0 +1,11 @@
+services:
+  _defaults:
+    autowire: true
+    autoconfigure: true
+    public: false
+
+  Ang3\Component\Odoo\ORM\Normalizer: ~
+  Ang3\Component\Odoo\ORM\Cache\ClassMetadataCache: ~
+  Ang3\Component\Odoo\ORM\Factory\CatalogFactory: ~
+  Ang3\Component\Odoo\ORM\Factory\ClassMetadataFactory: ~
+  Ang3\Component\Odoo\ORM\Factory\ManagerFactory: ~

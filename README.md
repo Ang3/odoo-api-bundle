@@ -1,5 +1,5 @@
 OdooApiBundle
-==============================
+=============
 
 [![Build Status](https://travis-ci.org/Ang3/OdooApiBundle.svg?branch=master)](https://travis-ci.org/Ang3/OdooApiBundle) [![Latest Stable Version](https://poser.pugx.org/ang3/odoo-api-bundle/v/stable)](https://packagist.org/packages/ang3/odoo-api-bundle) [![Latest Unstable Version](https://poser.pugx.org/ang3/odoo-api-bundle/v/unstable)](https://packagist.org/packages/ang3/odoo-api-bundle) [![Total Downloads](https://poser.pugx.org/ang3/odoo-api-bundle/downloads)](https://packagist.org/packages/ang3/odoo-api-bundle)
 

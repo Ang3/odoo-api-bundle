@@ -5,16 +5,7 @@ services:
     public: false
 
   # Autowire
-  Ang3\Component\OdooApiClient\Factory\ApiClientFactory: ~
-
-  #
-  # ORM services
-  #
-  Ang3\Bundle\OdooApiBundle\ORM\Cache\ClassMetadataCache: ~
-  Ang3\Bundle\OdooApiBundle\ORM\Factory\CatalogFactory: ~
-  Ang3\Bundle\OdooApiBundle\ORM\Factory\ClassMetadataFactory: ~
-  Ang3\Bundle\OdooApiBundle\ORM\Factory\ManagerFactory: ~
-  Ang3\Bundle\OdooApiBundle\ORM\Normalizer: ~
+  Ang3\Component\Odoo\Client\Factory\ApiClientFactory: ~
 
   # 
   # DOCTRINE
@@ -24,16 +15,6 @@ services:
     tags:
       - { name: doctrine.event_listener, event: postLoad }
 
-  # 
-  # SERIALIZER
-  # 
-
-  Ang3\Bundle\OdooApiBundle\ORM\Serializer\Handler\RecordAssociationHandler:
-    tags:
-      - { name: jms_serializer.handler, type: Ang3\Bundle\OdooApiBundle\ORM\Serializer\Type\SingleAssociation, direction: serialization, format: json, method: serializeSingleAssociationToJson }
-      - { name: jms_serializer.handler, type: Ang3\Bundle\OdooApiBundle\ORM\Serializer\Type\SingleAssociation, direction: deserialization, format: json, method: deserializeSingleAssociationFromJson }
-      - { name: jms_serializer.handler, type: Ang3\Bundle\OdooApiBundle\ORM\Serializer\Type\MultipleAssociation, direction: serialization, format: json, method: serializeMultipleAssociationToJson }
-      - { name: jms_serializer.handler, type: Ang3\Bundle\OdooApiBundle\ORM\Serializer\Type\MultipleAssociation, direction: deserialization, format: json, method: deserializeMultipleAssociationFromJson }
   # 
   # FAKER
   # 

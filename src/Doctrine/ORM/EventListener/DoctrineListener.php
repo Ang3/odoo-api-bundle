@@ -3,9 +3,9 @@
 namespace Ang3\Bundle\OdooApiBundle\Doctrine\ORM\EventListener;
 
 use ReflectionClass;
-use Ang3\Bundle\OdooApiBundle\ORM\Normalizer;
-use Ang3\Bundle\OdooApiBundle\ORM\Factory\ClassMetadataFactory;
-use Ang3\Bundle\OdooApiBundle\ORM\Mapping\ManyToOneMetadata;
+use Ang3\Component\Odoo\ORM\Normalizer;
+use Ang3\Component\Odoo\ORM\Factory\ClassMetadataFactory;
+use Ang3\Component\Odoo\ORM\Mapping\ManyToOneMetadata;
 use Doctrine\Common\Util\ClassUtils;
 use Doctrine\ORM\Event\LifecycleEventArgs;
 

@@ -3,7 +3,7 @@
 namespace Ang3\Bundle\OdooApiBundle\DataFixtures\Faker\Provider;
 
 use ReflectionClass;
-use Ang3\Bundle\OdooApiBundle\ORM\Model\RecordInterface;
+use Ang3\Component\Odoo\ORM\Model\RecordInterface;
 use Faker\Provider\Base as BaseProvider;
 
 /**

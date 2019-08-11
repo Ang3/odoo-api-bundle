@@ -2,7 +2,7 @@
 
 namespace Ang3\Bundle\OdooApiBundle\Helper;
 
-use Ang3\Component\OdooApiClient\ExternalApiClient;
+use Ang3\Component\Odoo\Client\ExternalApiClient;
 
 /**
  * @author Joanis ROUANET

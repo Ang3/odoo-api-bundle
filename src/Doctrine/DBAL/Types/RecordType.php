@@ -2,7 +2,7 @@
 
 namespace Ang3\Bundle\OdooApiBundle\Doctrine\DBAL\Types;
 
-use Ang3\Bundle\OdooApiBundle\ORM\Model\RecordInterface;
+use Ang3\Component\Odoo\ORM\Model\RecordInterface;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\DBAL\Types\ConversionException;
 use Doctrine\DBAL\Types\Type;

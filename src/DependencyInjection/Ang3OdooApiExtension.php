@@ -2,14 +2,14 @@
 
 namespace Ang3\Bundle\OdooApiBundle\DependencyInjection;
 
-use Ang3\Component\OdooApiClient\ExternalApiClient;
-use Ang3\Component\OdooApiClient\Factory\ApiClientFactory;
+use Ang3\Component\Odoo\Client\ExternalApiClient;
+use Ang3\Component\Odoo\Client\Factory\ApiClientFactory;
 use Ang3\Bundle\OdooApiBundle\Doctrine\DBAL\Types\RecordType;
-use Ang3\Bundle\OdooApiBundle\ORM\Manager;
-use Ang3\Bundle\OdooApiBundle\ORM\Registry;
-use Ang3\Bundle\OdooApiBundle\ORM\Model as Models;
-use Ang3\Bundle\OdooApiBundle\ORM\Factory\ManagerFactory;
-use Ang3\Bundle\OdooApiBundle\ORM\Mapping\TypeCollection;
+use Ang3\Component\Odoo\ORM\Manager;
+use Ang3\Component\Odoo\ORM\Registry;
+use Ang3\Component\Odoo\ORM\Model as Models;
+use Ang3\Component\Odoo\ORM\Factory\ManagerFactory;
+use Ang3\Component\Odoo\ORM\Mapping\TypeCollection;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\Alias;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -47,6 +47,9 @@ class Ang3OdooApiExtension extends Extension implements PrependExtensionInterfac
 
         // Si l'ORM est activé
         if (true === $config['orm']['enabled']) {
+            // Chargement des services de l'ORM
+            $loader->load('orm.yml');
+
             // Chargement de l'ORM
             $this->loadOrm($container, $connections, $config['orm'], $config['default_connection']);
         }
@@ -198,20 +201,40 @@ class Ang3OdooApiExtension extends Extension implements PrependExtensionInterfac
      * Load ORM types.
      *
      * @param ContainerBuilder $container
-     * @param Reference[]      $types
+     * @param array            $types
      *
      * @return Reference
      */
     public function loadTypeCollection(ContainerBuilder $container, array $types)
     {
-        // Récupération du registre des connections
-        $definition = new Definition(TypeCollection::class);
+        // Récupération de la collection des types
+        $collectionDefinition = new Definition(TypeCollection::class);
 
         // Définition du nom du service
         $serviceName = 'ang3_odoo_api.orm.type_collection';
 
+        // Pour chaque type à ajouter
+        foreach ($types as $name => $class) {
+            // Si la classe n'existe pas
+            if (!class_exists($class)) {
+                throw new InvalidArgumentException(sprintf('Odoo ORM type class "%s" not found', $class));
+            }
+
+            // Création de la définition du service du type
+            $typeDefinition = new Definition($class);
+
+            // Définition du nom du service dans le container
+            $typeServiceName = sprintf('odoo_api.orm.type.%s', $name);
+
+            // Enregistrement du type dans le container
+            $container->setDefinition($typeServiceName, $typeDefinition);
+
+            // Enregistrement du type dans la collection
+            $collectionDefinition->addMethodCall('register', [$name, new Reference($typeServiceName)]);
+        }
+
         // Enregistrement du registre de la collection dans le container
-        $container->setDefinition(TypeCollection::class, $definition);
+        $container->setDefinition(TypeCollection::class, $collectionDefinition);
 
         // Retour de la référence du service
         return new Reference(TypeCollection::class);

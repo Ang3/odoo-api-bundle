@@ -5,6 +5,8 @@ OdooApiBundle
 
 Symfony integration of Odoo external API client v12.0. Please see [API client documentation](https://github.com/Ang3/php-odoo-api-client) for more information.
 
+Also, this bundles integrates [Odoo ORM component](https://github.com/Ang3/php-odoo-orm) and allows you to manage clients from managers and annoted model classes.
+
 Installation
 ============
 
@@ -55,28 +57,20 @@ Step 3: Configure your app
 ```yaml
 # app/config/config.yml
 ang3_odoo_api:
-  url: <database_url>
-  database: <database_name>
-  user: <username>
-  password: <password>
+  default_connection: default
+  connections:
+    default:
+      url: <database_url>
+      database: <database_name>
+      user: <username>
+      password: <password>
 ```
 
-Usage
-=====
+Get started
+===========
 
-```php
-<?php
+## Usage
 
-// ...
-// From a controller for example
+The bundle create one client by configured connection and a public alias following this naming convention: ```ang3_odoo_api.client.<connection_name>```.
 
-/**
- * Get the client.
-
- * @var \Ang3\Component\OdooApiClient\Client\ExternalApiClient
- */
-$client = $this->get('ang3_odoo_api.default_external_api_client');
-
-```
-
-That's it!
+The ```default_connection``` parameter is used to define the default client alias ```ang3_odoo_api.client``` (public).

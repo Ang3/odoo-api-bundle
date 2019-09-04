@@ -6,18 +6,3 @@ services:
 
   # Autowire
   Ang3\Component\Odoo\Client\Factory\ApiClientFactory: ~
-
-  # 
-  # DOCTRINE
-  # 
-  
-  Ang3\Bundle\OdooApiBundle\Doctrine\ORM\EventListener\DoctrineListener:
-    tags:
-      - { name: doctrine.event_listener, event: postLoad }
-
-  # 
-  # FAKER
-  # 
-  
-  Ang3\Bundle\OdooApiBundle\DataFixtures\Faker\Provider\ModelProvider:
-    tags: [ { name: nelmio_alice.faker.provider } ]

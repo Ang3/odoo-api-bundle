@@ -5,8 +5,6 @@ OdooApiBundle
 
 Symfony integration of Odoo external API client v12.0. Please see [API client documentation](https://github.com/Ang3/php-odoo-api-client) for more information.
 
-Also, this bundles integrates [Odoo ORM component](https://github.com/Ang3/php-odoo-orm) and allows you to manage clients from managers and annoted model classes.
-
 Installation
 ============
 

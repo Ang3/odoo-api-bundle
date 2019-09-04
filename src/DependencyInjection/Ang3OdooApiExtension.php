@@ -65,7 +65,7 @@ class Ang3OdooApiExtension extends Extension
             $connection = $this->createClient($container, $name, $connection, $name === $defaultConnection);
 
             // Enregistrement de la connection dans le registre
-            $registry->addMethodCall('add', [$connection]);
+            $registry->addMethodCall('set', [$name, $connection]);
         }
 
         // Retour des conenctions

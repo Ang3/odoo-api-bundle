@@ -68,6 +68,12 @@ class Ang3OdooApiExtension extends Extension
             $registry->addMethodCall('set', [$name, $connection]);
         }
 
+        // Enregistrement du client dans le container
+        $container->setDefinition(ClientRegistry::class, $registry);
+
+        // Enregistrement de l'alias
+        $container->setAlias('ang3_odoo_api.client_registry', new Alias(ClientRegistry::class, true));
+
         // Retour des conenctions
         return $connections;
     }

@@ -39,7 +39,7 @@ class ClientRegistry
     {
         // Si on a pas le client
         if (!$this->has($name)) {
-            throw new LogicException(sprintf('The Odoo connection "%s" does not exists', $name));
+            throw new LogicException(sprintf('The Odoo connection "%s" does not exist', $name));
         }
 
         // Retour du client

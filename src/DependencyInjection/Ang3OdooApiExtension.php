@@ -2,9 +2,9 @@
 
 namespace Ang3\Bundle\OdooApiBundle\DependencyInjection;
 
+use Ang3\Bundle\OdooApiBundle\ClientRegistry;
 use Ang3\Component\Odoo\Client\ExternalApiClient;
 use Ang3\Component\Odoo\Client\Factory\ApiClientFactory;
-use Ang3\Bundle\OdooApiBundle\Doctrine\DBAL\Types\RecordType;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\Alias;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -37,7 +37,7 @@ class Ang3OdooApiExtension extends Extension
         $loader->load('services.yml');
 
         // Chargement des connections
-        $connections = $this->loadClients($container, $config['connections'], $config['default_connection']);
+        $connections = $this->loadClientRegistry($container, $config['connections'], $config['default_connection']);
     }
 
     /**
@@ -49,17 +49,23 @@ class Ang3OdooApiExtension extends Extension
      *
      * @return Reference[]
      */
-    public function loadClients(ContainerBuilder $container, array $connections, string $defaultConnection)
+    public function loadClientRegistry(ContainerBuilder $container, array $connections, string $defaultConnection)
     {
         // Si la connexion par défat n'existe pas
         if (!array_key_exists($defaultConnection, $connections)) {
             throw new InvalidArgumentException(sprintf('The default Odoo connection "%s" is not configured', $defaultConnection));
         }
 
+        // Création de la définition du registre
+        $registry = new Definition(ClientRegistry::class);
+
         // Pour chaque conenctions
         foreach ($connections as $name => &$connection) {
             // Mise-à-jour de la connexion par la référence du client associé
             $connection = $this->createClient($container, $name, $connection, $name === $defaultConnection);
+
+            // Enregistrement de la connection dans le registre
+            $registry->addMethodCall('add', [$connection]);
         }
 
         // Retour des conenctions

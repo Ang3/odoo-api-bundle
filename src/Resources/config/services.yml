@@ -6,4 +6,4 @@ services:
 
   # Autowire
   Ang3\Bundle\OdooApiBundle\ClientRegistry: ~
-  Ang3\Component\Odoo\Client\Factory\ApiClientFactory: ~
+  Ang3\Component\Odoo\Factory\ApiClientFactory: ~

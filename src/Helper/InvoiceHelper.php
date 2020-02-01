@@ -2,7 +2,7 @@
 
 namespace Ang3\Bundle\OdooApiBundle\Helper;
 
-use Ang3\Component\Odoo\Client\ExternalApiClient;
+use Ang3\Component\Odoo\ExternalApiClient;
 
 /**
  * @author Joanis ROUANET
@@ -19,9 +19,6 @@ class InvoiceHelper
      */
     private $client;
 
-    /**
-     * @param ExternalApiClient $client
-     */
     public function __construct(ExternalApiClient $client)
     {
         $this->client = $client;
@@ -29,20 +26,16 @@ class InvoiceHelper
 
     /**
      * Open an invoice.
-     *
-     * @param int $invoiceId
      */
-    public function validate($invoiceId)
+    public function validate(int $invoiceId): void
     {
         $this->client->call(self::MODEL_NAME, 'action_invoice_open', [$invoiceId]);
     }
 
     /**
      * Compute taxes so as to reload the total amount.
-     *
-     * @param int $invoiceId
      */
-    public function computeTaxes($invoiceId)
+    public function computeTaxes(int $invoiceId): void
     {
         $this->client->call(self::MODEL_NAME, 'compute_taxes', [$invoiceId]);
     }

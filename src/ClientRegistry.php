@@ -2,8 +2,8 @@
 
 namespace Ang3\Bundle\OdooApiBundle;
 
+use Ang3\Component\Odoo\ExternalApiClient;
 use LogicException;
-use Ang3\Component\Odoo\Client\ExternalApiClient;
 
 /**
  * @author Joanis ROUANET
@@ -15,13 +15,7 @@ class ClientRegistry
      */
     private $registry = [];
 
-    /**
-     * @param string            $name
-     * @param ExternalApiClient $client
-     *
-     * @return self
-     */
-    public function set(string $name, ExternalApiClient $client)
+    public function set(string $name, ExternalApiClient $client): self
     {
         $this->registry[$name] = $client;
 
@@ -29,13 +23,9 @@ class ClientRegistry
     }
 
     /**
-     * @param string $name
-     *
      * @throws LogicException when the connection does not exist
-     *
-     * @return ExternalApiClient
      */
-    public function get(string $name)
+    public function get(string $name): ExternalApiClient
     {
         // Si on a pas le client
         if (!$this->has($name)) {
@@ -46,12 +36,7 @@ class ClientRegistry
         return $this->registry[$name];
     }
 
-    /**
-     * @param string $name
-     *
-     * @return bool
-     */
-    public function has(string $name)
+    public function has(string $name): bool
     {
         return array_key_exists($name, $this->registry);
     }

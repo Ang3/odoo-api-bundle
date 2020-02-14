@@ -53,7 +53,7 @@ Step 3: Configure your app
 --------------------------
 
 ```yaml
-# app/config/config.yml
+# app/config/config.yml or config/packages/ang3_odoo_api.yml
 ang3_odoo_api:
   default_connection: default
   connections:

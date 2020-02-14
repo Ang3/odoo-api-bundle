@@ -1,9 +1,0 @@
-services:
-  _defaults:
-    autowire: true
-    autoconfigure: true
-    public: false
-
-  # Autowire
-  Ang3\Bundle\OdooApiBundle\ClientRegistry: ~
-  Ang3\Component\Odoo\Factory\ApiClientFactory: ~

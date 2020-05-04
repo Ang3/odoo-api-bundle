@@ -157,4 +157,16 @@ MyClass:
 For each client, the bundle creates a public alias following this naming convention: 
 ```ang3_odoo_api.client.<connection_name>```.
 
-That's it!
+Upgrades
+========
+
+### From 1.* to 2.*
+
+What you have to do:
+- Replace ```Ang3\Component\Odoo\ExternalApiClient``` with ```Ang3\Component\Odoo\Client```.
+- Create and use your own helpers.
+
+Logs:
+- Updated composer.json for Symfony ```^5.0``` support.
+- Updated client to version ```5.0``` for latest feature (expression builder).
+- Deleted helpers before the model names depend on Odoo server version.

@@ -18,7 +18,7 @@
     },
     "require": {
         "php": "^7.1",
-        "ang3/php-odoo-api-client": "dev-master",
+        "ang3/php-odoo-api-client": "^5.0",
         "symfony/dependency-injection": ">=3.2.0",
         "symfony/config": ">=3.2.0",
         "symfony/http-kernel": ">=3.2.0"

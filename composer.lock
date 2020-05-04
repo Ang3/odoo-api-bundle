@@ -4,35 +4,35 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "5cdc1b96059dd05c785b1a07b150d726",
+    "content-hash": "9891fa1e7ddcf055412868f4a8045731",
     "packages": [
         {
             "name": "ang3/php-odoo-api-client",
-            "version": "dev-master",
+            "version": "V5.0.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Ang3/php-odoo-api-client.git",
-                "reference": "89c6a53ec89761f3d7bdb8420996ca68b0ab68f2"
+                "reference": "cc8b1fd86ae43e0dd500a0939d78c8969b2876c9"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Ang3/php-odoo-api-client/zipball/89c6a53ec89761f3d7bdb8420996ca68b0ab68f2",
-                "reference": "89c6a53ec89761f3d7bdb8420996ca68b0ab68f2",
+                "url": "https://api.github.com/repos/Ang3/php-odoo-api-client/zipball/cc8b1fd86ae43e0dd500a0939d78c8969b2876c9",
+                "reference": "cc8b1fd86ae43e0dd500a0939d78c8969b2876c9",
                 "shasum": ""
             },
             "require": {
                 "ext-curl": "*",
                 "php": ">=7.2",
                 "phpxmlrpc/phpxmlrpc": "^4.0",
-                "symfony/serializer": ">=3"
+                "symfony/serializer": ">=3.2.0"
             },
             "require-dev": {
                 "ang3/php-dev-binaries": "^1.0",
-                "phpunit/phpunit": "^8.5",
+                "phpunit/phpunit": ">=7.0",
                 "roave/security-advisories": "dev-master",
-                "symfony/inflector": "^5.0",
-                "symfony/property-info": "^5.0",
-                "symfony/var-dumper": "^4.0"
+                "symfony/inflector": ">=3.2.0",
+                "symfony/property-info": ">=3.2.0",
+                "symfony/var-dumper": ">=3.2.0"
             },
             "type": "component",
             "autoload": {
@@ -63,7 +63,7 @@
                 "odoo",
                 "operation"
             ],
-            "time": "2020-05-04T12:10:26+00:00"
+            "time": "2020-05-04T14:55:33+00:00"
         },
         {
             "name": "phpxmlrpc/phpxmlrpc",
@@ -2006,12 +2006,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/Roave/SecurityAdvisories.git",
-                "reference": "478dd17a48d0eb007ff854f4b885034df5db7c29"
+                "reference": "f46390d28af4fdb07c09d9aabf4c4e35149a7a08"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Roave/SecurityAdvisories/zipball/478dd17a48d0eb007ff854f4b885034df5db7c29",
-                "reference": "478dd17a48d0eb007ff854f4b885034df5db7c29",
+                "url": "https://api.github.com/repos/Roave/SecurityAdvisories/zipball/f46390d28af4fdb07c09d9aabf4c4e35149a7a08",
+                "reference": "f46390d28af4fdb07c09d9aabf4c4e35149a7a08",
                 "shasum": ""
             },
             "conflict": {
@@ -2101,7 +2101,7 @@
                 "magento/product-community-edition": ">=2,<2.2.10|>=2.3,<2.3.2-p.2",
                 "monolog/monolog": ">=1.8,<1.12",
                 "namshi/jose": "<2.2",
-                "nzo/url-encryptor-bundle": "<5.0.1",
+                "nzo/url-encryptor-bundle": ">=4,<4.3.2|>=5,<5.0.1",
                 "onelogin/php-saml": "<2.10.4",
                 "oneup/uploader-bundle": "<1.9.3|>=2,<2.1.5",
                 "openid/php-openid": "<2.3",
@@ -2265,7 +2265,7 @@
                 }
             ],
             "description": "Prevents installation of composer packages with known security vulnerabilities: no API, simply require it",
-            "time": "2020-05-03T18:57:18+00:00"
+            "time": "2020-05-04T14:37:25+00:00"
         },
         {
             "name": "symfony/console",
@@ -2608,7 +2608,6 @@
     "aliases": [],
     "minimum-stability": "stable",
     "stability-flags": {
-        "ang3/php-odoo-api-client": 20,
         "roave/security-advisories": 20
     },
     "prefer-stable": false,

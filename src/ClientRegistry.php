@@ -15,9 +15,9 @@ class ClientRegistry
      */
     private $registry = [];
 
-    public function set(string $name, Client $client): self
+    public function set(string $connectionName, Client $client): self
     {
-        $this->registry[$name] = $client;
+        $this->registry[$connectionName] = $client;
 
         return $this;
     }
@@ -25,19 +25,19 @@ class ClientRegistry
     /**
      * @throws LogicException when the connection does not exist
      */
-    public function get(string $name): Client
+    public function get(string $connectionName): Client
     {
         // Si on a pas le client
-        if (!$this->has($name)) {
-            throw new LogicException(sprintf('The Odoo connection "%s" does not exist', $name));
+        if (!$this->has($connectionName)) {
+            throw new LogicException(sprintf('The Odoo connection "%s" does not exist', $connectionName));
         }
 
         // Retour du client
-        return $this->registry[$name];
+        return $this->registry[$connectionName];
     }
 
-    public function has(string $name): bool
+    public function has(string $connectionName): bool
     {
-        return array_key_exists($name, $this->registry);
+        return array_key_exists($connectionName, $this->registry);
     }
 }

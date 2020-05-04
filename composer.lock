@@ -12,12 +12,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/Ang3/php-odoo-api-client.git",
-                "reference": "467b4e09d353f868fdee151a6b2d674dbaf5b193"
+                "reference": "2bbf1960510f3c50e67e1e31659ef3a0ba60c475"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Ang3/php-odoo-api-client/zipball/467b4e09d353f868fdee151a6b2d674dbaf5b193",
-                "reference": "467b4e09d353f868fdee151a6b2d674dbaf5b193",
+                "url": "https://api.github.com/repos/Ang3/php-odoo-api-client/zipball/2bbf1960510f3c50e67e1e31659ef3a0ba60c475",
+                "reference": "2bbf1960510f3c50e67e1e31659ef3a0ba60c475",
                 "shasum": ""
             },
             "require": {
@@ -63,7 +63,7 @@
                 "odoo",
                 "operation"
             ],
-            "time": "2020-05-04T09:59:32+00:00"
+            "time": "2020-05-04T11:47:58+00:00"
         },
         {
             "name": "phpxmlrpc/phpxmlrpc",

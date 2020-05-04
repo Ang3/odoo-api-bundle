@@ -115,4 +115,4 @@ The bundle defines one client by configured connection and a public alias follow
 The ```default_connection``` parameter is used to define the default client alias ```ang3_odoo_api.client``` (public).
 
 You can get a client by dependency injection with argument autowiring. 
-Type
+Run the command ```php bin/console debug:autowiring ApiClient``` to get the list of autowired clients.

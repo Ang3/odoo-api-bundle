@@ -2,7 +2,7 @@
     "name": "ang3/odoo-api-bundle",
     "type": "symfony-bundle",
     "description": "This bundles is an integration of the Odoo external API client: ang3/php-odoo-api-client",
-    "keywords": ["odoo", "api", "external", "bundle"],
+    "keywords": ["odoo", "api", "client", "bundle"],
     "license": "MIT",
     "authors": [
         {

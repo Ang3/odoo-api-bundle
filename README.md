@@ -166,7 +166,7 @@ Upgrades
 ### From 1.* to 2.*
 
 What you have to do:
-- Follow upgrade instructions ```From 4.* to 5.*``` of the [client package](https://packagist.org/packages/ang3/php-odoo-api-client#from-4-to-5)
+- Follow upgrade instructions ```From 4.* to 5.*``` of the [client](https://github.com/Ang3/php-odoo-api-client#from-4-to-5)
 - Replace ```Ang3\Component\Odoo\ExternalApiClient``` with ```Ang3\Component\Odoo\Client```.
 - Create and use your own helpers.
 

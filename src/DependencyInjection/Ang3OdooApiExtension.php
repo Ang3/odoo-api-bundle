@@ -3,7 +3,7 @@
 namespace Ang3\Bundle\OdooApiBundle\DependencyInjection;
 
 use Ang3\Bundle\OdooApiBundle\ClientRegistry;
-use Ang3\Component\Odoo\ExternalApiClient;
+use Ang3\Component\Odoo\Client;
 use Symfony\Component\DependencyInjection\Alias;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
@@ -47,28 +47,24 @@ class Ang3OdooApiExtension extends Extension
         // Pour chaque conenctions
         foreach ($connections as $name => $params) {
             // Création de la définition
-            $client = new Definition(ExternalApiClient::class);
-
-            // Enregistrement des arguments de la définition
-            $client
-                ->setArguments([
-                    $params['url'],
-                    $params['database'],
-                    $params['user'],
-                    $params['password'],
-                ])
-            ;
+            $client = new Definition(Client::class, [
+                $params['url'],
+                $params['database'],
+                $params['user'],
+                $params['password'],
+            ]);
 
             // Définition du nom du client
             $clientName = sprintf('ang3_odoo_api.client.%s', $name);
 
             // Enregistrement du client dans le container
             $container->setDefinition($clientName, $client);
+            $container->registerAliasForArgument($clientName, Client::class, "$name.client");
 
             // S'il s'agit du client par défaut
             if ($name === $defaultConnection) {
                 // Enregistrement du client par défaut
-                $container->setDefinition(ExternalApiClient::class, $client);
+                $container->setDefinition(Client::class, $client);
 
                 // Enregistrement du client par défaut
                 $container->setAlias('ang3_odoo_api.client', $clientName);

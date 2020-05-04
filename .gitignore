@@ -1,4 +1,6 @@
 /bin/
 /vendor/
 .php_cs.cache
+
+/.idea/
 test.php

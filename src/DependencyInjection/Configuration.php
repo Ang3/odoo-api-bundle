@@ -6,7 +6,7 @@ use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 
 /**
- * Configuration du bundle.
+ * Bundle configuration.
  *
  * @author Joanis ROUANET
  */
@@ -15,13 +15,12 @@ class Configuration implements ConfigurationInterface
     /**
      * {@inheritdoc}.
      */
-    public function getConfigTreeBuilder()
+    public function getConfigTreeBuilder(): TreeBuilder
     {
-        $treeBuilder = new TreeBuilder();
+        $treeBuilder = new TreeBuilder('ang3_odoo_api');
 
-        $rootNode = $treeBuilder->root('ang3_odoo_api');
-
-        $rootNode
+        $treeBuilder
+            ->getRootNode()
             ->children()
                 ->scalarNode('default_connection')
                     ->isRequired()

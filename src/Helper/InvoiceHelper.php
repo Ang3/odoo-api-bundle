@@ -2,7 +2,7 @@
 
 namespace Ang3\Bundle\OdooApiBundle\Helper;
 
-use Ang3\Component\Odoo\ExternalApiClient;
+use Ang3\Component\Odoo\Client;
 
 /**
  * @author Joanis ROUANET
@@ -15,11 +15,11 @@ class InvoiceHelper
     const MODEL_NAME = 'account.invoice';
 
     /**
-     * @var ExternalApiClient
+     * @var Client
      */
     private $client;
 
-    public function __construct(ExternalApiClient $client)
+    public function __construct(Client $client)
     {
         $this->client = $client;
     }

@@ -173,4 +173,5 @@ What you have to do:
 Logs:
 - Updated composer.json for Symfony ```^5.0``` support.
 - Updated client to version ```5.0``` for latest feature (expression builder).
+- Implemented client parameter autowiring.
 - Deleted helpers before the model names depend on Odoo server version.

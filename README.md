@@ -3,7 +3,13 @@ OdooApiBundle
 
 [![Build Status](https://travis-ci.org/Ang3/OdooApiBundle.svg?branch=master)](https://travis-ci.org/Ang3/OdooApiBundle) [![Latest Stable Version](https://poser.pugx.org/ang3/odoo-api-bundle/v/stable)](https://packagist.org/packages/ang3/odoo-api-bundle) [![Latest Unstable Version](https://poser.pugx.org/ang3/odoo-api-bundle/v/unstable)](https://packagist.org/packages/ang3/odoo-api-bundle) [![Total Downloads](https://poser.pugx.org/ang3/odoo-api-bundle/downloads)](https://packagist.org/packages/ang3/odoo-api-bundle)
 
-Symfony integration of Odoo external API client v12.0. Please see [API client documentation](https://github.com/Ang3/php-odoo-api-client) for more information.
+Symfony integration of the package 
+[ang3/php-odoo-api-client](https://packagist.org/packages/ang3/php-odoo-api-client) - 
+Please read the [documentation of the client](https://github.com/Ang3/php-odoo-api-client) 
+to know how to use it.
+
+This bundle helps you to manage your Odoo connections by providing a registry 
+and your clients as services.
 
 Installation
 ============
@@ -68,16 +74,19 @@ ang3_odoo_api:
       password: <password>
 ```
 
-Get started
-===========
+The parameter ```default_connection``` is used to define the default connection to use.
 
 Usage
------
+=====
 
 First, configure your connections in the package configuration file. 
 That should be done in step 3 of the installation section.
 
-### Registry
+Registry
+--------
+
+If you want to work with all your configured clients, then you may want to get the *registry*. 
+It stores all configured clients by connection name. You can get it by dependency injection:
 
 ```php
 use Ang3\Bundle\OdooApiBundle\ClientRegistry;
@@ -93,26 +102,59 @@ class MyService
 }
 ```
 
-The registry contains all created clients from your configuration. It contains three useful methods:
+The registry contains three useful methods:
 - ```public function set(string $connectionName, Client $client): self``` Set a client by connection name.
 - ```public function get(string $connectionName): Client``` Get the client of a connection. A ```\LogicException``` is thrown if the connection was not found.
 - ```public function has(string $connectionName): bool``` Check if a connection exists by name.
 
 If you don't use autowiring, you must pass the service as argument of your service:
+
 ```yaml
 # app/config/services.yml or config/services.yaml
 # ...
 MyClass:
     arguments:
-        $clientRegistry: '@ang3_odoo_api.registry'
+        $clientRegistry: '@ang3_odoo_api.client_registry'
 ```
 
-### Clients
+Clients
+-------
 
-The bundle defines one client by configured connection and a public alias following this naming convention: 
+It could be useful to get a client directly without working with the registry.
+
+For example, the get the default client by autowiring, use the argument 
+```Ang3\Component\Odoo\Client $client```:
+
+```php
+use Ang3\Component\Odoo\Client;
+
+class MyService
+{
+    private $client;
+
+    public function __construct(Client $client)
+    {
+        $this->client = $client;
+    }
+}
+```
+
+Run the command ```php bin/console debug:autowiring ApiClient``` to get the list of autowired clients.
+
+- If the connection name is ```acme```, then the autowiring argument is 
+```Ang3\Component\Odoo\Client $acmeClient```
+
+Finally, if you don't use autowiring, you must pass the service as argument of your service:
+
+```yaml
+# app/config/services.yml or config/services.yaml
+# ...
+MyClass:
+    arguments:
+        $clientRegistry: '@ang3_odoo_api.client.<connection_name>' # Or '@ang3_odoo_api.client' for the default connection
+```
+
+For each client, the bundle creates a public alias following this naming convention: 
 ```ang3_odoo_api.client.<connection_name>```.
 
-The ```default_connection``` parameter is used to define the default client alias ```ang3_odoo_api.client``` (public).
-
-You can get a client by dependency injection with argument autowiring. 
-Run the command ```php bin/console debug:autowiring ApiClient``` to get the list of autowired clients.
+That's it!

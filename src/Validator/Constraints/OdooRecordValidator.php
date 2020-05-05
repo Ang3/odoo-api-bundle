@@ -3,10 +3,13 @@
 namespace Ang3\Bundle\OdooApiBundle\Validator\Constraints;
 
 use Ang3\Bundle\OdooApiBundle\ClientRegistry;
+use Ang3\Component\Odoo\Expression\CustomDomain;
+use Ang3\Component\Odoo\Expression\DomainInterface;
 use InvalidArgumentException;
 use LogicException;
 use RuntimeException;
 use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
+use Symfony\Component\Security\Core\Security;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
 use Symfony\Component\Validator\Exception\UnexpectedTypeException;
@@ -23,10 +26,16 @@ class OdooRecordValidator extends ConstraintValidator
      */
     private $expressionLanguage;
 
-    public function __construct(ClientRegistry $clientRegistry)
+    /**
+     * @var Security
+     */
+    private $security;
+
+    public function __construct(ClientRegistry $clientRegistry, Security $security)
     {
         $this->clientRegistry = $clientRegistry;
         $this->expressionLanguage = new ExpressionLanguage();
+        $this->security = $security;
     }
 
     /**
@@ -57,31 +66,38 @@ class OdooRecordValidator extends ConstraintValidator
         }
 
         $expressionBuilder = $client->expr();
-        $domains = $constraint->domains ?: $expressionBuilder->eq('id', $value);
 
-        if (is_string($domains)) {
+        if (is_string($constraint->domains) && $constraint->domains) {
             try {
                 $domains = $this->expressionLanguage->evaluate(
-                    $domains,
+                    $constraint->domains,
                     [
                         'expr' => $expressionBuilder,
-                        'context' => [
-                            'object' => $this->context->getObject(),
-                            'model' => $constraint->model,
-                            'id' => $value,
-                        ],
+                        'this' => $this->context->getObject(),
+                        'user' => $this->security->getUser(),
                     ]
                 );
+
+                if (!($domains instanceof DomainInterface) && !is_array($domains)) {
+                    throw new InvalidArgumentException(sprintf('The evaluation of domains expression must returns value of type %s|array<%s|array>, %s returned', DomainInterface::class, DomainInterface::class, gettype($domains)));
+                }
             } catch (\Throwable $e) {
-                throw new RuntimeException(sprintf('The domains expression "%s" is not valid', $domains), 0, $e);
+                throw new RuntimeException(sprintf('The domains expression "%s" is not valid', $constraint->domains), 0, $e);
             }
+
+            $domains = $expressionBuilder->andX(
+                $expressionBuilder->eq('id', $value),
+                is_array($domains) ? new CustomDomain($domains) : $domains
+            );
+        } else {
+            $domains = $expressionBuilder->eq('id', $value);
         }
 
-        if (!$client->findOneBy($constraint->model, $value, $domains)) {
+        if (0 === $client->count($constraint->model, $domains)) {
             $this->context
-                ->buildViolation($constraint->message)
-                ->setParameter('{{ model_name }}', (string) $constraint->model)
+                ->buildViolation($constraint->notFoundMessage)
                 ->setParameter('{{ model_id }}', (string) $value)
+                ->setParameter('{{ model_name }}', (string) $constraint->model)
                 ->addViolation()
             ;
         }

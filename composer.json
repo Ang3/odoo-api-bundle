@@ -19,11 +19,12 @@
     "require": {
         "php": "^7.1",
         "ang3/php-odoo-api-client": "^5.0",
-        "symfony/dependency-injection": ">=3.2.0",
-        "symfony/config": ">=3.2.0",
-        "symfony/http-kernel": ">=3.2.0",
-        "symfony/validator": ">=3.2.0",
-        "symfony/expression-language": ">=3.2.0"
+        "symfony/dependency-injection": ">=3.4.0",
+        "symfony/config": ">=3.4.0",
+        "symfony/http-kernel": ">=3.4.0",
+        "symfony/security-core": ">=3.4.0",
+        "symfony/validator": ">=3.4.0",
+        "symfony/expression-language": ">=3.4.0"
     },
     "require-dev": {
         "roave/security-advisories": "dev-master",

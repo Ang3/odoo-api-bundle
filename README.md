@@ -160,6 +160,57 @@ MyClass:
 For each client, the bundle creates a public alias following this naming convention: 
 ```ang3_odoo_api.client.<connection_name>```.
 
+Validator
+---------
+
+This bundle provides a validator according to the package 
+[symfony/validator](https://symfony.com/doc/current/components/validator.html) 
+to validate a record by ID, domains and/or connection. It resides to a basic annotation.
+
+Here is an example of an object storing the ID of a company and invoice:
+
+```php
+use Ang3\Bundle\OdooApiBundle\Validator\Constraints\OdooRecord;
+
+class MyEntity
+{
+    /**
+     * @var int
+     *
+     * @OdooRecord("res.company")
+     * ...
+     */
+    private $companyId;
+
+    /**
+     * @var int
+     *
+     * @OdooRecord(model="account.move", domains="expr.eq('company_id.id', this.companyId)", connection="accounting")
+     * ...
+     */
+    private $invoiceId;
+}
+```
+
+Here is the list of all options you can pass to the annotation:
+- ```model``` (**required** string) The model name of the record.
+- ```domains``` (string) An expression which evaluation must returns valid client criteria.
+- ```connection``` (string) the name of the connection to use - By default the default connection is used.
+- ```typeErrorMessage``` (string) The error message if the value is not a positive integer - By 
+default the message is: ```This value must be a positive integer.```
+- ```notFoundMessage``` (string) The message if the record was not found - By default the message is:
+```The record of ID {{ model_id }} from "{{ model_name }}" was not found.```
+
+As you can see, the validator uses both 
+[symfony/expression-language](https://symfony.com/doc/current/components/expression_language.html) 
+and the expression builder provided with the client. 
+By this way, you can filter allowed records easily.
+ 
+Here are the variable passed to the evaluated expression:
+- ```expr``` the expression builder
+- ```this``` the object that the property/getter belongs to
+- ```user``` the user of the request ```Symfony\Component\Security\Core\User\UserInterface|null```
+
 Upgrades
 ========
 
@@ -171,6 +222,7 @@ What you have to do:
 - Create and use your own helpers.
 
 Logs:
+- Added Odoo record validator.
 - Updated composer.json for Symfony ```^5.0``` support.
 - Updated client to version ```5.0``` for latest feature (expression builder).
 - Implemented client parameter autowiring.

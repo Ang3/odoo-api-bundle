@@ -35,7 +35,7 @@ class OdooRecord extends Constraint
     /**
      * @var string
      */
-    public $message = 'The record of ID {{ model_id }} from model "{{ model_name }}" does not exist.';
+    public $notFoundMessage = 'The record of ID {{ model_id }} from "{{ model_name }}" was not found.';
 
     public function getDefaultOption(): string
     {

@@ -4,24 +4,25 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "8384b2d138612fd7789bd5ac7a4cb54d",
+    "content-hash": "b1eb8edec14e3ebe09e4910af94884ee",
     "packages": [
         {
             "name": "ang3/php-odoo-api-client",
-            "version": "V5.0.1",
+            "version": "v5.0.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Ang3/php-odoo-api-client.git",
-                "reference": "cc8b1fd86ae43e0dd500a0939d78c8969b2876c9"
+                "reference": "2812b01ee06489ec0ec0523dee828b454e124b1d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Ang3/php-odoo-api-client/zipball/cc8b1fd86ae43e0dd500a0939d78c8969b2876c9",
-                "reference": "cc8b1fd86ae43e0dd500a0939d78c8969b2876c9",
+                "url": "https://api.github.com/repos/Ang3/php-odoo-api-client/zipball/2812b01ee06489ec0ec0523dee828b454e124b1d",
+                "reference": "2812b01ee06489ec0ec0523dee828b454e124b1d",
                 "shasum": ""
             },
             "require": {
                 "ext-curl": "*",
+                "ext-json": "*",
                 "php": ">=7.2",
                 "phpxmlrpc/phpxmlrpc": "^4.0",
                 "symfony/serializer": ">=3.2.0"
@@ -52,7 +53,7 @@
                     "homepage": "https://github.com/Ang3"
                 }
             ],
-            "description": "Odoo API client v12.0",
+            "description": "Odoo API client",
             "keywords": [
                 "12",
                 "13",
@@ -63,7 +64,7 @@
                 "odoo",
                 "operation"
             ],
-            "time": "2020-05-04T14:55:33+00:00"
+            "time": "2020-05-05T16:25:14+00:00"
         },
         {
             "name": "phpxmlrpc/phpxmlrpc",

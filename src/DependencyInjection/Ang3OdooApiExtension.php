@@ -68,7 +68,7 @@ class Ang3OdooApiExtension extends Extension
 
                 // Enregistrement du client par défaut
                 $container->setAlias('ang3_odoo_api.client', $clientName);
-	            $container->registerAliasForArgument($clientName, Client::class, "client");
+                $container->registerAliasForArgument($clientName, Client::class, 'client');
             }
 
             // Retour de la référence du service client

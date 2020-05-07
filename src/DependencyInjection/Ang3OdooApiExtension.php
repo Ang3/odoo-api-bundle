@@ -47,12 +47,12 @@ class Ang3OdooApiExtension extends Extension
         // Pour chaque conenctions
         foreach ($connections as $name => $params) {
             // Création de la définition
-            $client = new Definition(Client::class, [
+            $client = new Definition(Client::class, [[
                 $params['url'],
                 $params['database'],
                 $params['user'],
                 $params['password'],
-            ]);
+            ]]);
 
             // Définition du nom du client
             $clientName = sprintf('ang3_odoo_api.client.%s', $name);

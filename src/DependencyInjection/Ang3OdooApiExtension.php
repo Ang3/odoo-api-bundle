@@ -16,6 +16,8 @@ use Symfony\Component\HttpKernel\DependencyInjection\Extension;
  */
 class Ang3OdooApiExtension extends Extension
 {
+    private const MONOLOG_DEFINITION = 'monolog.logger.odoo';
+
     /**
      * {@inheritdoc}
      */
@@ -43,6 +45,7 @@ class Ang3OdooApiExtension extends Extension
 
         // Création de la définition du registre
         $registry = new Definition(ClientRegistry::class);
+        $odooLogger = $container->hasDefinition(self::MONOLOG_DEFINITION) ? new Reference(self::MONOLOG_DEFINITION) : null;
 
         // Pour chaque conenctions
         foreach ($connections as $name => $params) {
@@ -52,7 +55,7 @@ class Ang3OdooApiExtension extends Extension
                 $params['database'],
                 $params['user'],
                 $params['password'],
-            ]]);
+            ], $odooLogger]);
 
             // Définition du nom du client
             $clientName = sprintf('ang3_odoo_api.client.%s', $name);

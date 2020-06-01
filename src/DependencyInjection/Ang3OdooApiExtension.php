@@ -4,10 +4,12 @@ namespace Ang3\Bundle\OdooApiBundle\DependencyInjection;
 
 use Ang3\Bundle\OdooApiBundle\ClientRegistry;
 use Ang3\Component\Odoo\Client;
+use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\Alias;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Exception\InvalidArgumentException;
+use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 
@@ -31,6 +33,12 @@ class Ang3OdooApiExtension extends Extension
 
         // Chargement des connections
         $this->loadClientRegistry($container, $config['connections'], $config['default_connection']);
+
+        // Définition d'un chargeur de fichier YAML
+        $loader = new YamlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
+
+        // Chargement des services
+        $loader->load('services.yaml');
     }
 
     /**

@@ -9,3 +9,7 @@ services:
   Ang3\Bundle\OdooApiBundle\:
     resource: '../../*'
     exclude: '../../{DependencyInjection,Resources}'
+
+  ang3_odoo_api.client_registry:
+    alias: Ang3\Bundle\OdooApiBundle\ClientRegistry
+    public: true

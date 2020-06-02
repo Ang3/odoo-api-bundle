@@ -214,6 +214,12 @@ Here are the variable passed to the evaluated expression:
 Upgrades
 ========
 
+### v1.0.1
+
+- Added file ```Resources/config/services.yaml```
+- Fixed bundle extension
+- Configured bundle autowiring
+
 ### From 1.* to 2.*
 
 What you have to do:

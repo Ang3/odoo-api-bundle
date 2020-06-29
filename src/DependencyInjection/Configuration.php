@@ -51,6 +51,9 @@ class Configuration implements ConfigurationInterface
                         ->end()
                     ->end()
                 ->end()
+                ->scalarNode('logger')
+                    ->defaultNull()
+                ->end()
             ->end()
         ;
 

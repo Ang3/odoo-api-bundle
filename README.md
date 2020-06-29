@@ -142,7 +142,7 @@ class MyService
 }
 ```
 
-Run the command ```php bin/console debug:autowiring ApiClient``` to get the list of autowired clients.
+Run the command ```php bin/console debug:autowiring Client``` to get the list of autowired clients.
 
 - If the connection name is ```acme```, then the autowiring argument is 
 ```Ang3\Component\Odoo\Client $acmeClient```
@@ -185,7 +185,7 @@ class MyEntity
     /**
      * @var int
      *
-     * @OdooRecord(model="account.move", domains="expr.eq('company_id.id', this.companyId)", connection="accounting")
+     * @OdooRecord(model="account.move", domains="expr.eq('company_id.id', this.companyId)", connection="default")
      * ...
      */
     private $invoiceId;
@@ -195,11 +195,12 @@ class MyEntity
 Here is the list of all options you can pass to the annotation:
 - ```model``` (**required** string) The model name of the record.
 - ```domains``` (string) An expression which evaluation must returns valid client criteria.
-- ```connection``` (string) the name of the connection to use - By default the default connection is used.
-- ```typeErrorMessage``` (string) The error message if the value is not a positive integer - By 
-default the message is: ```This value must be a positive integer.```
-- ```notFoundMessage``` (string) The message if the record was not found - By default the message is:
-```The record of ID {{ model_id }} from "{{ model_name }}" was not found.```
+- ```connection``` (string) the name of the connection to use
+    - By default the ```default``` connection is used.
+- ```typeErrorMessage``` (string) The error message if the value is not a positive integer 
+    - By default the message is: ```This value must be a positive integer.```
+- ```notFoundMessage``` (string) The message if the record was not found 
+    - By default the message is: ```The record of ID {{ model_id }} from "{{ model_name }}" was not found.```
 
 As you can see, the validator uses both 
 [symfony/expression-language](https://symfony.com/doc/current/components/expression_language.html) 
@@ -213,6 +214,10 @@ Here are the variable passed to the evaluated expression:
 
 Upgrades
 ========
+
+### v1.0.2
+
+- Fixed logger injection.
 
 ### v1.0.1
 

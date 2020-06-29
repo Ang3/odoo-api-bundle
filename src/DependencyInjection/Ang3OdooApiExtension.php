@@ -47,6 +47,11 @@ class Ang3OdooApiExtension extends Extension
         }
 
         $registry = $container->getDefinition(ClientRegistry::class);
+        $defaultLogger = $config['logger'];
+
+        if ($defaultLogger) {
+            throw new ServiceNotFoundException($defaultLogger);
+        }
 
         foreach ($config['connections'] as $name => $params) {
             if ($params['logger']) {
@@ -62,7 +67,7 @@ class Ang3OdooApiExtension extends Extension
                     $params['user'],
                     $params['password'],
                 ],
-                $params['logger'] ? new Reference($config['logger']) : null,
+                $params['logger'] ? new Reference($config['logger']) : $defaultLogger,
             ]);
 
             $clientName = sprintf('ang3_odoo_api.client.%s', $name);

@@ -47,7 +47,7 @@ class Ang3OdooApiExtension extends Extension
         }
 
         $registry = $container->getDefinition(ClientRegistry::class);
-        $defaultLogger = $config['logger'];
+        $defaultLogger = $config['default_logger'];
 
         if ($defaultLogger) {
             throw new ServiceNotFoundException($defaultLogger);
@@ -55,8 +55,8 @@ class Ang3OdooApiExtension extends Extension
 
         foreach ($config['connections'] as $name => $params) {
             if ($params['logger']) {
-                if (!$container->hasDefinition($config['logger'])) {
-                    throw new ServiceNotFoundException($config['logger']);
+                if (!$container->hasDefinition($params['logger'])) {
+                    throw new ServiceNotFoundException($params['logger']);
                 }
             }
 

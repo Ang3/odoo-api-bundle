@@ -217,6 +217,7 @@ Upgrades
 
 ### v1.0.2
 
+- Updated client version to ```v5.1.0``` (no BC).
 - Fixed logger injection.
 
 ### v1.0.1

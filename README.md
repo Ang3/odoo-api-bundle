@@ -69,12 +69,15 @@ Depends on your symfony version, enable the configuration of the bundle:
 # app/config/config.yml or config/packages/ang3_odoo_api.yaml
 ang3_odoo_api:
   default_connection: default
+  default_logger: '<logger_service_name>' # Instance of \Psr\Log\LoggerInterface
+  # If set, the default logger is used if no logger was set for a connection
   connections:
     default:
       url: <database_url>
       database: <database_name>
       user: <username>
       password: <password>
+      logger: '<logger_service_name>' # Instance of \Psr\Log\LoggerInterface
 ```
 
 The parameter ```default_connection``` is used to define the default connection to use.
